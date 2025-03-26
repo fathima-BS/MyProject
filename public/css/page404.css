@@ -1,0 +1,43 @@
+body {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    background-color: #f8f9fa;
+    text-align: center;
+    flex-direction: column;
+}
+.error-code {
+    font-size: 100px;
+    font-weight: bold;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+}
+.battery-icon {
+    width: 60px;
+    height: 100px;
+    background: linear-gradient(to bottom, #dde2e6, #aeb6bf);
+    border-radius: 8px;
+    position: relative;
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+    padding-bottom: 5px;
+}
+.battery-icon::before {
+    content: "";
+    width: 20px;
+    height: 8px;
+    background-color: #aeb6bf;
+    position: absolute;
+    top: -8px;
+    border-radius: 4px;
+}
+.battery-level {
+    width: 90%;
+    height: 15%;
+    background-color: red;
+    border-radius: 4px;
+}
