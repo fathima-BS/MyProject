@@ -1,0 +1,17 @@
+
+    .content-placeholder {
+      padding: 30px;
+      margin-left: 250px; /* Adjust based on your sidebar width */
+    }
+
+    .content-placeholder h1 {
+      font-size: 32px;
+      font-weight: bold;
+      color: white;
+    }
+
+    body {
+      background-color: #1d1e34; /* match the dashboard bg */
+      margin: 0;
+      font-family: 'Poppins', sans-serif;
+    }

@@ -1,0 +1,327 @@
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      color: #333;
+    }
+    
+    .navbar {
+      padding: 15px 0;
+      background-color: white;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    }
+    
+    .navbar-brand {
+      font-weight: 700;
+      font-size: 24px;
+    }
+    
+    .logo-icon {
+      margin-right: 8px;
+    }
+    
+    .nav-link {
+      font-weight: 500;
+      color: #333;
+      margin: 0 10px;
+    }
+    
+    .search-form {
+      position: relative;
+    }
+    
+    .search-input {
+      border-radius: 20px;
+      padding-right: 40px;
+      border: 1px solid #ddd;
+    }
+    
+    .search-button {
+      position: absolute;
+      right: 5px;
+      top: 5px;
+      background: #333;
+      border: none;
+      border-radius: 50%;
+      width: 30px;
+      height: 30px;
+      color: white;
+    }
+    
+    .promo-banner {
+      background: linear-gradient(to right, #e6e6e6, #f2f2f2);
+      padding: 12px;
+      font-weight: 500;
+      text-align: center;
+      border-radius: 0;
+    }
+    
+    .step-container {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin: 30px 0;
+      position: relative;
+    }
+    
+    .step-line {
+      position: absolute;
+      top: 25px;
+      left: 60px;
+      right: 60px;
+      height: 2px;
+      background-color: #ddd;
+      z-index: 1;
+    }
+    
+    .step {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      position: relative;
+      z-index: 2;
+    }
+    
+    .step-number {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background-color: #f8f9fa;
+      border: 2px solid #ddd;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-weight: bold;
+      margin-bottom: 10px;
+    }
+    
+    .step.active .step-number {
+      background-color: #333;
+      border-color: #333;
+      color: white;
+    }
+    
+    .cart-item {
+      border: 1px solid #eee;
+      padding: 15px;
+      margin-bottom: 15px;
+      border-radius: 5px;
+      background-color: white;
+    }
+    
+    .product-image {
+      width: 100px;
+      height: 100px;
+      object-fit: cover;
+    }
+    
+    .item-details {
+      padding-left: 15px;
+    }
+    
+    .product-name {
+      font-weight: 600;
+      margin-bottom: 5px;
+    }
+    
+    .product-meta {
+      color: #777;
+      font-size: 0.9em;
+      margin-bottom: 5px;
+    }
+    
+    .quantity-selector {
+      display: inline-flex;
+      align-items: center;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      overflow: hidden;
+    }
+    
+    .quantity-selector button {
+      background: #f8f9fa;
+      border: none;
+      width: 28px;
+      height: 28px;
+    }
+    
+    .quantity-input {
+      width: 40px;
+      border: none;
+      text-align: center;
+    }
+    
+    .price-container {
+      text-align: right;
+    }
+    
+    .original-price {
+      text-decoration: line-through;
+      color: #999;
+      font-size: 0.9em;
+    }
+    
+    .final-price {
+      font-weight: 700;
+      font-size: 1.2em;
+      color: #333;
+    }
+    
+    .order-summary {
+      background-color: #f8f9fa;
+      border-radius: 5px;
+      padding: 20px;
+    }
+    
+    .summary-title {
+      font-weight: 600;
+      margin-bottom: 20px;
+    }
+    
+    .summary-row {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 15px;
+    }
+    
+    .discount {
+      color: #28a745;
+    }
+    
+    .total-amount {
+      font-weight: 700;
+      font-size: 1.1em;
+      border-top: 1px solid #ddd;
+      padding-top: 15px;
+    }
+    
+    .checkout-button {
+      width: 100%;
+      background-color: #3949ab;
+      border: none;
+      padding: 12px;
+      font-weight: 500;
+      margin: 15px 0;
+    }
+    
+    .coupon-container {
+      margin-top: 20px;
+    }
+    
+    .coupon-header {
+      display: flex;
+      align-items: center;
+      margin-bottom: 10px;
+      color: #666;
+      cursor: pointer;
+    }
+    
+    .coupon-form {
+      display: flex;
+    }
+    
+    .coupon-input {
+      flex-grow: 1;
+      border-radius: 4px 0 0 4px;
+    }
+    
+    .apply-button {
+      border-radius: 0 4px 4px 0;
+      background-color: white;
+      color: #007bff;
+      border: 1px solid #ddd;
+      border-left: none;
+    }
+    
+    footer {
+      background-color: #2b3240;
+      color: white;
+      padding: 40px 0 20px;
+      margin-top: 50px;
+    }
+    
+    .footer-logo {
+      font-weight: 700;
+      font-size: 24px;
+      margin-bottom: 15px;
+      display: flex;
+      align-items: center;
+    }
+    
+    .footer-text {
+      color: #aaa;
+      margin-bottom: 20px;
+    }
+    
+    .footer-title {
+      font-weight: 600;
+      margin-bottom: 20px;
+      color: white;
+    }
+    
+    .footer-links {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+    }
+    
+    .footer-links li {
+      margin-bottom: 10px;
+    }
+    
+    .footer-links a {
+      color: #aaa;
+      text-decoration: none;
+      transition: color 0.3s;
+    }
+    
+    .footer-links a:hover {
+      color: white;
+    }
+    
+    .contact-item {
+      display: flex;
+      align-items: center;
+      margin-bottom: 15px;
+      color: #aaa;
+    }
+    
+    .contact-icon {
+      margin-right: 10px;
+      width: 20px;
+    }
+    
+    .social-icons {
+      display: flex;
+      margin-top: 15px;
+    }
+    
+    .social-icon {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      background-color: rgba(255, 255, 255, 0.1);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      margin-right: 10px;
+    }
+    
+    .copyright-bar {
+      border-top: 1px solid rgba(255, 255, 255, 0.1);
+      margin-top: 30px;
+      padding-top: 20px;
+      display: flex;
+      justify-content: space-between;
+      color: #aaa;
+      font-size: 0.9em;
+    }
+    
+    .copyright-links a {
+      color: #aaa;
+      margin-left: 15px;
+      text-decoration: none;
+    }
+    
+    .copyright-links a:hover {
+      color: white;
+    }

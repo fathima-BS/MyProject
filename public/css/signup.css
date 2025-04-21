@@ -1,0 +1,33 @@
+
+        body {
+            height: 100vh;
+        }
+        .signup-container {
+            display: flex;
+            height: 100%;
+        }
+        .signup-form {
+            width: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 40px;
+        }
+        .signup-form .card {
+            width: 100%;
+            max-width: 400px;
+            padding: 20px;
+            box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        .signup-bg {
+            width: 50%;
+            background-image: url('/img/login.jpg'); 
+            background-size: cover;
+            background-position: center;
+        }
+        .error-message{
+            color:red;
+            font-size : 0.75rem;
+            display: none
+
+        }

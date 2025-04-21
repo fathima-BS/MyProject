@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cario Dashboard</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="https://unpkg.com/cropperjs@1.5.12/dist/cropper.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.css" rel="stylesheet">
+    <style>
+        body {
+            background-color: #1a1d21;
+            color: #ffffff;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        .sidebar {
+            background-color: #1a1d21;
+            color: #93979f;
+            height: 100vh;
+            padding-top: 20px;
+            position: fixed;
+            width: 200px;
+        }
+
+        .sidebar .nav-link {
+            color: #93979f;
+            padding: 12px 20px;
+            border-radius: 5px;
+            margin-bottom: 5px;
+        }
+
+        .sidebar .nav-link:hover,
+        .sidebar .nav-link.active {
+            background-color: #252830;
+            color: #ffffff;
+        }
+
+        .sidebar .nav-link i {
+            width: 20px;
+            margin-right: 10px;
+        }
+
+        .logo {
+            font-size: 18px;
+            font-weight: bold;
+            color: #ffffff;
+            padding: 10px 20px;
+            margin-bottom: 20px;
+        }
+
+        .main-content {
+            margin-left: 200px;
+            padding: 20px;
+        }
+
+        .dashboard-header {
+            margin-bottom: 30px;
+        }
+
+        .card {
+            background: linear-gradient(135deg, #9171f8, #7b3fe4);
+            border: none;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            color: white;
+        }
+
+        .card-body {
+            padding: 15px;
+        }
+
+        .stats-title {
+            font-size: 14px;
+            font-weight: 500;
+            margin-bottom: 5px;
+            opacity: 0.8;
+        }
+
+        .stats-number {
+            font-size: 24px;
+            font-weight: bold;
+        }
+
+        .products-table {
+            background-color: #1e2126;
+            border-radius: 10px;
+            padding: 20px;
+            margin-top: 30px;
+        }
+
+        .table {
+            color: #ffffff;
+        }
+
+        .table thead th {
+            border-bottom: 1px solid #32363e;
+            color: #9aa0a9;
+            font-weight: 500;
+            padding: 15px 10px;
+        }
+
+        .table tbody td {
+            border-bottom: 1px solid #32363e;
+            padding: 15px 10px;
+            vertical-align: middle;
+        }
+
+        .product-img {
+            width: 50px;
+            height: 70px;
+            background-color: #32363e;
+            border-radius: 5px;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .pagination {
+            margin-top: 15px;
+        }
+
+        .page-item .page-link {
+            background-color: #32363e;
+            border-color: #32363e;
+            color: #9aa0a9;
+        }
+
+        .page-item.active .page-link {
+            background-color: #7b3fe4;
+            border-color: #7b3fe4;
+            color: white;
+        }
+
+        .active {
+            background-color: #433a5b;
+            color: white;
+        }
+
+        .logout-btn {
+            color: #ff4757;
+        }
+
+        .download-report {
+            background-color: #32363e;
+            padding: 5px 10px;
+            border-radius: 5px;
+            display: inline-block;
+            margin-left: 10px;
+        }
+
+        .download-report span {
+            display: inline-block;
+            background-color: #ff4757;
+            color: white;
+            width: 20px;
+            height: 20px;
+            text-align: center;
+            line-height: 20px;
+            border-radius: 2px;
+            margin-left: 5px;
+        }
+    </style>
+
+</head>
+
+<body>
+    <div class="sidebar">
+        <div class="logo">Cario</div>
+        <ul class="nav flex-column">
+            <li class="nav-item">
+                <a id="dashboard" class="nav-link" href="/admin/dashboard">
+                    <i class="fas fa-th-large"></i> Dashboard
+                </a>
+            </li>
+            <li class="nav-item">
+                <a id="SalesReport" class="nav-link" href="/admin/SalesReport">
+                    <i class="fas fa-th-large"></i> SalesReport
+                </a>
+            </li>
+            <li class="nav-item">
+                <a id="product" class="nav-link" href="/admin/product">
+                    <i class="fas fa-box"></i> Product
+                </a>
+            </li>
+            <li class="nav-item ">
+                <a id="orders" class="nav-link" href="/admin/order">
+                    <i class="fas fa-shopping-cart"></i> Orders
+                </a>
+            </li>
+            <li class="nav-item">
+                <a onclick="" id="users" class="nav-link" href="/admin/user">
+                    <i class="fas fa-users"></i> Users
+                </a>
+            </li>
+            <li class="nav-item">
+                <a id="category" class="nav-link" href="/admin/Category">
+                    <i class="fas fa-tags"></i> Category
+                </a>
+            </li>
+            <li class="nav-item">
+                <a id="brands" class="nav-link" href="/admin/brand">
+                    <i class="fas fa-tags"></i> Brands
+                </a>
+            </li>
+            <li class="nav-item ">
+                <a id="Offers" class="nav-link" href="/admin/offersPage">
+                    <i class="fas fa-gift"></i> Offers
+                </a>
+            </li>
+            <li class="nav-item">
+                <a id="coupon" class="nav-link" href="/admin/couponPage">
+                    <i class="fas fa-ticket-alt"></i> Coupons
+                </a>
+            </li>
+            <li class="nav-item ">
+                <a class="nav-link logout-btn" onclick="logout()" href="/admin/logout">
+                    <i class="fas fa-sign-out-alt"></i> Logout
+                </a>
+            </li>
+        </ul>
+    </div>
+
+    <div class="main-content ">
+        <div class="dashboard-header d-flex justify-content-between align-items-center">
+            <!-- <button class="btn btn-lg btn-danger me-3" >Logout</button> -->
+        </div>
+
+
+        <script>
+            document.addEventListener('DOMContentLoaded', () => {
+                const activeLinkId = localStorage.getItem('activeLinkId');
+                if (activeLinkId) {
+                    const activeLink = document.getElementById(activeLinkId);
+                    if (activeLink) {
+                        activeLink.classList.add('active');
+                    }
+                }
+            });
+
+            const boxes = document.querySelectorAll('.nav-link');
+            boxes.forEach(navLink => {
+                navLink.addEventListener('click', (event) => {
+                    event.preventDefault();
+                    console.log('hi');
+                    boxes.forEach(b => b.classList.remove('active'));
+                    navLink.classList.add('active');
+                    const activeLinkId = navLink.getAttribute('id');
+                    localStorage.setItem('activeLinkId', activeLinkId);
+                    const href = navLink.getAttribute('href');
+                    console.log(href);
+                    window.location.href = href;
+                });
+            });
+
+
+        </script>

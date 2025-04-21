@@ -1,9 +1,40 @@
 const express=require('express')
 const router=express.Router()
 const userController=require('../controllers/user/userController')
+const passport=require('passport')
 
 router.get('/',userController.loadHomePage)
+router.get('/signup',userController.loadSignup)
+router.post('/signup',userController.signup)
 router.get('/pageNotFound',userController.pageNotFound)
+
+
+router.post('/verifyOtp',userController.verifyOtp)
+router.post('/resendOtp',userController.resendOtp)
+
+
+router.get('/auth/google', passport.authenticate('google', {
+    scope: ['profile', 'email'],
+    prompt: 'select_account'
+  }));
+router.get('/auth/google/callback',
+    passport.authenticate('google', { failureRedirect: '/login' }),
+    (req, res) => {
+      res.redirect('/');
+     }
+    );
+
+router.get('/login',userController.loadLogin)
+router.post('/login',userController.login)
+router.get('/logout',(req,res)=>{
+  req.session.destroy((err)=>{
+    if(err){
+      console.log(err)
+      return res.redirect('/',)
+    }
+    res.redirect('/login')
+  })
+})
 
 
 module.exports=router

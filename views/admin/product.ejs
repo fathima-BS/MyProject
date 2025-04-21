@@ -1,0 +1,673 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Products Dashboard</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="/css/admin/product.css">
+    
+</head>
+
+<body>
+    <%- include("../partials/admin/sidebar") %>
+
+        <div class="container my-4">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h1 class="text-white">Products</h1>
+                <button class="btn btn-primary add-product-btn" data-bs-toggle="modal" data-bs-target="#productModal">
+                    ADD PRODUCT +
+                </button>
+            </div>
+
+            <div class="search-container">
+                <form action="/admin/product" method="get" id="searchForm">
+                    <div class="input-group">
+                        <input type="text" class="search-input bg-dark text-white" name="search"
+                            placeholder="Search by product name"
+                            value="<%= typeof search !== 'undefined' ? search : '' %>">
+                        <button type="submit" class="btn btn-outline-primary">Search</button>
+                    </div>
+                </form>
+                <% if (typeof search !=='undefined' && search.trim()) { %>
+                    <form action="/admin/product" method="get" style="display: inline;">
+                        <button type="submit" class="clear-btn" id="clearSearch">Clear</button>
+                    </form>
+                    <% } %>
+            </div>
+        </div>
+
+        <div class="modal fade" id="productModal" tabindex="-1" aria-labelledby="productModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-lg">
+                <div class="modal-content" style="background-color: #1a1a1a; color: #ffffff;">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="productModalLabel">Add New Product</h5>
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
+                            aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <form id="productForm">
+                            <div class="row mb-3">
+                                <div class="col">
+                                    <label for="productName" class="form-label text-white">Product Name</label>
+                                    <input type="text" class="form-control bg-dark text-white" id="productName"
+                                        name="productName">
+                                </div>
+                                <div class="col">
+                                    <label for="productCategory" class="form-label text-white">Category</label>
+                                    <select class="form-select bg-dark text-white" id="productCategory" name="category">
+                                        <option value="" selected disabled>Select Category</option>
+                                        <% category.forEach(function(category) { %>
+                                            <option value="<%= category._id %>">
+                                                <%= category.name %>
+                                            </option>
+                                            <% }); %>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="row mb-3">
+                                <div class="col">
+                                    <label for="productQuantity" class="form-label text-white">Quantity</label>
+                                    <input type="number" class="form-control bg-dark text-white" id="productQuantity"
+                                        name="quantity" min="0">
+                                </div>
+                                <div class="col">
+                                    <label for="productBrand" class="form-label text-white">Brand</label>
+                                    <select class="form-select bg-dark text-white" id="productBrand" name="brand">
+                                        <option value="" selected disabled>Select Brand</option>
+                                        <% brand.forEach(function(brand) { %>
+                                            <option value="<%= brand._id %>">
+                                                <%= brand.BrandName %>
+                                            </option>
+                                            <% }); %>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="row mb-3">
+                                <div class="col">
+                                    <label for="regularPrice" class="form-label text-white">Regular Price (₹)</label>
+                                    <input type="number" class="form-control bg-dark text-white" id="regularPrice"
+                                        name="regularPrice" min="0" step="0.01">
+                                </div>
+                                <div class="col">
+                                    <label for="salePrice" class="form-label text-white">Sale Price (₹)</label>
+                                    <input type="number" class="form-control bg-dark text-white" id="salePrice"
+                                        name="salePrice" min="0" step="0.01">
+                                </div>
+                            </div>
+                            <div class="row mb-3">
+                                <div class="col">
+                                    <label for="productOffer" class="form-label text-white">Product Offer (%)</label>
+                                    <input type="number" class="form-control bg-dark text-white" id="productOffer"
+                                        name="productOffer" min="0" max="100" value="0">
+                                </div>
+                                <div class="col">
+                                    <label for="status" class="form-label text-white">Status</label>
+                                    <select class="form-select bg-dark text-white" id="status" name="status">
+                                        <option value="available">Available</option>
+                                        <option value="out of stock">Out of Stock</option>
+                                        <option value="Discontinued">Discontinued</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="mb-3">
+                                <label for="productDescription" class="form-label text-white">Description</label>
+                                <textarea class="form-control bg-dark text-white" id="productDescription"
+                                    name="description" rows="3"></textarea>
+                            </div>
+                            <div class="mb-3">
+                                <label for="imageUpload" class="form-label text-white">Upload Images (Max 3)</label>
+                                <input type="file" class="form-control bg-dark text-white" id="imageUpload"
+                                    name="productImage" accept="image/*" multiple>
+                                <div id="imagePreview" class="mt-2 d-flex gap-2 flex-wrap"></div>
+                            </div>
+                            <input type="hidden" id="productId" name="productId">
+                        </form>
+                        <div id="cropperOverlay" class="cropper-overlay" style="display: none;">
+                            <div id="cropperContainer">
+                                <img id="cropperImage" style="max-width: 100%;" />
+                                <button type="button" class="btn btn-sm btn-primary mt-2" id="cropBtn">Crop</button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                        <button type="submit" form="productForm" class="btn btn-primary" id="saveProductBtn">Save
+                            Product</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="table-container">
+            <table class="table table-dark">
+                <thead>
+                    <tr>
+                        <th>No</th>
+                        <th>PRODUCT IMAGE</th>
+                        <th>PRODUCT NAME</th>
+                        <th>STOCK</th>
+                        <!-- <th>STATUS</th> -->
+                        <th>AMOUNT</th>
+                        <th>LISTING</th>
+                        <th>ACTIONS</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <% let counter = (currentPage - 1) * 4 + 1; %>
+                    <% products.forEach(function(product) { %>
+                        <tr>
+                            <td class="SlNo">#<%= counter++ %></td>
+                            </td>
+                            <td>
+                                <img src="<%= product.productImage[0] || '/api/placeholder/40/40' %>"
+                                    alt="<%= product.productName %>" class="product-img">
+                            </td>
+                            <td class="product-name">
+                                <%= product.productName %>
+                            </td>
+                            <td class="piece-column">
+                                <%= product.quantity %>
+                            </td>
+                            <!-- <td class="status-icon">
+                                <%= product.status==='available' ? '✓' : product.status==='out of stock' ? '✗' : '!' %>
+                            </td> -->
+                            <td class="amount-column">₹<%= product.salePrice %>
+                            </td>
+                            <td>
+                                <% if (product.isListed) { %>
+                                    <button onclick="unlistProduct('<%= product._id %>')"
+                                        class="list-btn unlist">Unlist</button>
+                                    <% } else { %>
+                                        <button onclick="listProduct('<%= product._id %>')"
+                                            class="list-btn list">List</button>
+                                        <% } %>
+                            </td>
+                            <td>
+                                <button class="action-btn edit-btn" data-id="<%= product._id %>"><i class="fas fa-edit"></i></button>
+                                <button class="action-btn delete-btn" onclick="deleteProduct('<%= product._id %>')"><i class="fas fa-trash"></i></button>
+                            </td>
+                        </tr>
+                        <% }); %>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="pagination">
+            <span class="showing-info">Page <%= currentPage %> of <%= totalPages %></span>
+            <% if (currentPage > 1) { %>
+                <a href="/admin/product?page=<%= currentPage - 1 %>&search=<%= typeof search !== 'undefined' ? encodeURIComponent(search) : '' %>" style="text-decoration: none;">
+                    <button class="nav-btn">Previous</button>
+                </a>
+            <% } %>
+            <% for (let j = 1; j <= totalPages; j++) { %>
+                <a href="/admin/product?page=<%= j %>&search=<%= typeof search !== 'undefined' ? encodeURIComponent(search) : '' %>" style="text-decoration: none;">
+                    <button class="page-btn <%= (j === currentPage) ? 'active' : '' %>">
+                        <%= j %>
+                    </button>
+                </a>
+            <% } %>
+            <% if (currentPage < totalPages) { %>
+                <a href="/admin/product?page=<%= currentPage + 1 %>&search=<%= typeof search !== 'undefined' ? encodeURIComponent(search) : '' %>" style="text-decoration: none;">
+                    <button class="nav-btn">Next</button>
+                </a>
+            <% } %>
+        </div>
+
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+        <script>
+            let cropper;
+            let selectedFiles = [];
+            let currentFileIndex = 0;
+            let croppedImages = [];
+            let editMode = false;
+            let currentProductId = null;
+            let originalImages = [];
+            let deletedImageIndices = new Set();
+        
+            const imageUpload = document.getElementById("imageUpload");
+            const cropperOverlay = document.getElementById("cropperOverlay");
+            const cropperContainer = document.getElementById("cropperContainer");
+            const cropperImage = document.getElementById("cropperImage");
+            const cropBtn = document.getElementById("cropBtn");
+            const imagePreview = document.getElementById("imagePreview");
+            const productForm = document.getElementById("productForm");
+            const saveProductBtn = document.getElementById("saveProductBtn");
+            const productIdInput = document.getElementById("productId");
+            const productModal = document.getElementById("productModal");
+        
+            // Function to reset the modal state
+            function resetModalState() {
+                productForm.reset(); // Reset form fields
+                croppedImages = [];
+                originalImages = [];
+                deletedImageIndices.clear();
+                imagePreview.innerHTML = "";
+                currentProductId = null;
+                editMode = false;
+                document.getElementById("productModalLabel").textContent = "Add New Product";
+                saveProductBtn.textContent = "Save Product";
+                imageUpload.value = ""; // Clear file input
+                if (cropper) {
+                    cropper.destroy();
+                    cropper = null;
+                }
+                cropperOverlay.style.display = "none";
+            }
+        
+            // Reset modal state when modal is closed
+            productModal.addEventListener("hidden.bs.modal", resetModalState);
+        
+            // Handle "Add Product" button click
+            document.querySelector(".add-product-btn").addEventListener("click", function () {
+                resetModalState(); // Ensure clean state for adding a new product
+            });
+        
+            imageUpload.addEventListener("change", function (event) {
+                const files = Array.from(event.target.files);
+                const totalImages = originalImages.length + croppedImages.length + files.length - deletedImageIndices.size;
+        
+                if (totalImages > 3) {
+                    Swal.fire({
+                        icon: "warning",
+                        title: "Too Many Images",
+                        text: "You can upload a maximum of 3 images.",
+                        timer: 3000,
+                        showConfirmButton: false
+                    });
+                    imageUpload.value = "";
+                    return;
+                }
+        
+                selectedFiles = files.slice(0, 3 - (originalImages.length + croppedImages.length - deletedImageIndices.size));
+                if (selectedFiles.length === 0) {
+                    Swal.fire({
+                        icon: "warning",
+                        title: "Limit Reached",
+                        text: "You have already uploaded the maximum of 3 images.",
+                        timer: 3000,
+                        showConfirmButton: false
+                    });
+                    imageUpload.value = "";
+                    return;
+                }
+        
+                currentFileIndex = 0;
+                showCropperForCurrentFile();
+            });
+        
+            function showCropperForCurrentFile() {
+                if (currentFileIndex >= selectedFiles.length) {
+                    return;
+                }
+        
+                const file = selectedFiles[currentFileIndex];
+                const reader = new FileReader();
+        
+                reader.onload = function (e) {
+                    cropperImage.src = e.target.result;
+                    cropperOverlay.style.display = "flex";
+        
+                    if (cropper) {
+                        cropper.destroy();
+                    }
+        
+                    cropper = new Cropper(cropperImage, {
+                        aspectRatio: 1,
+                        viewMode: 1,
+                        autoCropArea: 1,
+                    });
+                };
+        
+                reader.readAsDataURL(file);
+            }
+        
+            cropBtn.addEventListener("click", function () {
+                const canvas = cropper.getCroppedCanvas({
+                    width: 300,
+                    height: 300,
+                });
+        
+                canvas.toBlob(function (blob) {
+                    const totalImages = originalImages.length + croppedImages.length - deletedImageIndices.size;
+                    if (totalImages >= 3) {
+                        Swal.fire({
+                            icon: "warning",
+                            title: "Limit Reached",
+                            text: "You can only upload 3 images.",
+                            timer: 3000,
+                            showConfirmButton: false
+                        });
+                        cropperOverlay.style.display = "none";
+                        return;
+                    }
+        
+                    const file = new File([blob], `cropped-${Date.now()}.jpg`, { type: "image/jpeg" });
+                    croppedImages.push(file);
+                    renderImagePreview();
+        
+                    cropperOverlay.style.display = "none";
+                    currentFileIndex++;
+                    showCropperForCurrentFile();
+                });
+            });
+        
+            function renderImagePreview() {
+                imagePreview.innerHTML = "";
+        
+                const imagesToRender = editMode ? [...originalImages, ...croppedImages].filter((_, index) => !deletedImageIndices.has(index)) : croppedImages;
+                if (imagesToRender.length > 3) imagesToRender.splice(3);
+        
+                imagesToRender.forEach((img, index) => {
+                    const url = typeof img === 'string' ? `/uploads/products/${img.split('/').pop()}` : URL.createObjectURL(img);
+                    const wrapper = document.createElement("div");
+        
+                    const imgElement = document.createElement("img");
+                    imgElement.src = url;
+                    imgElement.style.width = "100px";
+                    imgElement.style.height = "100px";
+                    imgElement.style.objectFit = "cover";
+                    imgElement.onerror = () => console.log(`Image load failed for ${url}`);
+        
+                    const deleteBtn = document.createElement("span");
+                    deleteBtn.classList.add("delete-btn");
+                    deleteBtn.innerHTML = "❌";
+                    deleteBtn.style.color = "#fff";
+                    deleteBtn.style.background = "#333";
+                    deleteBtn.style.borderRadius = "50%";
+                    deleteBtn.style.padding = "2px";
+                    deleteBtn.style.cursor = "pointer";
+        
+                    deleteBtn.addEventListener("click", () => {
+                        if (editMode && typeof imagesToRender[index] === 'string') {
+                            deletedImageIndices.add(index);
+                        } else {
+                            const croppedIndex = croppedImages.indexOf(imagesToRender[index]);
+                            if (croppedIndex !== -1) croppedImages.splice(croppedIndex, 1);
+                        }
+                        renderImagePreview();
+                    });
+        
+                    wrapper.appendChild(imgElement);
+                    wrapper.appendChild(deleteBtn);
+                    imagePreview.appendChild(wrapper);
+                });
+            }
+        
+            productForm.addEventListener("submit", async function (e) {
+                e.preventDefault();
+        
+                const productName = document.getElementById("productName").value.trim();
+                const quantity = document.getElementById("productQuantity").value.trim();
+                const regularPrice = document.getElementById("regularPrice").value.trim();
+                const salePrice = document.getElementById("salePrice").value.trim();
+                const productOffer = document.getElementById("productOffer").value.trim();
+                const description = document.getElementById("productDescription").value.trim();
+                const category = document.getElementById("productCategory").value;
+                const brand = document.getElementById("productBrand").value;
+                const status = document.getElementById("status").value;
+        
+                if (!productName) return Swal.fire({ icon: "warning", title: "Missing Product Name", text: "Product Name is required.", timer: 3000, showConfirmButton: false });
+                if (!quantity || isNaN(quantity) || parseInt(quantity) < 0) return Swal.fire({ icon: "warning", title: "Invalid Quantity", text: "Quantity must be a non-negative number.", timer: 3000, showConfirmButton: false });
+                if (!regularPrice || isNaN(regularPrice) || parseFloat(regularPrice) <= 0) return Swal.fire({ icon: "warning", title: "Invalid Regular Price", text: "Regular Price must be greater than 0.", timer: 3000, showConfirmButton: false });
+                if (!salePrice || isNaN(salePrice) || parseFloat(salePrice) <= 0) return Swal.fire({ icon: "warning", title: "Invalid Sale Price", text: "Sale Price must be greater than 0.", timer: 3000, showConfirmButton: false });
+                if (!description) return Swal.fire({ icon: "warning", title: "Missing Description", text: "Description is required.", timer: 3000, showConfirmButton: false });
+                if (!category) return Swal.fire({ icon: "warning", title: "Missing Category", text: "Please select a category.", timer: 3000, showConfirmButton: false });
+                if (!brand) return Swal.fire({ icon: "warning", title: "Missing Brand", text: "Please select a brand.", timer: 3000, showConfirmButton: false });
+        
+                const totalImages = originalImages.length + croppedImages.length - deletedImageIndices.size;
+                if (totalImages < 3) {
+                    Swal.fire({
+                        icon: "warning",
+                        title: "Incomplete Upload",
+                        text: "You must upload exactly 3 images.",
+                        timer: 3000,
+                        showConfirmButton: false
+                    });
+                    return;
+                }
+                if (totalImages > 3) {
+                    Swal.fire({
+                        icon: "warning",
+                        title: "Too Many Images",
+                        text: "You can upload a maximum of 3 images.",
+                        timer: 3000,
+                        showConfirmButton: false
+                    });
+                    return;
+                }
+        
+                const formData = new FormData();
+                formData.append("productName", productName);
+                formData.append("quantity", quantity);
+                formData.append("regularPrice", regularPrice);
+                formData.append("salePrice", salePrice);
+                formData.append("productOffer", productOffer);
+                formData.append("description", description);
+                formData.append("category", category);
+                formData.append("brand", brand);
+                formData.append("status", status);
+                if (currentProductId) formData.append("productId", currentProductId);
+        
+                const retainedOriginalImages = originalImages.filter((_, index) => !deletedImageIndices.has(index));
+                retainedOriginalImages.forEach((img, index) => {
+                    formData.append("existingImages", img);
+                });
+                croppedImages.forEach((file, index) => {
+                    formData.append("productImage", file, `cropped-image-${index}.jpg`);
+                });
+        
+                const url = currentProductId ? "/admin/edit-product" : "/admin/add-product";
+                try {
+                    const response = await fetch(url, { method: "POST", body: formData });
+                    const result = await response.json();
+        
+                    if (response.ok) {
+                        Swal.fire({
+                            icon: "success",
+                            title: "Success",
+                            text: `Product ${currentProductId ? 'updated' : 'added'} successfully!`,
+                            timer: 3000,
+                            showConfirmButton: false
+                        }).then(() => {
+                            resetModalState();
+                            const modal = bootstrap.Modal.getInstance(document.getElementById("productModal"));
+                            modal.hide();
+                            location.reload();
+                        });
+                    } else {
+                        Swal.fire({
+                            icon: "error",
+                            title: "Error",
+                            text: result.message || "Something went wrong.",
+                            timer: 3000,
+                            showConfirmButton: false
+                        });
+                    }
+                } catch (error) {
+                    console.error("Error submitting form:", error);
+                    Swal.fire({
+                        icon: "error",
+                        title: "Error",
+                        text: "An error occurred. Please try again.",
+                        timer: 3000,
+                        showConfirmButton: false
+                    });
+                }
+            });
+        
+            function unlistProduct(productId) {
+                Swal.fire({
+                    title: 'Are you sure?',
+                    text: "You are about to unlist this product!",
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#3085d6',
+                    cancelButtonColor: '#d33',
+                    confirmButtonText: 'Yes, unlist it!'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        fetch(`/admin/unlist-product/${productId}`, {
+                            method: 'PATCH',
+                            headers: {
+                                'Content-Type': 'application/json'
+                            }
+                        })
+                            .then(res => res.json())
+                            .then(data => {
+                                if (data.success) {
+                                    Swal.fire({
+                                        icon: 'success',
+                                        title: data.message || 'Product unlisted',
+                                        timer: 1500
+                                    }).then(() => {
+                                        location.reload();
+                                    });
+                                } else {
+                                    Swal.fire({
+                                        icon: 'error',
+                                        title: data.message || 'Error while unlisting product',
+                                        timer: 1500
+                                    });
+                                }
+                            })
+                            .catch(err => {
+                                Swal.fire('Error', 'Something went wrong', 'error');
+                            });
+                    }
+                });
+            }
+        
+            function listProduct(productId) {
+                Swal.fire({
+                    title: 'Are you sure?',
+                    text: "You are about to list this product!",
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#3085d6',
+                    cancelButtonColor: '#d33',
+                    confirmButtonText: 'Yes, list it!'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        fetch(`/admin/list-product/${productId}`, {
+                            method: 'PATCH',
+                            headers: {
+                                'Content-Type': 'application/json'
+                            }
+                        })
+                            .then(res => res.json())
+                            .then(data => {
+                                if (data.success) {
+                                    Swal.fire({
+                                        icon: 'success',
+                                        title: data.message || 'Product listed',
+                                        timer: 1500
+                                    }).then(() => {
+                                        location.reload();
+                                    });
+                                } else {
+                                    Swal.fire({
+                                        icon: 'error',
+                                        title: data.message || 'Error while listing Product',
+                                        timer: 1500
+                                    });
+                                }
+                            })
+                            .catch(err => {
+                                Swal.fire('Error', 'Something went wrong', 'error');
+                            });
+                    }
+                });
+            }
+        
+            document.querySelectorAll('.edit-btn').forEach(button => {
+                button.addEventListener('click', async function () {
+                    const productId = this.getAttribute('data-id');
+                    currentProductId = productId;
+                    editMode = true;
+        
+                    try {
+                        const response = await fetch(`/admin/get-product/${productId}`);
+                        const product = await response.json();
+        
+                        document.getElementById("productName").value = product.productName;
+                        document.getElementById("productQuantity").value = product.quantity;
+                        document.getElementById("regularPrice").value = product.regularPrice;
+                        document.getElementById("salePrice").value = product.salePrice;
+                        document.getElementById("productOffer").value = product.productOffer;
+                        document.getElementById("productDescription").value = product.description;
+                        document.getElementById("productCategory").value = product.category._id;
+                        document.getElementById("productBrand").value = product.brand._id;
+                        document.getElementById("status").value = product.status;
+        
+                        originalImages = product.productImage.slice(0, 3);
+                        croppedImages = [];
+                        deletedImageIndices.clear();
+                        renderImagePreview();
+        
+                        const modal = new bootstrap.Modal(document.getElementById('productModal'));
+                        modal.show();
+                        document.getElementById("productModalLabel").textContent = "Edit Product";
+                        saveProductBtn.textContent = "Update Product";
+                    } catch (error) {
+                        console.error("Error fetching product:", error);
+                        Swal.fire({
+                            icon: "error",
+                            title: "Error",
+                            text: "Failed to load product data.",
+                            timer: 3000,
+                            showConfirmButton: false
+                        });
+                    }
+                });
+            });
+        
+            function deleteProduct(id) {
+                Swal.fire({
+                    title: 'Are you sure?',
+                    text: "You are about to delete this Product!",
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#3085d6',
+                    cancelButtonColor: '#d33',
+                    confirmButtonText: 'Yes, delete it!'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        fetch(`/admin/delete-product/${id}`, {
+                            method: 'PATCH',
+                            headers: {
+                                'Content-Type': 'application/json'
+                            }
+                        })
+                            .then(res => res.json())
+                            .then(data => {
+                                if (data.success) {
+                                    Swal.fire({
+                                        icon: 'success',
+                                        title: data.message || 'Product deleted',
+                                        timer: 1500
+                                    }).then(() => {
+                                        location.reload();
+                                    });
+                                } else {
+                                    Swal.fire({
+                                        icon: 'error',
+                                        title: data.message || 'Error while deleting Product',
+                                        timer: 1500
+                                    });
+                                }
+                            })
+                            .catch(err => {
+                                Swal.fire('Error', 'Something went wrong', 'error');
+                            });
+                    }
+                });
+            }
+        </script>
+</body>
+
+</html>
