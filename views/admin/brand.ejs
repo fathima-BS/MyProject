@@ -178,26 +178,25 @@
             const modal = new bootstrap.Modal(document.getElementById('editbrandModal'));
             modal.show();
         }
-
+        
         function submitEdit() {
             const form = document.getElementById('editbrandForm');
             const formData = new FormData(form);
             const BrandName = formData.get('BrandName').trim();
             const description = formData.get('description').trim();
-            const brandOffer = formData.get('brandOffer').trim();
+            let brandOffer = formData.get('brandOffer').trim();
             const brandId = formData.get('brandId').trim();
-
+        
             const nameRegex = /^[A-Za-z\s]{6,}$/;
-            const offerValue = Number(brandOffer);
-
+        
             if (!nameRegex.test(BrandName)) {
                 return Swal.fire({
                     icon: 'warning',
-                    title: 'Invalid brand Name!',
+                    title: 'Invalid Brand Name!',
                     text: 'Name must be at least 6 characters and contain only alphabets.',
                 });
             }
-
+        
             if (description.length > 80) {
                 return Swal.fire({
                     icon: 'warning',
@@ -205,29 +204,34 @@
                     text: `Description must not exceed 80 characters. Currently: ${description.length} characters.`,
                 });
             }
-
+        
+            // If brandOffer is empty, set it to 0 (or null if your schema expects null)
             if (!brandOffer) {
-                return Swal.fire({
-                    icon: 'warning',
-                    title: 'Invalid Offer Value!',
-                    text: 'Please enter an offer value before submitting.',
-                });
+                brandOffer = 0; // Or set to null if your backend schema expects null
+            } else {
+                const offerValue = Number(brandOffer);
+                if (isNaN(offerValue) || offerValue < 0 || offerValue > 100) {
+                    return Swal.fire({
+                        icon: 'warning',
+                        title: 'Invalid Offer Value!',
+                        text: 'Offer must be a percentage between 0 and 100.',
+                    });
+                }
             }
-
-            if (isNaN(offerValue) || offerValue < 0 || offerValue > 100) {
-                return Swal.fire({
-                    icon: 'warning',
-                    title: 'Invalid Offer Value!',
-                    text: 'Offer must be a percentage between 0 and 100.',
-                });
-            }
-
+        
+            // Prepare form data for submission
+            const updatedFormData = new FormData();
+            updatedFormData.append('BrandName', BrandName);
+            updatedFormData.append('description', description);
+            updatedFormData.append('brandOffer', brandOffer);
+            updatedFormData.append('brandId', brandId);
+        
             fetch('/admin/edit-brand', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/x-www-form-urlencoded'
                 },
-                body: new URLSearchParams([...formData])
+                body: new URLSearchParams([...updatedFormData])
             })
                 .then(response => response.json())
                 .then(data => {
@@ -252,7 +256,7 @@
                 })
                 .catch(error => console.error('Error:', error));
         }
-
+        
         function deletebrand(id) {
             Swal.fire({
                 title: 'Are you sure?',
@@ -294,7 +298,7 @@
                 }
             });
         }
-
+        
         function unlistbrand(brandId) {
             Swal.fire({
                 title: 'Are you sure?',
@@ -336,7 +340,7 @@
                 }
             });
         }
-
+        
         function listbrand(brandId) {
             Swal.fire({
                 title: 'Are you sure?',
@@ -378,24 +382,23 @@
                 }
             });
         }
-
+        
         document.getElementById('brandForm').addEventListener('submit', function (e) {
             e.preventDefault();
             const BrandName = document.getElementById('brandName').value.trim();
             const description = document.getElementById('description').value.trim();
-            const brandOffer = document.getElementById('brandOffer').value.trim();
-
+            let brandOffer = document.getElementById('brandOffer').value.trim();
+        
             const nameRegex = /^[A-Za-z\s]{6,}$/;
-            const offerValue = Number(brandOffer);
-
+        
             if (!nameRegex.test(BrandName)) {
                 return Swal.fire({
                     icon: 'warning',
-                    title: 'Invalid brand Name!',
+                    title: 'Invalid Brand Name!',
                     text: 'Name must be at least 6 characters and contain only alphabets.',
                 });
             }
-
+        
             if (description.length > 80) {
                 return Swal.fire({
                     icon: 'warning',
@@ -403,23 +406,21 @@
                     text: `Description must not exceed 80 characters. Currently: ${description.length} characters.`,
                 });
             }
-
+        
+            // If brandOffer is empty, set it to 0 (or null if your schema expects null)
             if (!brandOffer) {
-                return Swal.fire({
-                    icon: 'warning',
-                    title: 'Invalid Offer Value!',
-                    text: 'Please enter an offer value before submitting.',
-                });
+                brandOffer = 0; // Or set to null if your backend schema expects null
+            } else {
+                const offerValue = Number(brandOffer);
+                if (isNaN(offerValue) || offerValue < 0 || offerValue > 100) {
+                    return Swal.fire({
+                        icon: 'warning',
+                        title: 'Invalid Offer Value!',
+                        text: 'Offer must be a percentage between 0 and 100.',
+                    });
+                }
             }
-
-            if (isNaN(offerValue) || offerValue < 0 || offerValue > 100) {
-                return Swal.fire({
-                    icon: 'warning',
-                    title: 'Invalid Offer Value!',
-                    text: 'Offer must be a percentage between 0 and 100.',
-                });
-            }
-
+        
             fetch('/admin/add-brand', {
                 method: 'POST',
                 headers: {
@@ -451,7 +452,7 @@
                 })
                 .catch(error => console.error('Error:', error));
         });
-    </script>
+        </script>
 </body>
 
 </html>

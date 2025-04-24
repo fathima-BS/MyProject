@@ -42,7 +42,7 @@ const productSchema = new Schema({
   },
   isListed: {
     type: Boolean,
-    default: false,
+    default: true,
   },
   isDeleted: {
     type: Boolean,

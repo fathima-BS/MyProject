@@ -13,7 +13,7 @@ module.exports = function(passport) {
 
     const newUser = new User({
       googleId: profile.id,
-      name: profile.displayName,
+      username: profile.displayName,
       email: profile.emails[0].value
     });
     await newUser.save();

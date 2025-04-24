@@ -163,6 +163,17 @@
             border-radius: 2px;
             margin-left: 5px;
         }
+
+        .btn-logout{
+            background: none; 
+            border: none; 
+            color: #93979f; 
+            margin-left: 16px;
+        }
+
+        .btn-logout:hover{
+            color: #ffffff;
+        }
     </style>
 
 </head>
@@ -217,9 +228,12 @@
                 </a>
             </li>
             <li class="nav-item ">
-                <a class="nav-link logout-btn" onclick="logout()" href="/admin/logout">
+                <!-- <a class="nav-link logout-btn" href="/admin/logout">
                     <i class="fas fa-sign-out-alt"></i> Logout
-                </a>
+                </a> -->
+                <form action="/admin/logout" method="post">
+                    <button type="submit" class="btn-logout"><i class="fas fa-sign-out-alt"></i> Logout</button>
+                </form>
             </li>
         </ul>
     </div>

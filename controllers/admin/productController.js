@@ -55,8 +55,8 @@ const loadProduct = async (req, res) => {
 
         const count = await Product.countDocuments(query);
 
-        const categories = await Category.find({ isListed: true });
-        const brands = await Brand.find({ isListed: true });
+        const categories = await Category.find({ isListed: true,isDeleted:false });
+        const brands = await Brand.find({ isListed: true ,isDeleted:false });
 
         res.render('product', {
             products,
@@ -227,6 +227,9 @@ const listProduct = async (req, res) => {
         return res.status(500).json({ success: false, message: 'Internal server error' })
     }
 }
+
+
+
 
 module.exports = {
     loadProduct,

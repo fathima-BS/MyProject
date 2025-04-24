@@ -184,11 +184,10 @@
             const formData = new FormData(form);
             const categoryName = formData.get('categoryName').trim();
             const description = formData.get('description').trim();
-            const categoryOffer = formData.get('categoryOffer').trim();
+            let categoryOffer = formData.get('categoryOffer').trim();
             const categoryId = formData.get('categoryId').trim();
 
             const nameRegex = /^[A-Za-z\s]{6,}$/;
-            const offerValue = Number(categoryOffer);
 
             if (!nameRegex.test(categoryName)) {
                 return Swal.fire({
@@ -206,28 +205,33 @@
                 });
             }
 
+            // If categoryOffer is empty, set it to 0
             if (!categoryOffer) {
-                return Swal.fire({
-                    icon: 'warning',
-                    title: 'Invalid Offer Value!',
-                    text: 'Please enter an offer value before submitting.',
-                });
+                categoryOffer = 0; // Or set to null if your schema expects null
+            } else {
+                const offerValue = Number(categoryOffer);
+                if (isNaN(offerValue) || offerValue < 0 || offerValue > 100) {
+                    return Swal.fire({
+                        icon: 'warning',
+                        title: 'Invalid Offer Value!',
+                        text: 'Offer must be a percentage between 0 and 100.',
+                    });
+                }
             }
 
-            if (isNaN(offerValue) || offerValue < 0 || offerValue > 100) {
-                return Swal.fire({
-                    icon: 'warning',
-                    title: 'Invalid Offer Value!',
-                    text: 'Offer must be a percentage between 0 and 100.',
-                });
-            }
+            // Prepare form data for submission
+            const updatedFormData = new FormData();
+            updatedFormData.append('categoryName', categoryName);
+            updatedFormData.append('description', description);
+            updatedFormData.append('categoryOffer', categoryOffer);
+            updatedFormData.append('categoryId', categoryId);
 
             fetch('/admin/edit-category', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/x-www-form-urlencoded'
                 },
-                body: new URLSearchParams([...formData])
+                body: new URLSearchParams([...updatedFormData])
             })
                 .then(response => response.json())
                 .then(data => {
@@ -383,10 +387,9 @@
             e.preventDefault();
             const categoryName = document.getElementById('categoryName').value.trim();
             const description = document.getElementById('description').value.trim();
-            const categoryOffer = document.getElementById('categoryOffer').value.trim();
+            let categoryOffer = document.getElementById('categoryOffer').value.trim();
 
             const nameRegex = /^[A-Za-z\s]{6,}$/;
-            const offerValue = Number(categoryOffer);
 
             if (!nameRegex.test(categoryName)) {
                 return Swal.fire({
@@ -404,20 +407,18 @@
                 });
             }
 
+            // If categoryOffer is empty, set it to 0
             if (!categoryOffer) {
-                return Swal.fire({
-                    icon: 'warning',
-                    title: 'Invalid Offer Value!',
-                    text: 'Please enter an offer value before submitting.',
-                });
-            }
-
-            if (isNaN(offerValue) || offerValue < 0 || offerValue > 100) {
-                return Swal.fire({
-                    icon: 'warning',
-                    title: 'Invalid Offer Value!',
-                    text: 'Offer must be a percentage between 0 and 100.',
-                });
+                categoryOffer = 0; // Or set to null if your schema expects null
+            } else {
+                const offerValue = Number(categoryOffer);
+                if (isNaN(offerValue) || offerValue < 0 || offerValue > 100) {
+                    return Swal.fire({
+                        icon: 'warning',
+                        title: 'Invalid Offer Value!',
+                        text: 'Offer must be a percentage between 0 and 100.',
+                    });
+                }
             }
 
             fetch('/admin/add-category', {
