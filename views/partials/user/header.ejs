@@ -63,10 +63,20 @@
    display: block;
 }
 .header {
-   position: relative;
-   z-index: 500;
+   position: sticky;
+   top: 0;
+   z-index: 999;
+   background-color: #fff; /* Important: background is needed for sticky */
+   box-shadow: 0 2px 5px rgba(0,0,0,0.1); /* Optional: subtle shadow */
 }
-
+.row {
+   margin-left: 0 !important;
+   margin-right: 0 !important;
+}
+.container-head{
+    padding-left: 45px;
+    padding-right: 60px;
+}
 
 
 
@@ -74,18 +84,18 @@
 </head>
 <body>
    <header class="header">
-       <div class="container">
+       <div class="container-head">
            <div class="row">
                <div class="col-lg-3 col-md-3">
                    <div class="header__logo">
-                       <a href="#"><img src="img/logo.png" alt=""></a>
+                       <a href="#"><img class="logo" src="img/logo.png" alt=""></a>
                    </div>
                </div>
                <div class="col-lg-6 col-md-6">
                    <nav class="header__menu mobile-menu">
                        <ul>
                            <li class="active"><a href="/">Home</a></li>
-                           <li><a href="/shop">Shop</a></li>
+                           <li id="shop" ><a  href="/shop">Shop</a></li>
                        </ul>
                    </nav>
                </div>
@@ -119,3 +129,29 @@
            <div class="canvas__open"><i class="fa fa-bars"></i></div>
        </div>
    </header>
+      <script>
+   // Wait until full page loaded
+   window.addEventListener("DOMContentLoaded", function() {
+      // Get current URL path
+      const currentPath = window.location.pathname;
+
+      // Get all menu list items
+      const menuItems = document.querySelectorAll(".header__menu ul li");
+
+      menuItems.forEach(li => {
+         // Get the href of inside a tag
+         const link = li.querySelector("a");
+
+         if (link) {
+            // Check if current path matches href
+            if (link.getAttribute("href") === currentPath) {
+               // Remove active from all first
+               menuItems.forEach(item => item.classList.remove("active"));
+               
+               // Add active to current li
+               li.classList.add("active");
+            }
+         }
+      });
+   });
+</script>

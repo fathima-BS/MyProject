@@ -585,7 +585,6 @@ ol {
 
 .hero__items {
 	height: 800px;
-	padding-top: 230px;
 }
 
 .hero__text h6 {
@@ -2139,6 +2138,10 @@ ol {
 .about__item p {
 	margin-bottom: 0;
 }
+.logo{
+	width: 200px;
+	height: 45px;
+}
 
 /*---------------------
   Testimonial
@@ -3366,7 +3369,7 @@ ol {
 
 @media only screen and (min-width: 1200px) {
 	.container {
-		max-width: 1170px;
+		max-width: 1100px;
 	}
 }
 
@@ -3802,8 +3805,6 @@ ol {
 	}
 	.hero__items {
 		height: auto;
-		padding-top: 130px;
-		padding-bottom: 40px;
 	}
 	.hero__text h2 {
 		font-size: 36px;

@@ -50,7 +50,7 @@ const loadShopPage = async (req, res) => {
     const listedBrands = await Brand.find({ isListed: true, isDeleted: false });
 
     let { search, sort, categoryf, brandf, priceRange, page = 1 } = req.query;
-    const perPage = 6;
+    const perPage = 9;
     const skip = (page - 1) * perPage;
 
     // Initialize filter object
@@ -64,7 +64,7 @@ const loadShopPage = async (req, res) => {
     console.log('Query Parameters:', { search, sort, categoryf, brandf, priceRange, page });
 
     // Add category filter
-    if (categoryf) {
+    if (categoryf && categoryf != "all") {
       const categoryExists = listedCategories.some(cat => cat._id.toString() === categoryf);
       if (categoryExists) {
         filter.category = categoryf;
@@ -207,23 +207,29 @@ const loadShopPage = async (req, res) => {
 
 const productDetailPage = async (req, res) => {
   try {
-      const productId = req.query.productId; // Get productId from query string
-      if (!productId) {
-          req.session.message = 'Product ID is required';
-          return res.redirect('/pageNotFound'); // Redirect to user error page if needed
-      }
-
-      const product = await Product.findById(productId).populate('brand'); // Fetch product with brand
-      if (!product) {
-          req.session.message = 'Product not found';
-          return res.redirect('/pageNotFound');
-      }
-
-      res.render('productDetail', { product }); // Render product detail page
+    const productId = req.query.productId;
+    // Assuming you have a Product model
+    const product = await Product.findById(productId).populate('brand category');
+    
+    if (!product) {
+      return res.status(404).render('error', { message: 'Product not found' });
+    }
+    const relatedProducts = await Product.find({
+      category: product.category._id,
+      _id: { $ne: productId },
+      isListed: true,
+      isDeleted: false
+    })
+      .populate('brand')
+      .limit(4); // Limit to 4 related products
+    res.render('productDetail', {
+      product,
+      title: product.productName,
+      relatedProducts,
+    });
   } catch (error) {
-      console.error('Error in loadProductDetail:', error);
-      req.session.message = 'Failed to load product details';
-      res.redirect('/pageNotFound');
+    console.error(error);
+    res.status(500).render('error', { message: 'Server error' });
   }
 };
 
