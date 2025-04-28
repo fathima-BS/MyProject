@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OTP Verification</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: Arial, sans-serif;
+        }
+        
+        body {
+            background-color: #f8f8f8;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+        
+        .container {
+            background-color: #fff;
+            border-radius: 4px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            padding: 40px;
+            width: 400px;
+            max-width: 90%;
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        .header h1 {
+            font-size: 28px;
+            color: #333;
+            margin-bottom: 10px;
+        }
+        
+        .header p {
+            color: #666;
+            font-size: 16px;
+            line-height: 1.5;
+        }
+        
+        .otp-container {
+            display: flex;
+            justify-content: space-between;
+            margin: 30px 0;
+            gap: 10px;
+        }
+        
+        .otp-input {
+            width: 50px;
+            height: 55px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            text-align: center;
+            font-size: 24px;
+            font-weight: bold;
+            color: #333;
+        }
+        
+        .otp-input:focus {
+            outline: none;
+            border-color: #b19cd9;
+            box-shadow: 0 0 0 2px rgba(177, 156, 217, 0.2);
+        }
+        
+        .otp-input.filled {
+            background-color: #f3e8ff;
+            border-color: #b19cd9;
+        }
+        
+        .btn {
+            display: block;
+            width: 100%;
+            padding: 12px 15px;
+            background-color: #222;
+            color: #fff;
+            border: none;
+            border-radius: 4px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        
+        .btn:hover {
+            background-color: #333;
+        }
+        
+        .text-center {
+            text-align: center;
+        }
+        
+        .link {
+            color: #b19cd9;
+            text-decoration: none;
+            font-weight: 500;
+        }
+        
+        .link:hover {
+            text-decoration: underline;
+        }
+        
+        .mt-20 {
+            margin-top: 20px;
+        }
+        
+        .timer {
+            margin-top: 15px;
+            color: #666;
+            font-size: 14px;
+        }
+        
+        .resend-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 25px;
+            padding-top: 15px;
+            border-top: 1px solid #eee;
+        }
+        
+        @keyframes pulse {
+            0% { box-shadow: 0 0 0 0 rgba(177, 156, 217, 0.4); }
+            70% { box-shadow: 0 0 0 10px rgba(177, 156, 217, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(177, 156, 217, 0); }
+        }
+        
+        .pulse {
+            animation: pulse 1.5s infinite;
+        }
+    </style>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Verification Code</h1>
+            <p>We've sent a verification code to your email.<br>Please enter the code below.</p>
+        </div>
+        
+        <form id="otpForm" action="/verifyForgetPassOtp" method="post" onsubmit="return validateOTPForm(event)">
+            <div class="otp-container">
+                <input type="text" maxlength="1" class="otp-input" pattern="\d*" inputmode="numeric" name="otp1" required autofocus>
+                <input type="text" maxlength="1" class="otp-input" pattern="\d*" inputmode="numeric" name="otp2" required>
+                <input type="text" maxlength="1" class="otp-input" pattern="\d*" inputmode="numeric" name="otp3" required>
+                <input type="text" maxlength="1" class="otp-input" pattern="\d*" inputmode="numeric" name="otp4" required>
+                <input type="text" maxlength="1" class="otp-input" pattern="\d*" inputmode="numeric" name="otp5" required>
+                <input type="text" maxlength="1" class="otp-input" pattern="\d*" inputmode="numeric" name="otp6" required>
+            </div>
+            
+            <button type="submit" class="btn">Verify Code</button>
+            
+            <div class="resend-container">
+                <div class="timer">Please wait <span id="countdown">60</span> seconds before requesting another code</div>
+                <a href="javascript:void(0)" class="link" id="resendLink" onclick="resendOTP()" style="pointer-events: none; opacity: 0.5;" role="button" aria-disabled="true">Resend Code</a>
+            </div>
+            
+            <div class="text-center mt-20">
+                <a href="/login" class="link">Back to Sign In</a>
+            </div>
+        </form>
+    </div>
+
+    <script>
+        let timer = 60;
+        let countdown;
+        const timerValue = document.getElementById("countdown");
+        const resendLink = document.getElementById("resendLink");
+        const inputs = document.querySelectorAll(".otp-input");
+
+        // Setup auto-focus for OTP inputs
+        inputs.forEach((input, index) => {
+            input.addEventListener("keyup", function(e) {
+                // Add filled class when input has value
+                if (this.value) {
+                    this.classList.add("filled");
+                } else {
+                    this.classList.remove("filled");
+                }
+                
+                // Move to next input if current is filled
+                if (this.value.length === 1 && index < inputs.length - 1) {
+                    inputs[index + 1].focus();
+                }
+                
+                // Handle backspace
+                if (e.key === "Backspace" && index > 0 && this.value.length === 0) {
+                    inputs[index - 1].focus();
+                }
+            });
+            
+            input.addEventListener("paste", function(e) {
+                e.preventDefault();
+                const pastedData = e.clipboardData.getData("text").trim();
+                
+                if (/^\d+$/.test(pastedData) && pastedData.length === inputs.length) {
+                    // Fill all inputs with pasted data
+                    inputs.forEach((input, i) => {
+                        input.value = pastedData[i];
+                        input.classList.add("filled");
+                    });
+                    // Focus last input
+                    inputs[inputs.length - 1].focus();
+                }
+            });
+        });
+
+        function startTimer() {
+            timer = 60;
+
+            resendLink.style.pointerEvents = "none";
+            resendLink.style.opacity = "0.5";
+            resendLink.style.color = "#b19cd9";
+            resendLink.style.textDecoration = "none";
+
+            clearInterval(countdown);
+
+            countdown = setInterval(() => {
+                timer--;
+                timerValue.textContent = timer;
+
+                if (timer <= 0) {
+                    clearInterval(countdown);
+                    timerValue.textContent = "0";
+                    resendLink.style.pointerEvents = "auto";
+                    resendLink.style.opacity = "1";
+                    resendLink.style.color = "#b19cd9";
+                    resendLink.classList.add("pulse");
+                }
+            }, 1000);
+        }
+
+        // Start countdown on page load
+        startTimer();
+
+        function validateOTPForm(event) {
+            event.preventDefault();
+            
+            let otp = "";
+            const inputs = document.querySelectorAll(".otp-input");
+            
+            inputs.forEach(input => {
+                otp += input.value;
+            });
+
+            if (otp.length !== 6 || isNaN(otp)) {
+                Swal.fire({
+                    icon: "error",
+                    title: "Invalid Code",
+                    text: "Please enter a valid 6-digit verification code",
+                    confirmButtonColor: "#b19cd9"
+                });
+                return false;
+            }
+
+            const submitBtn = document.querySelector(".btn");
+            const originalText = submitBtn.innerText;
+            submitBtn.innerText = "Verifying...";
+            submitBtn.disabled = true;
+            
+            $.ajax({
+                type: "POST",
+                url: "/verifyForgetPassOtp",
+                data: { otp: otp },
+                success: function(response) {
+                    if (response.success) {
+                        Swal.fire({
+                            icon: "success",
+                            title: "Verified!",
+                            text: "Your email has been successfully verified",
+                            confirmButtonColor: "#222",
+                            showConfirmButton: false,
+                            timer: 1500,
+                        }).then(() => {
+                            window.location.href = response.redirectUrl;
+                        });
+                    } else {
+                        Swal.fire({
+                            icon: "error",
+                            title: "Verification Failed",
+                            text: response.message || "Please try again",
+                            confirmButtonColor: "#b19cd9"
+                        });
+                        submitBtn.innerText = originalText;
+                        submitBtn.disabled = false;
+                    }
+                },
+                error: function() {
+                    Swal.fire({
+                        icon: "error",
+                        title: "Invalid Code",
+                        text: "The verification code you entered is incorrect",
+                        confirmButtonColor: "#b19cd9"
+                    });
+                    submitBtn.innerText = originalText;
+                    submitBtn.disabled = false;
+                }
+            });
+
+            return false;
+        }
+
+        function resendOTP() {
+            resendLink.classList.remove("pulse");
+            clearInterval(countdown);
+            startTimer();
+
+            $.ajax({
+                type: "POST",
+                url: "/resendForgetOtp",
+                success: function(response) {
+                    if (response.success) {
+                        inputs.forEach(input => {
+                            input.value = "";
+                            input.classList.remove("filled");
+                        });
+                        inputs[0].focus();
+                        
+                        Swal.fire({
+                            icon: "success",
+                            title: "Code Resent",
+                            text: "A new verification code has been sent to your email",
+                            confirmButtonColor: "#222",
+                            showConfirmButton: false,
+                            timer: 1500,
+                        });
+                    } else {
+                        Swal.fire({
+                            icon: "error",
+                            title: "Error",
+                            text: "An error occurred while resending the code. Please try again.",
+                            confirmButtonColor: "#b19cd9"
+                        });
+                    }
+                },
+                error: function() {
+                    Swal.fire({
+                        icon: "error",
+                        title: "Server Error",
+                        text: "Could not resend verification code. Please try again later.",
+                        confirmButtonColor: "#b19cd9"
+                    });
+                }
+            });
+        }
+    </script>
+</body>
+</html>

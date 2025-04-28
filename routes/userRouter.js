@@ -8,6 +8,19 @@ router.get('/signup', userController.loadSignup);
 router.post('/signup', userController.signup);
 router.get('/pageNotFound', userController.pageNotFound);
 
+router.get('/forgot-password',userController.forgetPassword)
+router.post('/forgot-password',userController.forgetPasswordsubmit)
+router.post('/verifyForgetPassOtp',userController.verifyForgetPassOtp)
+router.get('/reset-password',userController.resetPass)
+router.post('/reset-password',userController.newPass)
+
+
+
+
+router.post('/resendForgetOtp', userController.resendForgetPassOtp); 
+
+
+
 router.post('/verifyOtp', userController.verifyOtp);
 router.post('/resendOtp', userController.resendOtp);
 
