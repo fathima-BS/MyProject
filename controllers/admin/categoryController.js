@@ -1,6 +1,6 @@
 const Category = require('../../models/categorySchema');
 
-const LoadCategory = async (req, res) => {
+const loadCategory = async (req, res) => {
     try {
         let search = '';
         if (req.query.search) {
@@ -139,7 +139,7 @@ const listCategory = async (req, res) => {
 };
 
 module.exports = {
-    LoadCategory,
+    loadCategory,
     addCategory,
     editCategory,
     unlistCategory,

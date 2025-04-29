@@ -1,6 +1,6 @@
 const Brand = require('../../models/brandSchema');
 
-const LoadBrand = async (req, res) => {
+const loadBrand = async (req, res) => {
     try {
         let search = '';
         if (req.query.search) {
@@ -139,7 +139,7 @@ const listBrand = async (req, res) => {
 };
 
 module.exports = {
-    LoadBrand,
+    loadBrand,
     addBrand,
     editBrand,
     unlistBrand,

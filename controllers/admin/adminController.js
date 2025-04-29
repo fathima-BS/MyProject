@@ -24,7 +24,7 @@ const login = async (req, res) => {
         const passwordMatch = await bcrypt.compare(password, findadmin.password);
         if (passwordMatch) {
             req.session.adminId = findadmin._id; 
-            return res.redirect('/admin');
+            return res.redirect('/admin/dashboard');
         }
         req.session.message = 'Invalid credentials';
         return res.redirect('/admin/login');

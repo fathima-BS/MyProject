@@ -1,6 +1,6 @@
 const User = require('../../models/userSchema');
 
-const LoadUser = async (req, res) => {
+const loadUser = async (req, res) => {
     try {
         let search = '';
         if (req.query.search) {
@@ -77,7 +77,7 @@ const blockUser = async (req, res) => {
 };
 
 module.exports = {
-    LoadUser,
+    loadUser,
     unblockUser,
     blockUser
 };
