@@ -9,6 +9,36 @@
     font-family: 'Arial', sans-serif;
   }
 
+
+   /* Breadcrumb Styling */
+   .breadcrumb {
+        padding: 12px 20px;
+        font-size: 14px;
+        color: #666;
+    }
+
+    .breadcrumb a {
+        color: #1e90ff;
+        text-decoration: none;
+        transition: color 0.3s ease;
+    }
+
+    .breadcrumb a:hover {
+        color: #1871cc;
+    }
+
+    .breadcrumb span {
+        margin: 0 8px;
+        color: #999;
+    }
+
+    .breadcrumb .current {
+        color: #333;
+        font-weight: 500;
+    }
+
+
+
   .product-detail-section {
     display: flex;
     gap: 30px;
@@ -333,6 +363,25 @@
 </style>
 
 <div class="product-main-container">
+
+   <!-- Breadcrumb -->
+   <nav class="breadcrumb" aria-label="Breadcrumb">
+    <a href="/">Home</a>
+    <span>></span>
+    <a href="/shop">Shop</a>
+    <% if (product.category) { %>
+        <span>></span>
+        <a href="/shop?categoryf=<%= product.category._id %>">
+            <%= product.category.name %>
+        </a>
+    <% } %>
+    <span>></span>
+    <span class="current"><%= title %></span>
+</nav>
+
+
+
+
   <section class="product-detail-section">
     <!-- Image Gallery -->
     <div class="image-gallery">

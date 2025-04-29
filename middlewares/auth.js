@@ -1,54 +1,31 @@
 const User = require('../models/userSchema');
 
 const userAuth = (req, res, next) => {
-    if (req.session.passport && req.session.passport.user) {
-        User.findById(req.session.passport.user)
+    if (req.session.user) {
+        User.findById(req.session.user)
             .then(data => {
-                if (data && !data.isBlocked) {
+                if (data) {
                     next();
                 } else {
-                    req.session.destroy(err => {
-                        if (err) {
-                            console.error('Failed to clear session:', err);
-                            return res.status(500).send('Internal server error');
-                        }
-                        res.redirect('/login');
-                    });
+                    res.redirect('/login');
                 }
             })
-            .catch(error => {
-                console.error('Error in user auth:', error);
-                res.status(500).send('Internal server error');
+            .catch((error) => {
+                console.log("error in user auth");
+                res.status(500).send('internal server error');
             });
     } else {
-        req.session.message = 'Please login';
+        req.session.message = 'please login';
         res.redirect('/login');
     }
 };
 
 const adminAuth = (req, res, next) => {
-    if (req.session.adminId) {
-        User.findOne({ _id: req.session.adminId, isAdmin: true })
-            .then(admin => {
-                if (admin) {
-                    req.admin = admin;
-                    next();
-                } else {
-                    req.session.destroy(err => {
-                        if (err) {
-                            console.error('Failed to clear admin session:', err);
-                            return res.status(500).send('Internal server error');
-                        }
-                        res.render('adminlogin', { message: 'Please login' });
-                    });
-                }
-            })
-            .catch(error => {
-                console.error('Error in admin auth:', error);
-                res.status(500).send('Internal server error');
-            });
+    const data = req.session.adminId;
+    if (data) {
+        next();
     } else {
-        res.render('adminlogin', { message: 'Please login' });
+        res.render('adminlogin', { message: 'please login' });
     }
 };
 

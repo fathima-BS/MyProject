@@ -12,6 +12,38 @@
   background: #f8f9fa;
 }
 
+
+/* Breadcrumb Styling */
+.breadcrumb {
+        padding: 12px 0;
+        font-size: 14px;
+        color: #666;
+    }
+
+    .breadcrumb a {
+        color: #1e90ff;
+        text-decoration: none;
+        transition: color 0.3s ease;
+    }
+
+    .breadcrumb a:hover {
+        color: #1871cc;
+    }
+
+    .breadcrumb span {
+        margin: 0 8px;
+        color: #999;
+    }
+
+    .breadcrumb .current {
+        color: #333;
+        font-weight: 500;
+    }
+
+
+
+
+
 .shop-topbar {
   display: flex;
   justify-content: space-between;
@@ -397,6 +429,37 @@
 
 <div class="main-container " >
   <section class="shop-page container">
+
+     <!-- Breadcrumb -->
+     <nav class="breadcrumb" aria-label="Breadcrumb">
+      <a href="/">Home</a>
+      <span>></span>
+      <a href="/shop">Shop</a>
+      <% if (categoryf && categoryf !== 'all') { %>
+          <span>></span>
+          <% category.forEach(item => { %>
+              <% if (item._id.toString() === categoryf) { %>
+                  <a href="/shop?categoryf=<%= item._id %>&search=<%= search || '' %>&sort=<%= sort || '' %>&brandf=<%= brandf || '' %>&priceRange=<%= priceRange || '' %>">
+                      <%= item.name %>
+                  </a>
+              <% } %>
+          <% }) %>
+      <% } %>
+      <% if (brandf && brandf !== 'all') { %>
+          <span>></span>
+          <% brand.forEach(item => { %>
+              <% if (item._id.toString() === brandf) { %>
+                  <span class="current"><%= item.BrandName %></span>
+              <% } %>
+          <% }) %>
+      <% } else if (categoryf && categoryf !== 'all' && (!brandf || brandf === 'all')) { %>
+          <span class="current" style="display: none;"></span>
+      <% } else { %>
+          <span class="current" style="display: none;"></span>
+      <% } %>
+  </nav>
+
+
     <div class="shop-topbar">
       <div class="search-bar">
         <form action="/shop" method="GET" class="search-form">
