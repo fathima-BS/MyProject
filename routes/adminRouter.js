@@ -1,12 +1,11 @@
 const express=require('express')
 const router=express.Router()
 const adminController=require('../controllers/admin/adminController')
-const {userAuth,adminAuth}=require('../middlewares/auth')
+const {adminAuth}=require('../middlewares/auth')
 const categoryController=require('../controllers/admin/categoryController')
 const brandController=require('../controllers/admin/brandController')
 const userController=require('../controllers/admin/userController')
 const productController=require('../controllers/admin/productController')
-
 
 
 router.get('/login', adminController.loadlogin);
@@ -44,12 +43,6 @@ router.post('/edit-product',adminAuth, productController.editProduct);
 router.patch('/delete-product/:id',adminAuth, productController.deleteProduct);
 router.patch('/unlist-product/:id',adminAuth,productController.unlistProduct)
 router.patch('/list-product/:id',adminAuth,productController.listProduct)
-
-
-
-
-
-
 
 
 

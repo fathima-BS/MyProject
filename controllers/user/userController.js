@@ -194,43 +194,6 @@ const loadShopPage = async (req, res) => {
     res.redirect('/pageNotFound');
   }
 };
-
-
-
-
-
-const productDetailPage = async (req, res) => {
-  try {
-    const productId = req.query.productId;
-    // Assuming you have a Product model
-    const product = await Product.findById(productId).populate('brand category');
-    
-    if (!product) {
-      return res.status(404).render('error', { message: 'Product not found' });
-    }
-    const relatedProducts = await Product.find({
-      category: product.category._id,
-      _id: { $ne: productId },
-      isListed: true,
-      isDeleted: false
-    })
-      .populate('brand')
-      .limit(4); // Limit to 4 related products
-    res.render('productDetail', {
-      product,
-      title: product.productName,
-      relatedProducts,
-    });
-  } catch (error) {
-    console.error(error);
-    res.status(500).render('error', { message: 'Server error' });
-  }
-};
-
-
-
-
-
 const pageNotFound = async (req, res) => {
   try {
     res.render('page404')
@@ -259,6 +222,16 @@ const loadLogin = async (req, res) => {
   } catch (err) {
     res.redirect('/pageNotFound')
   }
+}
+
+const logout=async(req, res) => {
+  req.session.destroy((err) => {
+    if (err) {
+      console.log(err);
+      return res.redirect('/');
+    }
+    res.redirect('/login');
+  });
 }
 
 const forgetPassword = async (req, res) => {
@@ -545,19 +518,12 @@ const login = async (req, res) => {
 module.exports = {
   loadHomePage,
   loadShopPage,
-  productDetailPage,
   pageNotFound,
   loadSignup,
   loadLogin,
+  logout,
   signup,
   verifyOtp,
   resendOtp,
-  login,
-  forgetPassword,
-  forgetPasswordsubmit,
-  verifyForgetPassOtp,
-  resendForgetPassOtp,
-  resetPass,
-  newPass
-
+  login
 }
