@@ -12,38 +12,34 @@
   background: #f8f9fa;
 }
 
-
 /* Breadcrumb Styling */
 .breadcrumb {
-        padding: 12px 0;
-        font-size: 14px;
-        color: #666;
-    }
+    padding: 12px 0;
+    font-size: 14px;
+    color: #666;
+}
 
-    .breadcrumb a {
-        color: #1e90ff;
-        text-decoration: none;
-        transition: color 0.3s ease;
-    }
+.breadcrumb a {
+    color: #1e90ff;
+    text-decoration: none;
+    transition: color 0.3s ease;
+}
 
-    .breadcrumb a:hover {
-        color: #1871cc;
-    }
+.breadcrumb a:hover {
+    color: #1871cc;
+}
 
-    .breadcrumb span {
-        margin: 0 8px;
-        color: #999;
-    }
+.breadcrumb span {
+    margin: 0 8px;
+    color: #999;
+}
 
-    .breadcrumb .current {
-        color: #333;
-        font-weight: 500;
-    }
+.breadcrumb .current {
+    color: #333;
+    font-weight: 500;
+}
 
-
-
-
-
+/* Shop Topbar Styling */
 .shop-topbar {
   display: flex;
   justify-content: space-between;
@@ -105,12 +101,14 @@
   outline: none;
 }
 
+/* Product List Container */
 .product-list-container {
   display: flex;
   gap: 20px;
   margin-top: 10px;
 }
 
+/* Sidebar Styling */
 .sidebar {
   width: 250px;
   padding: 16px;
@@ -220,12 +218,13 @@
   background: #e03e4b;
 }
 
+/* Product Grid Styling */
 .product-grid {
-  display: flex;
-  flex-wrap: wrap;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr); /* 3-column grid */
   gap: 20px;
   width: calc(100% - 270px);
-  justify-content: flex-start; /* Aligns items to the left */
+  justify-content: flex-start;
 }
 
 .product-card {
@@ -235,11 +234,15 @@
   padding: 12px;
   text-align: center;
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
-  height: 300px; /* Fixed height to control card size */
+  height: 350px; /* Adjusted height to accommodate content */
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  width: 240px; /* Fixed width to match reference design */
+  width: 100%; /* Allow full width within grid */
+}
+
+.product-card a {
+  text-decoration: none; /* Remove underline from links */
 }
 
 .product-card img {
@@ -258,25 +261,29 @@
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  line-height: 1.2; /* Improve readability */
 }
 
 .product-card h6 {
   font-size: 12px;
   font-weight: 400;
   color: #666;
-  margin-bottom: 6px;
+  margin: 6px 0;
+  line-height: 1.2;
 }
 
 .product-card p {
   font-size: 14px;
   font-weight: 500;
   color: #1e90ff;
-  margin-bottom: 8px;
+  margin: 6px 0;
+  line-height: 1.2;
 }
 
 .product-card p .text-muted {
   font-size: 12px;
   color: #999;
+  margin-left: 5px;
 }
 
 .wishlist-btn {
@@ -315,6 +322,7 @@
   background: #218838;
 }
 
+/* Pagination Styling */
 .pagination {
   display: flex;
   justify-content: center;
@@ -346,6 +354,7 @@
   border-color: #1e90ff;
 }
 
+/* Sidebar Toggle */
 .sidebar-toggle {
   display: none;
   padding: 10px;
@@ -384,6 +393,7 @@
   }
 
   .product-grid {
+    grid-template-columns: repeat(2, 1fr); /* 2 columns on medium screens */
     width: 100%;
   }
 }
@@ -399,66 +409,56 @@
   }
 
   .product-grid {
-    justify-content: center; /* Center on smaller screens if needed */
+    grid-template-columns: 1fr; /* 1 column on small screens */
   }
 
   .product-card {
-    height: 280px;
-  }
-
-  .product-card img {
-    height: 130px;
+    height: 320px;
   }
 }
 
 @media (max-width: 480px) {
   .product-grid {
-    justify-content: center; /* Center on very small screens */
+    grid-template-columns: 1fr;
   }
 
   .product-card {
-    height: 260px;
-    width: 200px;
-  }
-
-  .product-card img {
-    height: 110px;
+    height: 300px;
   }
 }
 </style>
 
-<div class="main-container " >
+<div class="main-container">
   <section class="shop-page container">
 
-     <!-- Breadcrumb -->
-     <nav class="breadcrumb" aria-label="Breadcrumb">
+    <!-- Breadcrumb -->
+    <nav class="breadcrumb" aria-label="Breadcrumb">
       <a href="/">Home</a>
       <span>></span>
       <a href="/shop">Shop</a>
       <% if (categoryf && categoryf !== 'all') { %>
-          <span>></span>
-          <% category.forEach(item => { %>
-              <% if (item._id.toString() === categoryf) { %>
-                  <a href="/shop?categoryf=<%= item._id %>&search=<%= search || '' %>&sort=<%= sort || '' %>&brandf=<%= brandf || '' %>&priceRange=<%= priceRange || '' %>">
-                      <%= item.name %>
-                  </a>
-              <% } %>
-          <% }) %>
+        <span>></span>
+        <% category.forEach(item => { %>
+          <% if (item._id.toString() === categoryf) { %>
+            <a href="/shop?categoryf=<%= item._id %>&search=<%= search || '' %>&sort=<%= sort || '' %>&brandf=<%= brandf || '' %>&priceRange=<%= priceRange || '' %>">
+              <%= item.name %>
+            </a>
+          <% } %>
+        <% }) %>
       <% } %>
       <% if (brandf && brandf !== 'all') { %>
-          <span>></span>
-          <% brand.forEach(item => { %>
-              <% if (item._id.toString() === brandf) { %>
-                  <span class="current"><%= item.BrandName %></span>
-              <% } %>
-          <% }) %>
+        <span>></span>
+        <% brand.forEach(item => { %>
+          <% if (item._id.toString() === brandf) { %>
+            <span class="current"><%= item.BrandName %></span>
+          <% } %>
+        <% }) %>
       <% } else if (categoryf && categoryf !== 'all' && (!brandf || brandf === 'all')) { %>
-          <span class="current" style="display: none;"></span>
+        <span class="current" style="display: none;"></span>
       <% } else { %>
-          <span class="current" style="display: none;"></span>
+        <span class="current" style="display: none;"></span>
       <% } %>
-  </nav>
-
+    </nav>
 
     <div class="shop-topbar">
       <div class="search-bar">
@@ -566,11 +566,17 @@
           <% products.forEach(product => { %>
             <div class="product-card">
               <span class="wishlist-btn" aria-label="Add to wishlist">❤️</span>
-              <a href="/productDetail?productId=<%= product._id %>">
+              <a href="/product/<%= product._id %>">
                 <img src="<%= product.productImage[0] || '/images/placeholder.jpg' %>" alt="<%= product.productName || 'Product Image' %>" />
                 <h4><%= product.productName %></h4>
                 <h6><%= product.brand ? product.brand.BrandName : 'Unknown Brand' %></h6>
-                <p>₹ <%= product.salePrice.toFixed(2) %> <span class="text-muted"><strike>₹ <%= product.regularPrice.toFixed(2) %></strike></span></p>
+                <p>
+                  ₹ <%= product.salePrice.toLocaleString("en-IN", { minimumFractionDigits: 2, maximumFractionDigits: 2 }) %>
+                  <span class="text-muted">
+                    <strike>₹ <%= product.regularPrice.toLocaleString("en-IN", { minimumFractionDigits: 2, maximumFractionDigits: 2 }) %></strike>
+                  </span>
+                </p>
+                
               </a>
               <button class="add-to-cart-btn" aria-label="Add <%= product.productName %> to cart">Add to Cart</button>
             </div>

@@ -1,13 +1,11 @@
-const User = require('../../models/userSchema')
+
 const Product = require('../../models/productSchema')
-const Category = require('../../models/categorySchema')
-const Brand = require('../../models/brandSchema')
+
 
 
 const productDetailPage = async (req, res) => {
   try {
-    const productId = req.query.productId;
-    // Assuming you have a Product model
+    const productId = req.params.id;
     const product = await Product.findById(productId).populate('brand category');
     
     if (!product) {

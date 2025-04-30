@@ -105,6 +105,8 @@ const editProduct = async (req, res) => {
                     message: 'Invalid brand or category'
                 });
             }
+
+            
             product.productName = productName || product.productName;
             product.description = description || product.description;
             product.brand = brand || product.brand;

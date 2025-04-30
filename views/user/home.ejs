@@ -68,7 +68,7 @@
   .product-img img {
       width: 100%;
       height: 100%;
-      object-fit: cover;
+      object-fit: scale-down;
       transition: transform 0.3s;
   }
   
@@ -207,7 +207,7 @@
       top: 50%;
       transform: translateY(0%);
       color: #ffffff;
-      padding: 10px 20px;
+      padding: 160px 20px;
       max-width: 600px;
   }
 
@@ -260,52 +260,56 @@
   .primary-btn:hover {
       background-color: #ff4c4c;
   }
+/* Banner Section Styling */
+.banner {
+    padding: 0px 0;
+}
 
-  /* Banner Section Styling */
-  .banner {
-      padding: 0px 0;
-  }
+.banner__item {
+    margin-bottom: 30px;
+    position: relative;
+    overflow: hidden;
+    border-radius: 12px;
+}
 
-  .banner__item {
-      margin-bottom: 30px;
-      position: relative;
-      overflow: hidden;
-      border-radius: 12px;
-  }
+.banner__item__pic img {
+    width: 100%;
+    height: 300px;
+    object-fit: cover;
+    transition: transform 0.3s;
+    padding: 0px 70px;
+}
 
-  .banner__item__pic img {
-      width: 100%;
-      height: 300px;
-      object-fit: cover;
-      transition: transform 0.3s;
-  }
+.banner__item:hover .banner__item__pic img {
+    transform: scale(1.1);
+}
 
-  .banner__item:hover .banner__item__pic img {
-      transform: scale(1.1);
-  }
+.banner__item__text {
+    position: absolute;
+    bottom: 20px;
+    left: 160px;
+    color: #fff;
+}
 
-  .banner__item__text {
-      position: absolute;
-      bottom: 20px;
-      left: 20px;
-      color: #fff;
-  }
+.banner__item__text h2 {
+    font-size: 24px;
+    font-weight: 600;
+    margin-bottom: 10px;
+}
 
-  .banner__item__text h2 {
-      font-size: 24px;
-      font-weight: 600;
-      margin-bottom: 10px;
-  }
+.banner__item__text a {
+    display: inline-block; /* Ensure it's treated as a block-level element */
+    padding: 8px 15px; /* Add padding for better appearance */
+    
+    color: #000000;
+    text-decoration: none;
+    border-radius: 5px; /* Rounded corners */
+    transition: background-color 0.3s;
+}
 
-  .banner__item__text a {
-      color: #fff;
-      text-decoration: underline;
-      font-size: 14px;
-  }
-
-  .banner__item__text a:hover {
-      color: #ff6b6b;
-  }
+.banner__item__text a:hover {
+   
+}
 
   /* Product Section Styling */
   .product {
@@ -449,6 +453,9 @@
           height: 150px;
       }
   }
+  .offsetmargin{
+    margin-left: 24%;
+  }
 </style>
 
 <!-- Hero Section -->
@@ -489,7 +496,7 @@
 <section class="banner spad">
   <div class="container">
       <div class="row">
-          <div class="col-lg-7 offset-lg-4">
+          <div class="col-lg-7 offset-lg-4 offsetmargin">
               <div class="banner__item">
                   <div class="banner__item__pic">
                       <img src="/img/banner/banner-1.jpg" alt="Duffle collections">
@@ -570,7 +577,7 @@
         <% if(productData && productData.length > 6) { %>
             <div class="row mt-4">
                 <div class="col-12 text-center">
-                    <a href="/shop" class="btn">View All Products</a>
+                    <a href="/shop" class="btn btn-danger">View All Products</a>
                 </div>
             </div>
         <% } %>

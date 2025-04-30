@@ -45,6 +45,5 @@ router.get('/auth/google/callback',
 
 
 router.get('/shop',userAuth, userController.loadShopPage)
-router.get('/productdetail', userAuth,productController.productDetailPage)
-
+router.get('/product/:id', userAuth, productController.productDetailPage);
 module.exports = router;
