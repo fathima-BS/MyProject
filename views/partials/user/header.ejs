@@ -8,11 +8,12 @@
    <meta name="viewport" content="width=device-width, initial-scale=1.0">
    <meta http-equiv="X-UA-Compatible" content="ie=edge">
    <title>Cario</title>
-   
-   <!-- Google Fonts -->
-   <link href="https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@300;400;600;700;800;900&display=swap" rel="stylesheet">
-   
-   <!-- CSS Files -->
+
+
+   <link href="https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@300;400;600;700;800;900&display=swap"
+      rel="stylesheet">
+
+
    <link rel="stylesheet" href="/css/bootstrap.min.css" type="text/css">
    <link rel="stylesheet" href="/css/elegant-icons.css" type="text/css">
    <link rel="stylesheet" href="/css/magnific-popup.css" type="text/css">
@@ -20,12 +21,10 @@
    <link rel="stylesheet" href="/css/owl.carousel.min.css" type="text/css">
    <link rel="stylesheet" href="/css/slicknav.min.css" type="text/css">
    <link rel="stylesheet" href="/user-assets/css/maind134.css">
-   
-   <!-- Font Awesome -->
+
    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet">
-   
+
    <style>
-      /* Header Styles */
       .header {
          position: sticky;
          top: 0;
@@ -34,60 +33,60 @@
          box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
          width: 100%;
       }
-      
-      /* Logo Styles */
+
+
       .header__logo {
          padding: 20px 0;
       }
-      
+
       .header__logo a {
          display: inline-block;
       }
-      
+
       .logo {
          width: 150px;
          height: auto;
          object-fit: contain;
       }
-      
-      /* Container Styles */
+
+
       .container-head {
          padding-left: 30px;
          padding-right: 30px;
          margin: 0 auto;
       }
-      
+
       .row {
          display: flex;
          align-items: center;
          margin-left: 0 !important;
          margin-right: 0 !important;
       }
-      
+
       /* Menu Styles */
       .header__menu {
          text-align: center;
          padding: 10px 0;
       }
-      
+
       .header__menu ul {
          margin: 0;
          padding: 0;
          display: flex;
          justify-content: center;
       }
-      
+
       .header__menu ul li {
          list-style: none;
          display: inline-block;
          margin-right: 45px;
          position: relative;
       }
-      
+
       .header__menu ul li:last-child {
          margin-right: 0;
       }
-      
+
       .header__menu ul li a {
          font-size: 18px;
          color: #111111;
@@ -95,9 +94,9 @@
          font-weight: 600;
          position: relative;
          padding: 3px 0;
-         text-decoration: none; /* Remove default text underline */
+         text-decoration: none;
       }
-      
+
       .header__menu ul li a:after {
          position: absolute;
          left: 0;
@@ -109,13 +108,13 @@
          transition: all 0.3s;
          transform: scale(0);
       }
-      
+
       .header__menu ul li.active a:after,
       .header__menu ul li:hover a:after {
          transform: scale(1);
       }
-      
-      /* Navigation Options Styles */
+
+
       .header__nav__option {
          text-align: right;
          padding: 10px 0;
@@ -123,17 +122,17 @@
          justify-content: flex-end;
          align-items: center;
       }
-      
+
       .header__nav__option a {
          display: inline-block;
          margin-right: 15px;
          position: relative;
       }
-      
+
       .header__nav__option a:last-child {
          margin-right: 0;
       }
-      
+
       .header__nav__option a span {
          color: #0d0d0d;
          font-size: 11px;
@@ -141,7 +140,7 @@
          left: 5px;
          top: 8px;
       }
-      
+
       .header__nav__option .sign-in-link {
          font-size: 16px;
          color: #333;
@@ -149,35 +148,33 @@
          text-decoration: none;
          font-weight: 600;
       }
-      
+
       .header__nav__option .sign-in-link:hover {
          color: #ff7f50;
       }
-      
-      /* Icon links */
+
       .header__nav__option .icon-link {
          display: inline-flex;
          align-items: center;
          justify-content: center;
       }
-      
+
       .header__nav__option .icon-link img {
          display: block;
          width: 20px;
          height: 20px;
       }
-      
-      /* Username Display */
+
+
       .user-name {
          margin-right: 15px;
       }
-      
-      /* Dropdown Styles */
+
       .dropdown {
          position: relative;
          display: inline-block;
       }
-      
+
       .dropdown-content {
          display: none;
          position: absolute;
@@ -187,7 +184,7 @@
          z-index: 1000;
          right: 0;
       }
-      
+
       .dropdown-content a {
          color: black;
          padding: 12px 16px;
@@ -197,26 +194,24 @@
          text-align: left;
          margin: 0;
       }
-      
+
       .dropdown-content a:hover {
          background-color: #f1f1f1;
       }
-      
+
       .dropdown:hover .dropdown-content {
          display: block;
       }
-      
-      /* Mobile Menu Toggle */
+
       .canvas__open {
          display: none;
       }
-      
-      /* Responsive Styles */
+
       @media (max-width: 991px) {
          .header__menu {
             display: none;
          }
-         
+
          .canvas__open {
             display: block;
             font-size: 22px;
@@ -231,14 +226,13 @@
    <header class="header">
       <div class="container-head">
          <div class="row">
-            <!-- Logo -->
+
             <div class="col-lg-3 col-md-3">
                <div class="header__logo">
                   <a href="/"><img class="logo" src="/img/logo.png" alt="Cario Logo"></a>
                </div>
             </div>
-            
-            <!-- Navigation Menu -->
+
             <div class="col-lg-6 col-md-6">
                <nav class="header__menu mobile-menu">
                   <ul>
@@ -247,59 +241,56 @@
                   </ul>
                </nav>
             </div>
-            
-            <!-- User Options -->
+
             <div class="col-lg-3 col-md-3">
                <div class="header__nav__option">
                   <%if(user){%>
                      <div class="dropdown">
-                        <a href="#" class="sign-in-link"><%= user.username %></a>
+                        <a href="#" class="sign-in-link">
+                           <%= user.username %>
+                        </a>
                         <div class="dropdown-content">
                            <a href="/userProfile">Profile</a>
                            <a href="/logout">Logout</a>
                         </div>
                      </div>
-                  <%} else {%>
-                     <a href="/signup" class="sign-in-link">Sign Up</a>
-                     <a href="/login" class="sign-in-link">Log in</a>
-                  <%}%>
-                  <a href="/wishlist" class="icon-link"><img src="/img/icon/heart.png" alt="Wishlist"></a>
-                  <a href="/cart" class="icon-link"><img src="/img/icon/cart.png" alt="Cart"> <span>0</span></a>
+                     <%} else {%>
+                        <a href="/signup" class="sign-in-link">Sign Up</a>
+                        <a href="/login" class="sign-in-link">Log in</a>
+                        <%}%>
+                           <a href="/wishlist" class="icon-link"><img src="/img/icon/heart.png" alt="Wishlist"></a>
+                           <a href="/cart" class="icon-link"><img src="/img/icon/cart.png" alt="Cart">
+                              <span>0</span></a>
                </div>
             </div>
          </div>
-         
-         <!-- Mobile Menu Toggle -->
+
          <div class="canvas__open"><i class="fa fa-bars"></i></div>
       </div>
    </header>
 
    <script>
-      // Highlight active menu item based on current URL
-      window.addEventListener("DOMContentLoaded", function() {
-         // Get current URL path
+      window.addEventListener("DOMContentLoaded", function () {
          const currentPath = window.location.pathname;
-
-         // Get all menu list items
          const menuItems = document.querySelectorAll(".header__menu ul li");
-
+         menuItems.forEach(item => item.classList.remove("active"));
+         let matchFound = false;
          menuItems.forEach(li => {
-            // Get the href of inside a tag
             const link = li.querySelector("a");
-
-            if (link) {
-               // Check if current path matches href
+            if (link && !matchFound) {
                const href = link.getAttribute("href");
-               if (currentPath === href || (href !== "/" && currentPath.startsWith(href))) {
-                  // Remove active from all first
-                  menuItems.forEach(item => item.classList.remove("active"));
-
-                  // Add active to current li
+               if (href === "/" && currentPath === "/") {
                   li.classList.add("active");
+                  matchFound = true;
+               }
+               else if (href !== "/" && currentPath.startsWith(href)) {
+                  li.classList.add("active");
+                  matchFound = true;
                }
             }
          });
       });
    </script>
 </body>
+
 </html>
