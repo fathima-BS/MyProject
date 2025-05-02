@@ -18,7 +18,7 @@ const productDetailPage = async (req, res) => {
       isDeleted: false
     })
       .populate('brand')
-      .limit(4); // Limit to 4 related products
+      .limit(4); 
     res.render('productDetail', {
       product,
       title: product.productName,

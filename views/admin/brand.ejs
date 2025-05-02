@@ -81,7 +81,7 @@
 
     <div class="container">
         <div class="header">
-            <h2>BRANDS</h2>
+            <h2>Brands</h2>
             <button class="btn add-btn bg-primary" data-bs-toggle="modal" data-bs-target="#brandModal">ADD Brand +</button>
         </div>
 
@@ -196,7 +196,13 @@
                     text: 'Name must be at least 6 characters and contain only alphabets.',
                 });
             }
-        
+            if (!description) {
+                    return Swal.fire({
+                        icon: 'warning',
+                        title: 'Description Required!',
+                        text: 'Description cannot be empty.',
+                    });
+                }
             if (description.length > 80) {
                 return Swal.fire({
                     icon: 'warning',
@@ -398,7 +404,13 @@
                     text: 'Name must be at least 6 characters and contain only alphabets.',
                 });
             }
-        
+            if (!description) {
+                    return Swal.fire({
+                        icon: 'warning',
+                        title: 'Description Required!',
+                        text: 'Description cannot be empty.',
+                    });
+                }
             if (description.length > 80) {
                 return Swal.fire({
                     icon: 'warning',

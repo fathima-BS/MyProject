@@ -7,193 +7,7 @@ const bcrypt = require("bcrypt")
 
 
 
-const loadHomePage = async (req, res) => {
-  try {
-    let userData = null
-    const user = req.session.user
 
-    if (user) {
-      userData = await User.findOne({ _id: user });
-    }
-
-    const listedCategories = await Category.find({ isListed: true, isDeleted:false }).select('_id');
-    const listedBrands = await Brand.find({ isListed: true, isDeleted:false }).select('_id');
-
-
-    const productData = await Product.find({
-      isDeleted: false,
-      isListed: true,
-      quantity: { $gt: 0 },
-      category: { $in: listedCategories.map(cat => cat._id) },
-      brand: { $in: listedBrands.map(brand => brand._id) },
-  })
-      .sort({ createdAt: -1 })
-      .limit(8)
-      .populate('brand')
-
-
-    res.render('home', {
-      user: userData,
-      productData
-    })
-
-  } catch (err) {
-    console.log('Home page not found', err.message)
-    res.status(500).send('server error')
-  }
-}
-
-const loadShopPage = async (req, res) => {
-  try {
-    const user = req.session.user;
-    const userData = user ? await User.findById(user) : null;
-    const listedCategories = await Category.find({ isListed: true, isDeleted: false });
-    const listedBrands = await Brand.find({ isListed: true, isDeleted: false });
-
-    let { search, sort, categoryf, brandf, priceRange, page = 1 } = req.query;
-    const perPage = 9;
-    const skip = (page - 1) * perPage;
-
-    // Initialize filter object
-    let filter = {
-      isDeleted: false,
-      isListed: true,
-      quantity: { $gt: 0 },
-    };
-
-    // Log query parameters for debugging
-    console.log('Query Parameters:', { search, sort, categoryf, brandf, priceRange, page });
-
-    // Add category filter
-    if (categoryf && categoryf != "all") {
-      const categoryExists = listedCategories.some(cat => cat._id.toString() === categoryf);
-      if (categoryExists) {
-        filter.category = categoryf;
-        console.log(`Category filter applied: ${categoryf}`);
-      } else {
-        console.log(`Category ID ${categoryf} not found in listed categories`);
-      }
-    }
-
-    // Add brand filter only if brandf is explicitly provided
-    if (brandf && brandf !== 'all') {
-      const brandExists = listedBrands.some(brand => brand._id.toString() === brandf);
-      if (brandExists) {
-        filter.brand = brandf;
-        console.log(`Brand filter applied: ${brandf}`);
-      } else {
-        console.log(`Brand ID ${brandf} not found in listed brands`);
-      }
-    }
-
-    // Add price range filter
-    if (priceRange) {
-      switch (priceRange) {
-        case 'under500':
-          filter.salePrice = { $lt: 500 };
-          console.log('Price filter: under ₹500');
-          break;
-        case '500-1000':
-          filter.salePrice = { $gte: 500, $lte: 1000 };
-          console.log('Price filter: ₹500 - ₹1000');
-          break;
-        case '1000-1500':
-          filter.salePrice = { $gte: 1000, $lte: 1500 };
-          console.log('Price filter: ₹1000 - ₹1500');
-          break;
-        case 'above1500':
-          filter.salePrice = { $gt: 1500 };
-          console.log('Price filter: above ₹1500');
-          break;
-      }
-    }
-
-    // Add search filter
-    if (search && search.trim()) {
-      filter.$or = [
-        { productName: { $regex: search, $options: 'i' } },
-        { 'brand.BrandName': { $regex: search, $options: 'i' } },
-        { 'category.name': { $regex: search, $options: 'i' } },
-      ];
-      console.log(`Search filter applied: ${search}`);
-    }
-
-    // Log the final filter object
-    console.log('Final Filter:', filter);
-
-    // Sort options
-    let sortOptions = {};
-    switch (sort) {
-      case '':
-        sortOptions = { createdAt: -1 };
-        console.log('Sort: Default (Newest)');
-        break;
-      case 'A-Z':
-        sortOptions = { productName: 1 };
-        console.log('Sort: A-Z');
-        break;
-      case 'Z-A':
-        sortOptions = { productName: -1 };
-        console.log('Sort: Z-A');
-        break;
-      case 'Price : low - high':
-        sortOptions = { salePrice: 1 };
-        console.log('Sort: Price low to high');
-        break;
-      case 'Price : high - low':
-        sortOptions = { salePrice: -1 };
-        console.log('Sort: Price high to low');
-        break;
-      default:
-        sortOptions = { createdAt: -1 };
-        console.log('Sort: Default (Newest) - Fallback');
-    }
-
-    // Fetch products with pagination
-    const products = await Product.find(filter)
-      .sort(sortOptions)
-      .skip(skip)
-      .limit(perPage)
-      .populate('brand')
-      .populate('category');
-
-    // Log the number of products found
-    console.log(`Products found: ${products.length}`);
-
-    // Total count for pagination
-    const totalProducts = await Product.countDocuments(filter);
-    const totalPages = Math.ceil(totalProducts / perPage);
-    const currentPage = Math.max(1, Math.min(page, totalPages));
-
-    // Fetch all categories and brands for the sidebar
-    const category = await Category.find({ isListed: true, isDeleted: false });
-    const brand = await Brand.find({ isListed: true, isDeleted: false });
-
-    let message;
-    if (req.session.userMsg) {
-      message = req.session.userMsg;
-      req.session.userMsg = null;
-    }
-
-    res.render('shop', {
-      products,
-      totalPages,
-      currentPage,
-      search: search || '',
-      sort: sort || '',
-      categoryf: categoryf || '',
-      brandf: brandf || '',
-      priceRange: priceRange || '',
-      category,
-      brand,
-      findUser: userData,
-      message,
-    });
-  } catch (error) {
-    console.error('Error loading shop page:', error);
-    res.redirect('/pageNotFound');
-  }
-};
 const pageNotFound = async (req, res) => {
   try {
     res.render('page404')
@@ -213,8 +27,10 @@ const loadSignup = async (req, res) => {
 
 const loadLogin = async (req, res) => {
   try {
+    let message = req.query.error || null
+
     if (!req.session.user) {
-      return res.render('login', { message: null })
+      return res.render('login', { message })
     } else {
       res.redirect('/')
     }
@@ -222,16 +38,6 @@ const loadLogin = async (req, res) => {
   } catch (err) {
     res.redirect('/pageNotFound')
   }
-}
-
-const logout=async(req, res) => {
-  req.session.destroy((err) => {
-    if (err) {
-      console.log(err);
-      return res.redirect('/');
-    }
-    res.redirect('/login');
-  });
 }
 
 
@@ -286,6 +92,7 @@ const signup = async (req, res) => {
       return res.json("email-error")
     }
     req.session.userOtp = otp
+    req.session.otpExpires = Date.now() + 60 * 1000;
     req.session.userData = { username, dateOfBirth, email, password }
     res.render("verifyOtp")
     console.log("OTP Sent", otp)
@@ -300,15 +107,24 @@ const securePassword = async (password) => {
     const passwordHash = await bcrypt.hash(password, 10)
     return passwordHash
   } catch (error) {
-
+    console.error("Error while hashing password:", error.message);
+    return null;
   }
 }
 
 const verifyOtp = async (req, res) => {
   try {
     const { otp } = req.body
+
+    if (req.session.otpExpires && Date.now() > req.session.otpExpires) {
+      return res.json({success:false,message:"OTP Timout"})
+    }
+
+
+
     if (otp === req.session.userOtp) {
       const user = req.session.userData
+
       const passwordHash = await securePassword(user.password)
       const saveUserData = new User({
         username: user.username,
@@ -332,9 +148,12 @@ const verifyOtp = async (req, res) => {
   }
 }
 
+
+
+
 const resendOtp = async (req, res) => {
   try {
-    // Check if userData exists in session
+ 
     if (!req.session.userData) {
       return res.status(400).json({ success: false, message: "User data not found in session" });
     }
@@ -383,6 +202,203 @@ const login = async (req, res) => {
     console.error('login error', error)
     res.render('login', { message: 'login failed.Please try again later' })
   }
+}
+
+
+const loadHomePage = async (req, res) => {
+  try {
+    let userData = null
+    const user = req.session.user
+
+    if (user) {
+      userData = await User.findOne({ _id: user });
+    }
+
+    const listedCategories = await Category.find({ isListed: true, isDeleted:false }).select('_id');
+    const listedBrands = await Brand.find({ isListed: true, isDeleted:false }).select('_id');
+
+
+    const productData = await Product.find({
+      isDeleted: false,
+      isListed: true,
+      quantity: { $gt: 0 },
+      category: { $in: listedCategories.map(cat => cat._id) },
+      brand: { $in: listedBrands.map(brand => brand._id) },
+  })
+      .sort({ createdAt: -1 })
+      .limit(8)
+      .populate('brand')
+
+
+    res.render('home', {
+      user: userData,
+      productData
+    })
+
+  } catch (err) {
+    console.log('Home page not found', err.message)
+    res.status(500).send('server error')
+  }
+}
+
+const loadShopPage = async (req, res) => {
+  try {
+    const user = req.session.user;
+    const userData = user ? await User.findById(user) : null;
+    const listedCategories = await Category.find({ isListed: true, isDeleted: false });
+    const listedBrands = await Brand.find({ isListed: true, isDeleted: false });
+
+    let { search, sort, categoryf, brandf, priceRange, page = 1 } = req.query;
+    const perPage = 9;
+    const skip = (page - 1) * perPage;
+
+   
+    let filter = {
+      isDeleted: false,
+      isListed: true,
+      quantity: { $gt: 0 },
+    };
+
+    
+    console.log('Query Parameters:', { search, sort, categoryf, brandf, priceRange, page });
+
+
+    if (categoryf && categoryf != "all") {
+      const categoryExists = listedCategories.some(cat => cat._id.toString() === categoryf);
+      if (categoryExists) {
+        filter.category = categoryf;
+        console.log(`Category filter applied: ${categoryf}`);
+      } else {
+        console.log(`Category ID ${categoryf} not found in listed categories`);
+      }
+    }
+
+
+    if (brandf && brandf !== 'all') {
+      const brandExists = listedBrands.some(brand => brand._id.toString() === brandf);
+      if (brandExists) {
+        filter.brand = brandf;
+        console.log(`Brand filter applied: ${brandf}`);
+      } else {
+        console.log(`Brand ID ${brandf} not found in listed brands`);
+      }
+    }
+
+
+    if (priceRange) {
+      switch (priceRange) {
+        case 'under500':
+          filter.salePrice = { $lt: 500 };
+          console.log('Price filter: under ₹500');
+          break;
+        case '500-1000':
+          filter.salePrice = { $gte: 500, $lte: 1000 };
+          console.log('Price filter: ₹500 - ₹1000');
+          break;
+        case '1000-1500':
+          filter.salePrice = { $gte: 1000, $lte: 1500 };
+          console.log('Price filter: ₹1000 - ₹1500');
+          break;
+        case 'above1500':
+          filter.salePrice = { $gt: 1500 };
+          console.log('Price filter: above ₹1500');
+          break;
+      }
+    }
+
+
+    if (search && search.trim()) {
+      filter.$or = [
+        { productName: { $regex: search, $options: 'i' } },
+        { 'brand.BrandName': { $regex: search, $options: 'i' } },
+        { 'category.name': { $regex: search, $options: 'i' } },
+      ];
+      console.log(`Search filter applied: ${search}`);
+    }
+
+
+    console.log('Final Filter:', filter);
+
+ 
+    let sortOptions = {};
+    switch (sort) {
+      case '':
+        sortOptions = { createdAt: -1 };
+        console.log('Sort: Default (Newest)');
+        break;
+      case 'A-Z':
+        sortOptions = { productName: 1 };
+        console.log('Sort: A-Z');
+        break;
+      case 'Z-A':
+        sortOptions = { productName: -1 };
+        console.log('Sort: Z-A');
+        break;
+      case 'Price : low - high':
+        sortOptions = { salePrice: 1 };
+        console.log('Sort: Price low to high');
+        break;
+      case 'Price : high - low':
+        sortOptions = { salePrice: -1 };
+        console.log('Sort: Price high to low');
+        break;
+      default:
+        sortOptions = { createdAt: -1 };
+        console.log('Sort: Default (Newest) - Fallback');
+    }
+
+  
+    const products = await Product.find(filter)
+      .sort(sortOptions)
+      .skip(skip)
+      .limit(perPage)
+      .populate('brand')
+      .populate('category');
+
+
+    console.log(`Products found: ${products.length}`);
+
+
+    const totalProducts = await Product.countDocuments(filter);
+    const totalPages = Math.ceil(totalProducts / perPage);
+    const currentPage = Math.max(1, Math.min(page, totalPages));
+
+    const category = await Category.find({ isListed: true, isDeleted: false });
+    const brand = await Brand.find({ isListed: true, isDeleted: false });
+
+    let message;
+    if (req.session.userMsg) {
+      message = req.session.userMsg;
+      req.session.userMsg = null;
+    }
+
+    res.render('shop', {
+      products,
+      totalPages,
+      currentPage,
+      search: search || '',
+      sort: sort || '',
+      categoryf: categoryf || '',
+      brandf: brandf || '',
+      priceRange: priceRange || '',
+      category,
+      brand,
+      findUser: userData,
+      message,
+    });
+  } catch (error) {
+    console.error('Error loading shop page:', error);
+    res.redirect('/pageNotFound');
+  }
+};
+const logout=async(req, res) => {
+  req.session.destroy((err) => {
+    if (err) {
+      console.log(err);
+      return res.redirect('/');
+    }
+    res.redirect('/login');
+  });
 }
 
 module.exports = {

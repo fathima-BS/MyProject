@@ -5,20 +5,35 @@ const userAuth = (req, res, next) => {
         User.findById(req.session.user)
             .then(data => {
                 if (data) {
-                    next();
+                    if (data.isBlocked) {
+                        req.session.destroy(err => {
+                            if (err) {
+                                console.log("Error destroying session:", err);
+                            }
+                            res.render('login', { message: 'You are blocked. Please contact support.' });
+                        });
+                    } else {
+                        res.locals.user = data; 
+                        next();
+                    }
                 } else {
-                    res.redirect('/login');
+                    req.session.destroy(err => {
+                        if (err) {
+                            console.log("Error destroying session:", err);
+                        }
+                        res.render('login', { message: 'User not found. Please sign up again.' });
+                    });
                 }
             })
             .catch((error) => {
-                console.log("error in user auth");
-                res.status(500).send('internal server error');
+                console.log("Error in user auth:", error);
+                res.status(500).send('Internal server error');
             });
     } else {
-        req.session.message = 'please login';
-        res.redirect('/login');
+        res.render('login', { message: 'Please login to continue' });
     }
 };
+
 
 const adminAuth = (req, res, next) => {
     const data = req.session.adminId;

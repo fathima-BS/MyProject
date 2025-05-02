@@ -8,17 +8,18 @@ const loadUser = async (req, res) => {
         }
 
         const page = parseInt(req.query.page) || 1;
-        const limit = 3;
+        const limit = 5;
 
         const users = await User.find({
             isAdmin: false,
+
             $or: [
                 { username: { $regex: search, $options: 'i' } },
                 { email: { $regex: search, $options: 'i' } }
             ]
         })
             .sort({ createdAt: -1 })
-            .limit(limit)
+            .limit(limit * 1)
             .skip((page - 1) * limit)
             .exec();
 

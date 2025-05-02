@@ -32,16 +32,33 @@ router.get('/auth/google', passport.authenticate('google', {
   prompt: 'select_account',
 }))
 
-router.get('/auth/google/callback',
-  passport.authenticate('google', {
-    failureRedirect: '/signup',
-    failureFlash: true,
-  }),
-  (req, res) => {
-    req.session.user = req.user._id;
-    res.redirect('/');
-  }
-)
+// router.get('/auth/google/callback',
+//   passport.authenticate('google', {
+//     failureRedirect: '/signup',
+//     failureFlash: true,
+//   }),
+//   (req, res) => {
+//     req.session.user = req.user._id;
+//     res.redirect('/');
+//   }
+// )
+
+router.get("/auth/google/callback", (req, res, next) => {
+  passport.authenticate("google", (err, user, info) => {
+      if (err) return next(err);
+
+      if (!user) {
+          const message = info?.message || 'Google login failed';
+          return res.redirect(`/login?error=${encodeURIComponent(message)}`);
+      }
+
+      req.logIn(user, (err) => {
+          if (err) return next(err);
+          req.session.user = req.user._id;
+          return res.redirect("/");
+      });
+  })(req, res, next);
+});
 
 
 router.get('/shop',userAuth, userController.loadShopPage)

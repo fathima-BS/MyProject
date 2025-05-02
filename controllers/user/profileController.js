@@ -1,4 +1,5 @@
 const User = require('../../models/userSchema')
+const nodemailer = require('nodemailer')
 const bcrypt = require("bcrypt")
 
 
@@ -7,13 +8,38 @@ function generateOtp() {
     return Math.floor(100000 + Math.random() * 900000).toString()
 }
 
+async function sendVerificationEmail(email, otp) {
+  try {
+    const transporter = nodemailer.createTransport({
+      service: 'gmail',
+      port: 587,
+      secure: false,
+      requireTLS: true,
+      auth: {
+        user: process.env.NODEMAILER_EMAIL,
+        pass: process.env.NODEMAILER_PASSWORD
+      }
+    })
+    const info = await transporter.sendMail({
+      from: process.env.NODEMAILER_EMAIL,
+      to: email,
+      subject: "Verify your account",
+      text: `Your OTP is ${otp}`,
+      html: `<b>Your OTP: ${otp}</b>`
+    })
+    return info.accepted.length > 0
+  } catch (error) {
+    console.error("Error sending email", error)
+    return false
+  }
+}
 
 const forgetPassword = async (req, res) => {
     try {
         return res.render('forgetPassword', { message: null });
     } catch (error) {
         console.log("Forgot Password page not loading: ", error.message);
-        res.status(500).render('error', { message: 'Server Error' });
+        res.status(500).json( { success:false,message: 'Server Error' });
     }
 };
 
@@ -41,7 +67,7 @@ const forgetPasswordsubmit = async (req, res) => {
             });
         }
     } catch (error) {
-        res.status(500).render('error', { message: 'Server Error' });
+        res.status(500).json( { success:false,message: 'Server Error' });
     }
 }
 const verifyForgetPassOtp = async (req, res) => {

@@ -9,7 +9,14 @@ module.exports = function(passport) {
   },
   async (accessToken, refreshToken, profile, done) => {
     const existingUser = await User.findOne({ googleId: profile.id });
-    if (existingUser) return done(null, existingUser);
+    if (existingUser){
+
+      if(existingUser.isBlocked){
+        return done(null, false, {message: 'Account is Blocked'})
+      }
+
+      return done(null, existingUser)
+    }
 
     const newUser = new User({
       googleId: profile.id,
