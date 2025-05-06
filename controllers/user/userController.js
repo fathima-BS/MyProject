@@ -133,7 +133,7 @@ const verifyOtp = async (req, res) => {
         password: passwordHash
       })
       await saveUserData.save()
-      req.session.user = saveUserData._id
+  
       delete req.session.userOtp;
       delete req.session.userData
 

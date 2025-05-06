@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<style>
+
+    /* Recent Orders */
+    .section-title {
+      font-size: 18px;
+      font-weight: 700;
+      margin-bottom: 20px;
+      color: var(--secondary-color);
+    }
+    
+    .orders-table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+    
+    .orders-table th,
+    .orders-table td {
+      padding: 12px 15px;
+      text-align: left;
+      border-bottom: 1px solid #e5e7eb;
+    }
+    
+    .orders-table th {
+      background-color: #f9fafb;
+      font-weight: 600;
+      color: #6b7280;
+    }
+    
+    .orders-table tbody tr:hover {
+      background-color: #f9fafb;
+    }
+    
+    .status-badge {
+      display: inline-block;
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 600;
+    }
+    
+    .status-delivered {
+      background-color: #d1fae5;
+      color: #065f46;
+    }
+    
+    .status-processing {
+      background-color: #fef3c7;
+      color: #92400e;
+    }
+    
+    .status-cancelled {
+      background-color: #fee2e2;
+      color: #b91c1c;
+    }
+</style>
+<body>
+    <!-- Recent Orders -->
+    <div class="profile-card">
+        <h3 class="section-title">Recent Orders</h3>
+        <table class="orders-table">
+          <thead>
+            <tr>
+              <th>Order #</th>
+              <th>Date</th>
+              <th>Items</th>
+              <th>Total</th>
+              <th>Status</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>#ORD-7865</td>
+              <td>Apr 28, 2025</td>
+              <td>3 items</td>
+              <td>$142.50</td>
+              <td><span class="status-badge status-delivered">Delivered</span></td>
+              <td><a href="#">View</a></td>
+            </tr>
+            <tr>
+              <td>#ORD-7852</td>
+              <td>Apr 12, 2025</td>
+              <td>1 item</td>
+              <td>$86.99</td>
+              <td><span class="status-badge status-processing">Processing</span></td>
+              <td><a href="#">View</a></td>
+            </tr>
+            <tr>
+              <td>#ORD-7841</td>
+              <td>Mar 28, 2025</td>
+              <td>2 items</td>
+              <td>$213.00</td>
+              <td><span class="status-badge status-delivered">Delivered</span></td>
+              <td><a href="#">View</a></td>
+            </tr>
+            <tr>
+              <td>#ORD-7830</td>
+              <td>Mar 15, 2025</td>
+              <td>4 items</td>
+              <td>$76.50</td>
+              <td><span class="status-badge status-cancelled">Cancelled</span></td>
+              <td><a href="#">View</a></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+</body>
+</html>

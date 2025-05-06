@@ -5,6 +5,11 @@ const loadlogin = async (req, res) => {
     try {
         const message = req.session.message || '';
         req.session.message = null;
+
+        if(req.session.adminId){
+            return res.redirect('/admin/dashboard')
+        }
+
         res.render('adminlogin', { message });
     } catch (error) {
         console.error('Error in loadlogin:', error);

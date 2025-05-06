@@ -44,6 +44,14 @@ const userSchema =new Schema({
       type:Number,
       default:0
    },
+   phone:{
+      type:Number,
+      required:false,
+   },
+   profileImage: {
+      type: String,
+      required:false,
+    },
    wishlist:[{
       type:Schema.Types.ObjectId,
       ref:"Wishlist"

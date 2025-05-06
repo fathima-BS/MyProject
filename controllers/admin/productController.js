@@ -1,7 +1,7 @@
 const Product = require('../../models/productSchema');
 const Category = require('../../models/categorySchema');
 const Brand = require('../../models/brandSchema');
-const upload = require('../../config/multerconfig')
+const { productUpload } = require('../../config/multerconfig')
 
 const loadProduct = async (req, res) => {
     try {
@@ -41,7 +41,7 @@ const loadProduct = async (req, res) => {
 };
 
 const addProduct = async (req, res) => {
-    upload(req, res, async (err) => {
+    productUpload(req, res, async (err) => {
         if (err) {
             console.error('Multer error:', err.stack);
             return res.status(400).json({ message: `Multer error: ${err.message}` });
@@ -80,7 +80,7 @@ const getProduct = async (req, res) => {
 };
 
 const editProduct = async (req, res) => {
-    upload(req, res, async (err) => {
+    productUpload(req, res, async (err) => {
         if (err) {
             console.error('Multer error:', err.stack);
             return res.status(400).json({ message: `Multer error: ${err.message}` });

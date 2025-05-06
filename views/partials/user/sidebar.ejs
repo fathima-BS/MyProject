@@ -1,0 +1,77 @@
+<!-- sidebar.ejs -->
+<div class="settings-sidebar">
+  <h2 class="settings-title">SETTINGS</h2>
+  
+  <nav class="settings-nav">
+      <a href="/userProfile" style="text-decoration: none;" class="settings-nav-item <%= active === 'personal-info' ? 'active' : '' %>">
+          Personal Info
+      </a>
+      <a href="/settings/orders" class="settings-nav-item <%= active === 'orders' ? 'active' : '' %>">
+          Orders
+      </a>
+      <a href="/settings/addresses" class="settings-nav-item <%= active === 'addresses' ? 'active' : '' %>">
+          Addresses
+      </a>
+      <a href="/settings/wallet" class="settings-nav-item <%= active === 'wallet' ? 'active' : '' %>">
+          Wallet
+      </a>
+  </nav>
+</div>
+
+<style>
+  .settings-sidebar {
+      background-color: #f0f0f0;
+      padding: 1rem;
+      height: 100%;
+      min-width: 200px;
+  }
+
+  .settings-title {
+      font-size: 1.2rem;
+      font-weight: 600;
+      margin-bottom: 2rem;
+      color: #333;
+  }
+
+  .settings-nav {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+  }
+
+  .settings-nav-item {
+      padding: 0.75rem 1rem;
+      border-radius: 5px;
+      text-decoration: none;
+      color: #555;
+      transition: all 0.2s ease;
+  }
+
+  .settings-nav-item:hover {
+      background-color: #e0e0e0;
+  }
+
+  .settings-nav-item.active {
+      background-color: #a2b5cd;
+      color: #fff;
+      font-weight: 500;
+  }
+
+  /* Responsive Design */
+  @media (max-width: 768px) {
+      .settings-sidebar {
+          min-width: 100%;
+          height: auto;
+      }
+
+      .settings-nav {
+          flex-direction: row;
+          overflow-x: auto;
+          padding-bottom: 0.5rem;
+      }
+
+      .settings-nav-item {
+          white-space: nowrap;
+      }
+  }
+</style>

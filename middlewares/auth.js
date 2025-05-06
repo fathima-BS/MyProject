@@ -40,7 +40,7 @@ const adminAuth = (req, res, next) => {
     if (data) {
         next();
     } else {
-        res.render('adminlogin', { message: 'please login' });
+        res.redirect('/admin/login')
     }
 };
 
