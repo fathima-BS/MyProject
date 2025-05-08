@@ -3,6 +3,7 @@ const router = express.Router();
 const userController = require('../controllers/user/userController');
 const productController = require('../controllers/user/productController');
 const profileController = require('../controllers/user/profileController');
+const addressController = require('../controllers/user/addressController');
 const passport = require('passport');
 const { userAuth } = require('../middlewares/auth');
 
@@ -58,5 +59,12 @@ router.post('/send-otp', userAuth, profileController.sendOtp);
 router.get('/verify-otp', userAuth, profileController.getVerifyOtp);
 router.post('/verify-otp', userAuth, profileController.verifyOtp);
 router.post('/update-password', userAuth, profileController.postNewPassword);
+
+// address
+router.get('/addresses', addressController.loadAddress);
+router.post('/add-address', addressController.addAddress);
+router.post('/edit-address', addressController.editAddress);
+router.get('/delete-address', addressController.deleteAddress);
+router.post('/deliver-address', addressController.deliverAddress);
 
 module.exports = router;

@@ -39,66 +39,50 @@
                 </a>
             </div>
         </div>
-        
         <div class="profile-data-container">
             <div class="section-heading">
                 <h2>Profile Details</h2>
             </div>
+        
             <div class="profile-data-row">
                 <div class="profile-data-item">
                     <label>Full Name</label>
                     <p><%= user.username %></p>
                 </div>
+            </div> 
+        
+            <div class="profile-data-row">  
                 <div class="profile-data-item">
                     <label>Email Address</label>
                     <p><%= user.email %></p>
                 </div>
-                <% if (!user.googleId) { %>
+            </div>
+        
+            <div class="profile-data-row">    
                 <div class="profile-data-item">
                     <label>Date of Birth</label>
                     <% 
-                      const dob = new Date(user.dateOfBirth);
-                      const day = dob.getDate().toString().padStart(2, '0');
-                      const month = (dob.getMonth() + 1).toString().padStart(2, '0');
-                      const year = dob.getFullYear();
-                      const formattedDob = user.dateOfBirth ? `${day}-${month}-${year}` : 'Not set';
+                      let formattedDob = 'N/A';
+                      if (user.dateOfBirth) {
+                        const dob = new Date(user.dateOfBirth);
+                        const day = dob.getDate().toString().padStart(2, '0');
+                        const month = (dob.getMonth() + 1).toString().padStart(2, '0');
+                        const year = dob.getFullYear();
+                        formattedDob = `${day}-${month}-${year}`;
+                      }
                     %>
                     <p><%= formattedDob %></p>
                 </div>
-                <% } %>
-                
+            </div> 
+        
+            <div class="profile-data-row">  
                 <div class="profile-data-item">
                     <label>Phone Number</label>
-                    <p><%= user.phone || 'Not set' %></p>
+                    <p><%= user.phone ? user.phone : 'N/A' %></p>
                 </div>
             </div>
-
-            <div class="phone-update-section">
-                <h3>Phone Number</h3>
-            
-                <% if (!user.phone) { %>
-                  <div class="alert alert-warning">
-                    ⚠️ Phone number is required. Please update your profile to continue.
-                  </div>
-                <% } %>
-            
-                <form class="phone-update-form" method="POST" action="/update-phone">
-                    <div class="form-group">
-                        <label for="phone">Update Phone Number</label>
-                        <input
-                            type="tel"
-                            id="phone"
-                            name="phone"
-                            class="form-control"
-                            placeholder="Eg: 9876543210"
-                            value="<%= user.phone || '' %>"
-                            <%= !user.phone ? 'required' : '' %>
-                        />
-                    </div>
-                    <button type="submit" class="update-btn">Save</button>
-                </form>
-            </div>
         </div>
+        
         
         <% if (!user.googleId) { %>
         <div class="profile-data-container login-details-section">
@@ -134,10 +118,6 @@
                         <button type="submit" class="update-password-btn">UPDATE PASSWORD</button>
                     </div>
                 </form>
-                <div class="forgot-password">
-                    <p>Forgot your password?</p>
-                    <button type="button" class="reset-password-btn" onclick="window.location.href='/reset-password'">RESET PASSWORD</button>
-                </div>
             </div>
         </div>
     </div>
@@ -455,7 +435,7 @@
         color: #1e88e5;
         border: 1px solid #1e88e5;
         border-radius: 20px;
-        padding: 0.6rem 1.5rem;
+        padding: 0.6rem 1.2rem;
         font-size: 0.9rem;
         cursor: pointer;
         text-transform: uppercase;
@@ -508,7 +488,9 @@
     document.addEventListener('DOMContentLoaded', function() {
         const modal = document.getElementById('passwordModal');
         const changePasswordForm = document.getElementById('changePasswordForm');
+        const phoneUpdateForm = document.querySelector('.phone-update-form');
 
+        // Password change modal functions
         window.openPasswordModal = function() {
             modal.style.display = 'flex';
         };
@@ -524,6 +506,7 @@
             }
         };
 
+        // Handle password change form submission
         changePasswordForm.addEventListener('submit', async function(event) {
             event.preventDefault();
 
@@ -596,5 +579,49 @@
                 });
             }
         });
+
+        // Handle phone number update form submission
+        if (phoneUpdateForm) {
+            phoneUpdateForm.addEventListener('submit', async function(event) {
+                event.preventDefault();
+
+                const formData = new FormData(this);
+
+                try {
+                    const response = await fetch('/update-phone', {
+                        method: 'POST',
+                        body: formData
+                    });
+
+                    const result = await response.json();
+
+                    if (result.success) {
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Success',
+                            text: result.message || 'Phone number updated successfully',
+                            confirmButtonText: 'OK'
+                        }).then(() => {
+                            window.location.href = result.redirectUrl || '/userProfile';
+                        });
+                    } else {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Error',
+                            text: result.message || 'Failed to update phone number',
+                            confirmButtonText: 'OK'
+                        });
+                    }
+                } catch (error) {
+                    console.error("Fetch error:", error);
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error',
+                        text: 'An error occurred while updating the phone number: ' + error.message,
+                        confirmButtonText: 'OK'
+                    });
+                }
+            });
+        }
     });
 </script>

@@ -45,7 +45,7 @@ const userSchema =new Schema({
       default:0
    },
    phone:{
-      type:Number,
+      type:String,
       required:false,
    },
    profileImage: {

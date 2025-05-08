@@ -6,8 +6,7 @@ const path = require('path');
 const { profileUpload } = require('../../config/multerconfig');
 const multer = require('multer');
 
-// Configure multer for parsing form data (no file uploads)
-const upload = multer({ storage: multer.memoryStorage() }).none();
+
 
 function generateOtp() {
     return Math.floor(100000 + Math.random() * 900000).toString();
@@ -278,12 +277,18 @@ const PhoneNo = async (req, res) => {
         if (!userId) {
             return res.status(401).json({ success: false, message: 'User not authenticated' });
         }
+
         const phone = req.body.phone?.trim();
-        
+
+        // Validate phone number
         if (!phone) {
             return res.status(400).json({ success: false, message: 'Phone number is required' });
         }
-  
+
+        if (!/^\d{10}$/.test(phone)) {
+            return res.status(400).json({ success: false, message: 'Phone number must be 10 digits' });
+        }
+
         await User.findByIdAndUpdate(userId, { phone });
         res.json({ success: true, redirectUrl: '/userProfile' });
     } catch (error) {
@@ -337,10 +342,44 @@ const editProfile = (req, res) => {
                 return res.status(401).json({ success: false, message: 'User not authenticated' });
             }
 
-            const { fullName, birthdate, email } = req.body;
+            const { fullName, birthdate, email, phone } = req.body;
 
-            if (!fullName || !birthdate || !email) {
-                return res.status(400).json({ success: false, message: 'Missing required fields' });
+            // Validation
+            // Full Name: Required, 2+ characters, letters/spaces/hyphens only
+            if (!fullName || typeof fullName !== 'string' || fullName.trim().length < 2) {
+                return res.status(400).json({ success: false, message: 'Full Name is required and must be at least 2 characters long' });
+            }
+            if (!/^[a-zA-Z\s-]+$/.test(fullName.trim())) {
+                return res.status(400).json({ success: false, message: 'Full Name can only contain letters, spaces, or hyphens' });
+            }
+
+            // Email: Required, valid format
+            if (!email || typeof email !== 'string') {
+                return res.status(400).json({ success: false, message: 'Email is required' });
+            }
+            if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim())) {
+                return res.status(400).json({ success: false, message: 'Invalid email format' });
+            }
+
+            // Birthdate: Optional, valid date, user must be at least 13 years old
+            let parsedBirthdate;
+            if (birthdate) {
+                parsedBirthdate = new Date(birthdate);
+                if (isNaN(parsedBirthdate.getTime())) {
+                    return res.status(400).json({ success: false, message: 'Invalid date of birth format' });
+                }
+                const today = new Date();
+                const minAgeDate = new Date(today.getFullYear() - 13, today.getMonth(), today.getDate());
+                if (parsedBirthdate > minAgeDate) {
+                    return res.status(400).json({ success: false, message: 'You must be at least 13 years old' });
+                }
+            }
+
+            // Phone: Optional, 10 digits if provided
+            if (phone && phone.trim()) {
+                if (!/^\d{10}$/.test(phone.trim())) {
+                    return res.status(400).json({ success: false, message: 'Phone number must be exactly 10 digits' });
+                }
             }
 
             const user = await User.findById(userId);
@@ -348,12 +387,26 @@ const editProfile = (req, res) => {
                 return res.status(404).json({ success: false, message: 'User not found' });
             }
 
+            // Check for changes
+            let hasChanges = false;
             const updateData = {
-                username: fullName,
-                dateOfBirth: birthdate,
+                username: fullName.trim(),
                 email: user.email,
+                phone: phone ? phone.trim() : user.phone || '',
+                ...(parsedBirthdate && { dateOfBirth: parsedBirthdate }),
             };
 
+            // Compare fields
+            if (updateData.username !== user.username) hasChanges = true;
+            if (updateData.phone !== (user.phone || '')) hasChanges = true;
+            if (parsedBirthdate && (!user.dateOfBirth || parsedBirthdate.getTime() !== user.dateOfBirth.getTime())) {
+                hasChanges = true;
+            } else if (!parsedBirthdate && user.dateOfBirth) {
+                updateData.dateOfBirth = null; // Clear dateOfBirth if empty
+                hasChanges = true;
+            }
+
+            // Handle profile image
             if (req.file) {
                 if (user.profileImage) {
                     const oldImagePath = path.join(__dirname, '..', '..', 'public', user.profileImage);
@@ -361,19 +414,37 @@ const editProfile = (req, res) => {
                         fs.unlinkSync(oldImagePath);
                     }
                 }
-                updateData.profileImage = `/uploads/profiles/${req.file.filename}`;
+                updateData.profileImage = `/Uploads/profiles/${req.file.filename}`;
+                hasChanges = true;
             }
 
+            // Handle email verification
             if (req.session.emailVerified && req.session.newEmail) {
                 updateData.email = req.session.newEmail;
                 req.session.newEmail = null;
                 req.session.emailVerified = false;
+                hasChanges = true;
             } else if (email !== user.email) {
                 return res.status(400).json({ success: false, message: 'Please verify your new email address before saving.' });
             }
 
-            const updatedUser = await User.findByIdAndUpdate(userId, updateData, { new: true });
-            res.status(200).json({ success: true, message: 'Profile updated successfully', user: updatedUser });
+            // Update only if there are changes
+            if (hasChanges) {
+                const updatedUser = await User.findByIdAndUpdate(userId, updateData, { new: true });
+                return res.status(200).json({
+                    success: true,
+                    message: 'Profile updated successfully',
+                    user: updatedUser,
+                    hasChanges: true
+                });
+            } else {
+                return res.status(200).json({
+                    success: true,
+                    message: 'No changes detected',
+                    user: user,
+                    hasChanges: false
+                });
+            }
         } catch (error) {
             console.error("Error while updating profile:", error.stack);
             res.status(500).json({ success: false, message: `Server error: ${error.message}` });

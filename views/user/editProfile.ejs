@@ -14,7 +14,7 @@
             <h1>Edit Profile</h1>
         </div>
         
-        <form class="edit-profile-form" action="/edit-profile" method="POST" enctype="multipart/form-data">
+        <form class="edit-profile-form" id="editProfileForm" enctype="multipart/form-data">
             <div class="form-section">
                 <h2>Profile Image</h2>
                 <div class="profile-image-upload">
@@ -68,7 +68,6 @@
                 <div class="form-group">
                     <label for="birthdate">Date of Birth</label>
                     <% 
-                        // Format dateOfBirth to YYYY-MM-DD for the input field
                         let formattedDateOfBirth = '';
                         if (user.dateOfBirth) {
                             const date = new Date(user.dateOfBirth);
@@ -76,6 +75,11 @@
                         }
                     %>
                     <input type="date" id="birthdate" name="birthdate" value="<%= formattedDateOfBirth %>" class="form-control">
+                </div>
+                
+                <div class="form-group">
+                    <label for="phone">Phone Number</label>
+                    <input type="tel" id="phone" name="phone" value="<%= user.phone || '' %>" class="form-control" placeholder="Enter phone number">
                 </div>
             </div>
             
@@ -89,7 +93,6 @@
                     <div class="form-group">
                         <label for="email">Email Address</label>
                         <input type="email" id="email" name="email" value="<%= user.email %>" class="form-control" disabled>
-                        <!-- Hidden input to ensure email is sent -->
                         <input type="hidden" name="email" value="<%= user.email %>">
                     </div>
                 <% } else { %>
@@ -101,12 +104,10 @@
                             Note: Changing your email will require verification via OTP sent to your new email address.
                         </p>
                     </div>
-                    <!-- Verify Email Button (hidden by default) -->
                     <button type="button" id="verify-email-btn" class="verify-email-btn" style="display: none;">
                         Verify Email
                     </button>
                 <% } %>
-                <!-- Moved email-message outside the conditional -->
                 <p class="email-message" id="email-message"></p>
             </div>
             
@@ -120,9 +121,8 @@
 
 <%- include('../../views/partials/user/footer') %>
 
-<!-- Include SweetAlert -->
+<!-- Include SweetAlert2 and Cropper.js -->
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-<!-- Include Cropper.js -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.js"></script>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.css">
 
@@ -137,7 +137,7 @@
 
     .profile-container {
         display: flex;
-        min-height: calc(100vh - 120px); /* Adjust based on header/footer height */
+        min-height: calc(100vh - 120px);
     }
 
     .sidebar-container {
@@ -454,7 +454,6 @@
         background-color: #1976d2;
     }
 
-    /* Responsive design */
     @media (max-width: 768px) {
         .profile-container {
             flex-direction: column;
@@ -494,312 +493,239 @@
             height: 250px;
         }
     }
+
+    /* Custom Swal Styles */
+    .swal2-popup.custom-swal {
+        width: 400px !important;
+        width: 400px !important;
+        padding: 2rem !important;
+        border-radius: 12px !important;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1) !important;
+    }
+
+    .swal2-title.custom-swal-title {
+        font-size: 1.8rem !important;
+        font-weight: 600 !important;
+        color: #333 !important;
+        margin-bottom: 0.5rem !important;
+    }
+
+    .swal2-content.custom-swal-content {
+        font-size: 1.1rem !important;
+        color: #555 !important;
+        line-height: 1.4 !important;
+    }
+
+    .swal2-icon.swal2-success,
+    .swal2-icon.swal2-info {
+        margin-bottom: 1rem !important;
+    }
 </style>
 
 <script>
     document.addEventListener('DOMContentLoaded', function() {
-        // Image cropping logic
-        const fileInput = document.getElementById('profile-image');
-        const imagePreviewWrapper = document.getElementById('image-preview-wrapper');
-        const cropContainer = document.getElementById('crop-container');
+        let cropper;
+        const imageInput = document.getElementById('profile-image');
         const imageToCrop = document.getElementById('image-to-crop');
+        const imagePreviewWrapper = document.getElementById('image-preview-wrapper');
         const applyCropBtn = document.getElementById('apply-crop-btn');
         const cancelCropBtn = document.getElementById('cancel-crop-btn');
-        const currentImageDiv = document.querySelector('.current-image');
         const croppedImageData = document.getElementById('cropped-image-data');
-        
-        let cropper;
-        let imageSelected = false; // Track if an image has been selected
+        const editProfileForm = document.getElementById('editProfileForm');
+        const emailInput = document.getElementById('email');
+        const verifyEmailBtn = document.getElementById('verify-email-btn');
+        const emailMessage = document.getElementById('email-message');
+        const originalEmail = emailInput.value;
 
-        fileInput.addEventListener('change', function() {
-            const file = this.files[0];
+        // Image upload and crop functionality
+        imageInput.addEventListener('change', function(event) {
+            const file = event.target.files[0];
             if (file) {
-                if (!file.type.match('image.*')) {
-                    Swal.fire({
-                        icon: 'error',
-                        title: 'Invalid File',
-                        text: 'Please select an image file.',
-                    });
-                    this.value = '';
-                    return;
-                }
-                
-                if (file.size > 5 * 1024 * 1024) {
-                    Swal.fire({
-                        icon: 'error',
-                        title: 'File Too Large',
-                        text: 'File is too large. Maximum size is 5MB.',
-                    });
-                    this.value = '';
-                    return;
-                }
-                
-                imageSelected = true; // Mark that an image has been selected
-                updateButtonState(); // Update button state immediately
-
                 const reader = new FileReader();
                 reader.onload = function(e) {
                     imageToCrop.src = e.target.result;
                     imagePreviewWrapper.style.display = 'block';
-                    
-                    imageToCrop.onload = function() {
-                        if (cropper) {
-                            cropper.destroy();
-                        }
-                        
-                        cropper = new Cropper(imageToCrop, {
-                            aspectRatio: 1,
-                            viewMode: 1,
-                            guides: true,
-                            center: true,
-                            background: false,
-                            autoCropArea: 0.8,
-                            responsive: true
-                        });
-                    };
+                    if (cropper) {
+                        cropper.destroy();
+                    }
+                    cropper = new Cropper(imageToCrop, {
+                        aspectRatio: 1,
+                        viewMode: 1,
+                        autoCropArea: 0.8,
+                        responsive: true
+                    });
                 };
                 reader.readAsDataURL(file);
             }
         });
-        
+
         applyCropBtn.addEventListener('click', function() {
-            if (!cropper) return;
-            
-            const canvas = cropper.getCroppedCanvas({
-                width: 300,
-                height: 300,
-                imageSmoothingEnabled: true,
-                imageSmoothingQuality: 'high',
-            });
-            
-            if (canvas) {
-                const croppedImageUrl = canvas.toDataURL('image/jpeg', 0.9);
-                
-                let profileImg = currentImageDiv.querySelector('.profile-img');
-                if (!profileImg) {
-                    const placeholder = currentImageDiv.querySelector('.profile-placeholder');
-                    if (placeholder) {
-                        placeholder.remove();
+            if (cropper) {
+                const canvas = cropper.getCroppedCanvas({
+                    width: 200,
+                    height: 200
+                });
+                canvas.toBlob(function(blob) {
+                    const url = URL.createObjectURL(blob);
+                    croppedImageData.value = url;
+                    imagePreviewWrapper.style.display = 'none';
+                    cropper.destroy();
+                    cropper = null;
+                    // Update preview
+                    const previewImg = document.querySelector('.profile-img');
+                    if (previewImg) {
+                        previewImg.src = url;
                     }
-                    profileImg = document.createElement('img');
-                    profileImg.className = 'profile-img';
-                    profileImg.alt = 'Profile Image';
-                    currentImageDiv.appendChild(profileImg);
-                }
-                
-                profileImg.src = croppedImageUrl;
-                croppedImageData.value = croppedImageUrl;
-                
-                imagePreviewWrapper.style.display = 'none';
-                cropper.destroy();
-                cropper = null;
-                updateButtonState(); // Update button state after cropping
+                }, 'image/jpeg', 0.8);
             }
         });
-        
+
         cancelCropBtn.addEventListener('click', function() {
             imagePreviewWrapper.style.display = 'none';
             if (cropper) {
                 cropper.destroy();
                 cropper = null;
             }
-            fileInput.value = '';
-            imageSelected = false; // Reset image selection state
-            croppedImageData.value = ''; // Clear cropped image data
-            updateButtonState(); // Update button state after canceling
+            imageInput.value = '';
+            croppedImageData.value = '';
         });
 
-        // Email verification logic
-        const emailInput = document.getElementById('email');
-        const originalEmail = emailInput ? emailInput.value : '';
-        const verifyEmailBtn = document.getElementById('verify-email-btn');
-        const emailMessage = document.getElementById('email-message');
-        const saveBtn = document.getElementById('save-btn');
-        const fullNameInput = document.getElementById('fullName');
-        const birthdateInput = document.getElementById('birthdate');
-        const originalFullName = fullNameInput.value || '';
-        const originalBirthdate = birthdateInput.value || '';
-        let emailVerified = false;
-
-        // Check if the page was loaded after a successful email verification
-        const urlParams = new URLSearchParams(window.location.search);
-        const emailVerifiedParam = urlParams.get('emailVerified');
-        if (emailVerifiedParam === 'true') {
-            emailVerified = true;
-            emailMessage.textContent = 'Email verified successfully!';
-            emailMessage.className = 'email-message success';
-        }
-
-        // Function to check if any field has changed
-        function hasChanges() {
-            const newEmail = emailInput ? emailInput.value.trim() : originalEmail;
-            const newFullName = fullNameInput.value.trim();
-            const newBirthdate = birthdateInput.value;
-            const hasImageChanged = croppedImageData.value !== '' || imageSelected;
-            return (
-                newFullName !== originalFullName ||
-                newBirthdate !== originalBirthdate ||
-                hasImageChanged ||
-                (emailInput && newEmail !== originalEmail && emailVerified)
-            );
-        }
-
-        // Function to update button state
-        function updateButtonState() {
-            const newEmail = emailInput ? emailInput.value.trim() : originalEmail;
-            if (emailInput && emailInput.disabled) {
-                // If email is disabled (Google user), no verification needed
-                if (verifyEmailBtn) {
-                    verifyEmailBtn.style.display = 'none';
-                }
-                emailMessage.textContent = '';
-                saveBtn.disabled = !hasChanges();
-            } else if (emailInput && newEmail !== originalEmail && !emailVerified) {
-                // Email changed but not verified
-                if (verifyEmailBtn) {
-                    verifyEmailBtn.style.display = 'inline-block';
-                }
-                emailMessage.textContent = 'Please verify your new email address.';
-                emailMessage.className = 'email-message';
-                saveBtn.disabled = true; // Disable until email is verified
-            } else {
-                // Either email unchanged, or email changed and verified
-                if (verifyEmailBtn) {
-                    verifyEmailBtn.style.display = 'none';
-                }
-                if (emailInput && newEmail !== originalEmail && emailVerified) {
-                    emailMessage.textContent = 'Email verified successfully!';
-                    emailMessage.className = 'email-message success';
+        // Email verification
+        if (!emailInput.disabled) {
+            emailInput.addEventListener('input', function() {
+                if (emailInput.value !== originalEmail) {
+                    verifyEmailBtn.style.display = 'block';
+                    emailMessage.textContent = 'Please verify your new email address.';
+                    emailMessage.className = 'email-message';
                 } else {
+                    verifyEmailBtn.style.display = 'none';
                     emailMessage.textContent = '';
                 }
-                saveBtn.disabled = !hasChanges();
-            }
-        }
+            });
 
-        // Monitor email changes
-        if (emailInput && !emailInput.disabled) {
-            emailInput.addEventListener('input', updateButtonState);
-        }
-
-        // Monitor other field changes
-        fullNameInput.addEventListener('input', updateButtonState);
-        birthdateInput.addEventListener('input', updateButtonState);
-        fileInput.addEventListener('change', updateButtonState);
-
-        // Initial button state
-        updateButtonState();
-
-        // Handle Verify Email button click
-        if (verifyEmailBtn) {
-            verifyEmailBtn.addEventListener('click', function() {
-                const newEmail = emailInput ? emailInput.value.trim() : '';
-                if (!newEmail) {
-                    emailMessage.textContent = 'Please enter an email address.';
+            verifyEmailBtn.addEventListener('click', async function() {
+                const email = emailInput.value;
+                if (!email) {
+                    emailMessage.textContent = 'Please enter a valid email address.';
                     emailMessage.className = 'email-message error';
                     return;
                 }
-                
-                // Send OTP request to backend
-                fetch('/send-otp', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({ email: newEmail }),
-                })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success) {
-                        emailMessage.textContent = 'OTP sent to your new email address. Redirecting...';
+
+                try {
+                    const response = await fetch('/send-otp', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({ email })
+                    });
+
+                    const result = await response.json();
+                    if (result.success) {
+                        emailMessage.textContent = 'OTP sent to your email. Please verify.';
                         emailMessage.className = 'email-message success';
-                        // Redirect to OTP verification page
-                        setTimeout(() => {
-                            window.location.href = `/verify-otp?email=${encodeURIComponent(newEmail)}`;
-                        }, 1000);
+                        window.location.href = `/verify-otp?email=${encodeURIComponent(email)}`;
                     } else {
-                        emailMessage.textContent = data.message || 'Failed to send OTP. Please try again.';
+                        emailMessage.textContent = result.message || 'Failed to send OTP.';
                         emailMessage.className = 'email-message error';
-                        saveBtn.disabled = !hasChanges();
                     }
-                })
-                .catch(error => {
-                    emailMessage.textContent = 'Error sending OTP. Please try again.';
+                } catch (error) {
+                    console.error('Error sending OTP:', error);
+                    emailMessage.textContent = 'An error occurred while sending OTP.';
                     emailMessage.className = 'email-message error';
-                    saveBtn.disabled = !hasChanges();
-                });
+                }
             });
         }
 
-        // Form submission with AJAX
-        document.querySelector('.edit-profile-form').addEventListener('submit', function(event) {
-            event.preventDefault(); // Prevent default form submission
+        // Form submission
+        editProfileForm.addEventListener('submit', async function(event) {
+            event.preventDefault();
 
-            const newEmail = emailInput ? emailInput.value.trim() : originalEmail;
-            if (emailInput && !emailInput.disabled) {
-                // For Google users, email is disabled, so skip verification check
-                if (newEmail !== originalEmail && !emailVerified) {
-                    emailMessage.textContent = 'Please verify your new email address before saving.';
-                    emailMessage.className = 'email-message error';
-                    return;
+            const formData = new FormData(editProfileForm);
+
+            // If cropped image exists, append it
+            if (croppedImageData.value) {
+                try {
+                    const response = await fetch(croppedImageData.value);
+                    const blob = await response.blob();
+                    formData.append('profileImage', blob, 'cropped-image.jpg');
+                } catch (error) {
+                    console.error('Error appending cropped image:', error);
                 }
             }
 
-            // Prepare form data
-            const formData = new FormData(this);
+            try {
+                const response = await fetch('/edit-profile', {
+                    method: 'POST',
+                    body: formData
+                });
 
-            // If cropped image data exists, convert it to a Blob and append it as a file
-            if (croppedImageData.value) {
-                const dataUrl = croppedImageData.value;
-                const blob = dataURLtoBlob(dataUrl);
-                formData.set('profileImage', blob, 'cropped-image.jpg');
-            }
+                const result = await response.json();
+                console.log('Edit profile response:', result);
 
-            fetch('/edit-profile', {
-                method: 'POST',
-                body: formData,
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    Swal.fire({
-                        icon: 'success',
-                        title: 'Success',
-                        text: data.message || 'Profile updated successfully!',
-                        timer: 2000,
-                        showConfirmButton: false
-                    }).then(() => {
-                        // Redirect to userProfile on success
-                        window.location.href = '/userProfile';
-                    });
+                if (result.success) {
+                    if (result.hasChanges) {
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Profile Updated',
+                            text: result.message || 'Your profile has been updated successfully',
+                            timer: 1500,
+                            showConfirmButton: false,
+                            width: '400px',
+                            customClass: {
+                                popup: 'custom-swal',
+                                title: 'custom-swal-title',
+                                content: 'custom-swal-content'
+                            }
+                        }).then(() => {
+                            window.location.href = '/userProfile';
+                        });
+                    } else {
+                        Swal.fire({
+                            icon: 'info',
+                            title: 'No Changes Made',
+                            text: 'Your profile was not modified',
+                            timer: 1500,
+                            showConfirmButton: false,
+                            width: '400px',
+                            customClass: {
+                                popup: 'custom-swal',
+                                title: 'custom-swal-title',
+                                content: 'custom-swal-content'
+                            }
+                        }).then(() => {
+                            window.location.href = '/userProfile';
+                        });
+                    }
                 } else {
                     Swal.fire({
                         icon: 'error',
                         title: 'Error',
-                        text: data.message || 'Failed to update profile. Please try again.',
+                        text: result.message || 'Failed to update profile',
+                        confirmButtonText: 'OK',
+                        width: '400px',
+                        customClass: {
+                            popup: 'custom-swal',
+                            title: 'custom-swal-title',
+                            content: 'custom-swal-content'
+                        }
                     });
                 }
-            })
-            .catch(error => {
+            } catch (error) {
+                console.error('Error updating profile:', error);
                 Swal.fire({
                     icon: 'error',
                     title: 'Error',
-                    text: 'Error updating profile. Please try again.',
+                    text: 'An error occurred while updating the profile: ' + error.message,
+                    confirmButtonText: 'OK',
+                    width: '400px',
+                    customClass: {
+                        popup: 'custom-swal',
+                        title: 'custom-swal-title',
+                        content: 'custom-swal-content'
+                    }
                 });
-            });
-        });
-
-        // Function to convert data URL to Blob
-        function dataURLtoBlob(dataUrl) {
-            const arr = dataUrl.split(',');
-            const mime = arr[0].match(/:(.*?);/)[1];
-            const bstr = atob(arr[1]);
-            let n = bstr.length;
-            const u8arr = new Uint8Array(n);
-            while (n--) {
-                u8arr[n] = bstr.charCodeAt(n);
             }
-            return new Blob([u8arr], { type: mime });
-        }
+        });
     });
 </script>
