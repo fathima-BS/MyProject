@@ -134,7 +134,7 @@
                     <span>Price</span>
                     <span>₹<%= subtotal.toLocaleString("en-IN") %></span>
                 </div>
-                <div class="flex justify-between mb-2 text-gray-600">
+                <!-- <div class="flex justify-between mb-2 text-gray-600">
                     <span>Discount</span>
                     <span>-₹<%= offerDiscount.toLocaleString("en-IN") %></span>
                 </div>
@@ -148,7 +148,7 @@
                     <span>Taxes (GST 5%)</span>
                     <% let taxes = total * 0.05; %>
                     <span>₹<%= taxes.toLocaleString("en-IN") %></span>
-                </div>
+                </div> -->
                 <div class="flex justify-between mb-2 text-gray-600">
                     <span>Shipping</span>
                     <span>Free</span>
@@ -183,12 +183,12 @@
                                     <% if (index === 0) { %>
                                         <p class="text-blue-600 text-sm mt-1 font-medium">Default Address</p>
                                     <% } %>
-                                    <button class="text-blue-600 text-sm mt-2 font-medium deliver-btn" data-address-index="<%= index %>">
+                                    <!-- <button class="text-blue-600 text-sm mt-2 font-medium deliver-btn" data-address-index="<%= index %>">
                                         Deliver Here
-                                    </button>
+                                    </button> -->
                                 </div>
                             </div>
-                            <div class="flex space-x-2">
+                            <!-- <div class="flex space-x-2">
                                 <button class="action-btn text-gray-500 p-2 rounded edit-btn" data-address-index="<%= index %>">
                                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.536L16.732 3.732z"></path>
@@ -199,7 +199,7 @@
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
                                     </svg>
                                 </button>
-                            </div>
+                            </div> -->
                         </div>
                     </div>
                 <% }) %>
@@ -210,10 +210,14 @@
             <% } %>
 
             <!-- Add New Address -->
-            <div class="mt-4">
+            <!-- <div class="mt-6">
                 <a href="/addresses" class="border border-dashed border-gray-400 w-full py-3 text-gray-600 rounded-lg font-medium hover:bg-gray-100 transition text-center">
                     + Add New Address
                 </a>
+            </div> -->
+
+             <div class="mt-6">
+                <a href="/addresses" style="text-decoration: none;" class="w-full bg-blue-900 text-white py-3 rounded-lg font-medium proceed-btn ">+ Add New Address</a>
             </div>
 
             <!-- Payment Method -->

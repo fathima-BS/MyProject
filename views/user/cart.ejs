@@ -126,7 +126,7 @@
                     <span>₹<%= subtotal.toLocaleString("en-IN") %></span>
                 </div>
                 <a href="/checkout" class="block w-full bg-blue-900 text-white py-2 rounded-lg mt-4 checkout-btn font-medium text-center <%= cart.items.some(item => item.productId.quantity <= 0) ? 'opacity-50 cursor-not-allowed' : '' %>"
-                   <%= cart.items.some(item => item.productId.quantity <= 0) ? 'onclick="return false;"' : '' %>>Proceed to Checkout</a>
+                 style="text-decoration: none; color: white;"  <%= cart.items.some(item => item.productId.quantity <= 0) ? 'onclick="return false;"' : '' %>>Proceed to Checkout</a>
             <% } else { %>
                 <p class="text-gray-600">Your cart is empty.</p>
             <% } %>
