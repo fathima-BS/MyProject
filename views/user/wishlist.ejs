@@ -1,0 +1,411 @@
+<%- include("../partials/user/header") %>
+<link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+<style>
+    body {
+        font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        background-color: #f8f9fa;
+        color: #212529;
+    }
+    
+    .wishlist-container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 0 20px;
+    }
+    
+    .page-title {
+        font-size: 28px;
+        font-weight: 600;
+        margin-bottom: 20px;
+        padding-bottom: 15px;
+        border-bottom: 1px solid #e9ecef;
+    }
+
+    .breadcrumb {
+        display: flex;
+        align-items: center;
+        margin-bottom: 24px;
+        font-size: 14px;
+    }
+    
+    .breadcrumb a {
+        color: #6c757d;
+        text-decoration: none;
+    }
+    
+    .breadcrumb span {
+        margin: 0 8px;
+        color: #adb5bd;
+    }
+    
+    .breadcrumb .active {
+        color: #212529;
+        font-weight: 500;
+    }
+    
+    .wishlist-item {
+        display: flex;
+        align-items: center;
+        background: #fff;
+        border-radius: 8px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+        margin-bottom: 16px;
+        position: relative;
+        overflow: hidden;
+        transition: transform 0.2s, box-shadow 0.2s;
+        padding: 20px;
+    }
+    
+    .wishlist-item:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    }
+    
+    .item-image {
+        width: 120px;
+        height: 120px;
+        flex-shrink: 0;
+        margin-right: 20px;
+        border-radius: 4px;
+        overflow: hidden;
+    }
+    
+    .item-image img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+    
+    .item-details {
+        flex-grow: 1;
+    }
+    
+    .item-title {
+        font-size: 18px;
+        font-weight: 600;
+        margin-bottom: 4px;
+        color: #212529;
+    }
+    
+    .item-brand {
+        font-size: 14px;
+        color: #6c757d;
+        margin-bottom: 8px;
+    }
+    
+    .item-price {
+        font-size: 18px;
+        font-weight: 600;
+        color: #212529;
+        margin-bottom: 4px;
+    }
+    
+    .original-price {
+        font-size: 14px;
+        color: #6c757d;
+        text-decoration: line-through;
+        margin-left: 8px;
+    }
+    
+    .save-amount {
+        font-size: 14px;
+        color: #28a745;
+        margin-left: 8px;
+    }
+    
+    .item-actions {
+        display: flex;
+        align-items: center;
+        margin-top: 12px;
+    }
+    
+    .move-to-cart {
+        background-color: #1e3a8a;
+        color: white;
+        border: none;
+        padding: 10px 18px;
+        border-radius: 4px;
+        font-weight: 500;
+        font-size: 14px;
+        cursor: pointer;
+        transition: background-color 0.2s;
+        display: flex;
+        align-items: center;
+    }
+    
+    .move-to-cart:hover {
+        background-color: #122a6c;
+    }
+    
+    .cart-icon {
+        margin-right: 8px;
+    }
+    
+    .remove-btn {
+        background: none;
+        border: none;
+        color: #6c757d;
+        font-size: 14px;
+        cursor: pointer;
+        padding: 10px 14px;
+        margin-left: 10px;
+        border-radius: 4px;
+        transition: color 0.2s, background-color 0.2s;
+        display: flex;
+        align-items: center;
+    }
+    
+    .remove-btn:hover {
+        color: #dc3545;
+        background-color: #f8f9fa;
+    }
+    
+    .trash-icon {
+        margin-right: 6px;
+    }
+    
+    .date-added {
+        position: absolute;
+        top: 20px;
+        right: 20px;
+        font-size: 12px;
+        color: #6c757d;
+    }
+    
+    .empty-wishlist {
+        text-align: center;
+        padding: 60px 0;
+    }
+    
+    .empty-icon {
+        font-size: 48px;
+        color: #dee2e6;
+        margin-bottom: 16px;
+    }
+    
+    .empty-text {
+        font-size: 18px;
+        color: #6c757d;
+        margin-bottom: 20px;
+    }
+    
+    .start-shopping {
+        background-color: #0d6efd;
+        color: white;
+        border: none;
+        padding: 12px 24px;
+        border-radius: 4px;
+        font-weight: 500;
+        font-size: 16px;
+        cursor: pointer;
+        transition: background-color 0.2s;
+        text-decoration: none;
+        display: inline-block;
+    }
+    
+    .start-shopping:hover {
+        background-color: #0b5ed7;
+    }
+    
+    .message-alert {
+        background-color: #d4edda;
+        color: #155724;
+        padding: 12px 20px;
+        border-radius: 4px;
+        margin-bottom: 20px;
+        text-align: center;
+    }
+    
+    @media (max-width: 768px) {
+        .wishlist-item {
+            flex-direction: column;
+            align-items: flex-start;
+        }
+        
+        .item-image {
+            width: 100%;
+            height: auto;
+            margin-right: 0;
+            margin-bottom: 16px;
+        }
+        
+        .date-added {
+            position: static;
+            margin-top: 12px;
+            margin-bottom: 8px;
+        }
+    }
+</style>
+
+<div class="wishlist-container py-8">
+    <div class="breadcrumb">
+        <a href="/">Home</a>
+        <span>/</span>
+        <a href="/account">Account</a>
+        <span>/</span>
+        <span class="active">Wishlist</span>
+    </div>
+
+    <h1 class="page-title">My Wishlist</h1>
+    
+    <% if (message) { %>
+        <div class="message-alert">
+            <%= message %>
+        </div>
+    <% } %>
+    
+    <% if (wishlistItems && wishlistItems.length > 0) { %>
+        <% wishlistItems.forEach(item => { %>
+            <% if (item) { %>
+                <div class="wishlist-item">
+                    <div class="item-image">
+                        <a href="/product/<%= item._id %>">
+                            <img src="<%= item.productImage[0] %>" alt="<%= item.productName || 'Product Image' %>" />
+                        </a>
+                    </div>
+                    
+                    <div class="item-details">
+                        <h3 class="item-title">
+                            <a href="/product/<%= item._id %>" style="text-decoration: none; color: inherit;">
+                                <%= item.productName %>
+                            </a>
+                        </h3>
+                        
+                        <p class="item-brand"><%= item.brand ? item.brand.BrandName : 'Unknown Brand' %></p>
+                        
+                        <div class="item-price">
+                            ₹<%= item.salePrice.toLocaleString("en-IN", { minimumFractionDigits: 2 }) %>
+                            <span class="original-price">₹<%= item.regularPrice.toLocaleString("en-IN", { minimumFractionDigits: 2 }) %></span>
+                            <span class="save-amount">Save ₹<%= (item.regularPrice - item.salePrice).toLocaleString("en-IN", { minimumFractionDigits: 2 }) %></span>
+                        </div>
+                        
+                        <div class="item-actions">
+                            <button class="move-to-cart" data-product-id="<%= item._id %>">
+                                <svg class="cart-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M3 3H5L5.4 5M5.4 5H21L17 13H7M5.4 5L7 13M7 13L4.707 15.293C4.077 15.923 4.523 17 5.414 17H17M17 17C16.4696 17 15.9609 17.2107 15.5858 17.5858C15.2107 17.9609 15 18.4696 15 19C15 19.5304 15.2107 20.0391 15.5858 20.4142C15.9609 20.7893 16.4696 21 17 21C17.5304 21 18.0391 20.7893 18.4142 20.4142C18.7893 20.0391 19 19.5304 19 19C19 18.4696 18.7893 17.9609 18.4142 17.5858C18.0391 17.2107 17.5304 17 17 17ZM9 19C9 19.5304 8.78929 20.0391 8.41421 20.4142C8.03914 20.7893 7.53043 21 7 21C6.46957 21 5.96086 20.7893 5.58579 20.4142C5.21071 20.0391 5 19.5304 5 19C5 18.4696 5.21071 17.9609 5.58579 17.5858C5.96086 17.2107 6.46957 17 7 17C7.53043 17 8.03914 17.2107 8.41421 17.5858C8.78929 17.9609 9 18.4696 9 19Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                </svg>
+                                Move to Cart
+                            </button>
+                            
+                            <button class="remove-btn" onclick="removeFromWishlist('<%= item._id %>')">
+                                <svg class="trash-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M3 6H5H21" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                    <path d="M8 6V4C8 3.46957 8.21071 2.96086 8.58579 2.58579C8.96086 2.21071 9.46957 2 10 2H14C14.5304 2 15.0391 2.21071 15.4142 2.58579C15.7893 2.96086 16 3.46957 16 4V6M19 6V20C19 20.5304 18.7893 21.0391 18.4142 21.4142C18.0391 21.7893 17.5304 22 17 22H7C6.46957 22 5.96086 21.7893 5.58579 21.4142C5.21071 21.0391 5 20.5304 5 20V6H19Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                    <path d="M10 11V17" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                    <path d="M14 11V17" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                </svg>
+                                Remove
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="date-added">
+                        Added on <%= new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' }) %>
+                    </div>
+                </div>
+            <% } %>
+        <% }) %>
+    <% } else { %>
+        <div class="empty-wishlist">
+            <div class="empty-icon">
+                <svg width="64" height="64" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M20.84 4.61C20.3292 4.099 19.7228 3.69364 19.0554 3.41708C18.3879 3.14052 17.6725 2.99817 16.95 2.99817C16.2275 2.99817 15.5121 3.14052 14.8446 3.41708C14.1772 3.69364 13.5708 4.099 13.06 4.61L12 5.67L10.94 4.61C9.9083 3.57831 8.50903 2.99871 7.05 2.99871C5.59096 2.99871 4.19169 3.57831 3.16 4.61C2.1283 5.64169 1.54871 7.04097 1.54871 8.5C1.54871 9.95903 2.1283 11.3583 3.16 12.39L4.22 13.45L12 21.23L19.78 13.45L20.84 12.39C21.351 11.8792 21.7563 11.2728 22.0329 10.6054C22.3095 9.93793 22.4518 9.22252 22.4518 8.5C22.4518 7.77748 22.3095 7.06207 22.0329 6.39464C21.7563 5.7272 21.351 5.12076 20.84 4.61V4.61Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+            </div>
+            <p class="empty-text">Your wishlist is empty.</p>
+            <a href="/shop" class="start-shopping">Start Shopping</a>
+        </div>
+    <% } %>
+</div>
+
+<script>
+async function removeFromWishlist(productId) {
+    try {
+        const response = await fetch('/wishlist/remove', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ productId }),
+        });
+        const data = await response.json();
+        if (data.success) {
+            Swal.fire({
+                title: 'Removed!',
+                text: data.message,
+                icon: 'success',
+                confirmButtonText: 'OK',
+                confirmButtonColor: '#0d6efd'
+            }).then(() => {
+                window.location.href = '/wishlist?message=Product%20removed%20from%20wishlist';
+            });
+        } else {
+            Swal.fire({
+                title: 'Error!',
+                text: data.message,
+                icon: 'error',
+                confirmButtonText: 'OK',
+                confirmButtonColor: '#0d6efd'
+            });
+        }
+    } catch (error) {
+        Swal.fire({
+            title: 'Error!',
+            text: 'Error removing from wishlist. Please try again.',
+            icon: 'error',
+            confirmButtonText: 'OK',
+            confirmButtonColor: '#0d6efd'
+        });
+    }
+}
+
+document.querySelectorAll('.move-to-cart').forEach(button => {
+    button.addEventListener('click', async () => {
+        const productId = button.dataset.productId;
+        try {
+            const response = await fetch('/add', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ productId, fromWishlist: true }),
+            });
+            const data = await response.json();
+            if (data.success) {
+                Swal.fire({
+                    title: 'Added to Cart!',
+                    text: data.message,
+                    icon: 'success',
+                    confirmButtonText: 'Go to Cart',
+                    confirmButtonColor: '#0d6efd',
+                    showCancelButton: true,
+                    cancelButtonText: 'Continue Shopping',
+                    cancelButtonColor: '#6c757d'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        window.location.href = '/cart';
+                    } else {
+                        window.location.reload();
+                    }
+                });
+            } else {
+                Swal.fire({
+                    title: 'Error!',
+                    text: data.message,
+                    icon: 'error',
+                    confirmButtonText: 'OK',
+                    confirmButtonColor: '#0d6efd'
+                });
+            }
+        } catch (error) {
+            Swal.fire({
+                title: 'Error!',
+                text: 'Error adding to cart. Please try again.',
+                icon: 'error',
+                confirmButtonText: 'OK',
+                confirmButtonColor: '#0d6efd'
+            });
+        }
+    });
+});
+</script>
+
+<%- include("../partials/user/footer") %>

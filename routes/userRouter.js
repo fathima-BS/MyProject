@@ -4,6 +4,8 @@ const userController = require('../controllers/user/userController');
 const productController = require('../controllers/user/productController');
 const profileController = require('../controllers/user/profileController');
 const addressController = require('../controllers/user/addressController');
+const cartController = require('../controllers/user/cartController');
+const checkoutController=require('../controllers/user/checkoutController')
 const passport = require('passport');
 const { userAuth } = require('../middlewares/auth');
 
@@ -47,6 +49,7 @@ router.get("/auth/google/callback", (req, res, next) => {
     })(req, res, next);
 });
 
+// Shop and Product 
 router.get('/shop', userAuth, userController.loadShopPage);
 router.get('/product/:id', userAuth, productController.productDetailPage);
 
@@ -60,11 +63,30 @@ router.get('/verify-otp', userAuth, profileController.getVerifyOtp);
 router.post('/verify-otp', userAuth, profileController.verifyOtp);
 router.post('/update-password', userAuth, profileController.postNewPassword);
 
-// address
-router.get('/addresses', addressController.loadAddress);
-router.post('/add-address', addressController.addAddress);
-router.post('/edit-address', addressController.editAddress);
-router.get('/delete-address', addressController.deleteAddress);
-router.post('/deliver-address', addressController.deliverAddress);
+// Address
+router.get('/addresses', userAuth, addressController.loadAddress);
+router.post('/add-address', userAuth, addressController.addAddress);
+router.post('/edit-address', userAuth, addressController.editAddress);
+router.get('/delete-address', userAuth, addressController.deleteAddress);
+router.post('/deliver-address', userAuth, addressController.deliverAddress);
+
+// Cart 
+router.get('/cart', userAuth, userController.loadCartPage);
+router.post('/add', userAuth, userController.addToCart);
+router.post('/increment', userAuth, userController.incrementQuantity);
+router.post('/decrement', userAuth, userController.decrementQuantity);
+router.post('/remove', userAuth, userController.removeItem);
+router.get('/checkout', userAuth, checkoutController.loadCheckout);
+
+// Wishlist
+router.get('/wishlist', userAuth, userController.wishlist);
+router.post('/wishlist/add', userAuth, userController.addToWishlist);
+router.post('/wishlist/remove', userAuth, userController.removeWishlist);
+
+// Payment
+router.get('/checkout', userAuth, checkoutController.loadCheckout);
+router.post('/select-address', userAuth, checkoutController.selectAddress);
+router.post('/place-order', userAuth, checkoutController.placeOrder);
+router.get('/order-success', userAuth, checkoutController.loadOrderSuccess);
 
 module.exports = router;

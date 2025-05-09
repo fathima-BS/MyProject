@@ -1,4 +1,6 @@
 <%- include("../partials/user/header") %>
+<link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
 <style>
     * {
@@ -15,11 +17,11 @@
 
     /* Breadcrumb Styling */
     .product-main-container .breadcrumb {
-      padding: 12px 20px;
-    font-size: 14px;
-    color: #ffffff;
-    background: #f5f5f5;
-    margin: 10px 0;
+        padding: 12px 20px;
+        font-size: 14px;
+        color: #ffffff;
+        background: #f5f5f5;
+        margin: 10px 0;
     }
 
     .breadcrumb a {
@@ -48,7 +50,6 @@
         background: #fff;
         padding: 10px 150px 34px 56px;
         border-radius: 10px;
-        
     }
 
     .image-gallery {
@@ -57,8 +58,8 @@
         position: relative;
     }
 
-    /* Image zoom container */
-    .zoom-container {
+ /* Image zoom container */
+ .zoom-container {
         width: 100%;
         height: 500px;
         position: relative;
@@ -177,7 +178,6 @@
         width: 400px;
         margin-bottom: 20px;
     }
-  
 
     .related-products {
         margin-top: 40px;
@@ -261,10 +261,8 @@
         border-radius: 5px;
         cursor: pointer;
         margin-top: 10px;
-        transition: background 0.3s;
-    }
-    .add-to-cart-btn:hover {
-        background: #218838;
+        transition: background 0.3s, transform 0.2s;
+        width: 100%;
     }
 
     .add-to-cart-btn:hover {
@@ -280,17 +278,14 @@
         border-radius: 5px;
         cursor: pointer;
         margin-top: 10px;
-        transition: background 0.3s;
-    }
-    .add-to-wishList:hover {
-        background: #000000;
+        transition: background 0.3s, transform 0.2s;
+        width: 100%;
     }
 
     .add-to-wishList:hover {
-        background: #000000;
+        background: #333333;
         transform: translateY(-2px);
     }
-
 
     /* Responsive Design */
     @media (max-width: 992px) {
@@ -310,6 +305,10 @@
 
         .zoom-container {
             height: 300px;
+        }
+
+        .zoom-result {
+            display: none !important; /* Hide zoom result on small screens */
         }
 
         .product-main-container .breadcrumb {
@@ -332,7 +331,7 @@
         <a href="/shop">Shop</a>
         <% if (product.category) { %>
             <span>></span>
-            <a href="/shop?categoryf=<%= product.category._id %>">
+            <a href="/shop?category=<%= product.category._id %>">
                 <%= product.category.name %>
             </a>
         <% } %>
@@ -344,7 +343,11 @@
         <!-- Image Gallery -->
         <div class="image-gallery">
             <div class="zoom-container" id="zoomContainer">
-                <img src="<%= product.productImage[0] %>" alt="Bullet Trolley" class="main-image" id="mainImage">
+                <img src="<%= product.productImage[0] %>" alt="<%= product.productName %>" class="main-image" id="mainImage">
+                <div class="zoom-lens" id="zoomLens"></div>
+                <div class="zoom-result" id="zoomResult">
+                    <img src="<%= product.productImage[0] %>" alt="<%= product.productName %>" id="zoomedImage">
+                </div>
             </div>
             <div class="thumbnail-container">
                 <% product.productImage.forEach((image, index) => { %>
@@ -372,8 +375,8 @@
             </div>
 
             <div class="action-buttons">
-                <button class="add-to-cart-btn">Add to Cart</button>
-                <button class="add-to-wishList">❤️ Add to Wishlist</button>
+                <button class="add-to-cart-btn" onclick="addToCart('<%= product._id %>')">Add to Cart</button>
+                <button class="add-to-wishList" onclick="addToWishlist('<%= product._id %>')">❤️ Add to Wishlist</button>
             </div>
         </div>
     </section>
@@ -391,12 +394,11 @@
                                 <h4><%= product.productName %></h4>
                                 <h6><%= product.brand ? product.brand.BrandName : 'Unknown Brand' %></h6>
                                 <p>
-                                  ₹ <%= product.salePrice.toLocaleString("en-IN", { minimumFractionDigits: 2 }) %>
-                                  <span class="text-muted">
-                                    <strike>₹ <%= product.regularPrice.toLocaleString("en-IN", { minimumFractionDigits: 2 }) %></strike>
-                                  </span>
+                                    ₹<%= product.salePrice.toLocaleString("en-IN", { minimumFractionDigits: 2 }) %>
+                                    <span class="text-muted">
+                                        <strike>₹<%= product.regularPrice.toLocaleString("en-IN", { minimumFractionDigits: 2 }) %></strike>
+                                    </span>
                                 </p>
-                                
                             </a>
                             <button class="add-to-cart-btn" onclick="addToCart('<%= product._id %>')">Add to Cart</button>
                         </div>
@@ -412,8 +414,11 @@
 <script>
     function changeImage(element) {
         // Update main image
-        document.getElementById('mainImage').src = element.src;
-        
+        const mainImage = document.getElementById('mainImage');
+        const zoomedImage = document.getElementById('zoomedImage');
+        mainImage.src = element.src;
+        zoomedImage.src = element.src;
+
         // Update active thumbnail
         document.querySelectorAll('.thumbnail').forEach(thumb => {
             thumb.classList.remove('active');
@@ -421,7 +426,6 @@
         element.classList.add('active');
     }
 
-    // Image zoom functionality
     document.addEventListener('DOMContentLoaded', function() {
         const image = document.getElementById('mainImage');
         const container = document.getElementById('zoomContainer');
@@ -450,15 +454,78 @@
         });
     });
 
-    // Placeholder functions for add to cart and wishlist
-    function addToCart(productId) {
-        console.log(`Added product ${productId} to cart`);
-        // Implement actual cart functionality here
+    // Add to Cart functionality
+    async function addToCart(productId) {
+        try {
+            const response = await fetch('/add', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ productId }),
+            });
+            const data = await response.json();
+            if (response.ok) {
+                Swal.fire({
+                    title: 'Success!',
+                    text: data.message,
+                    icon: 'success',
+                    confirmButtonText: 'Go to Cart',
+                    showCancelButton: true,
+                    cancelButtonText: 'Continue Shopping',
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        window.location.href = '/cart';
+                    }
+                });
+            } else {
+                Swal.fire({
+                    title: 'Error!',
+                    text: data.message,
+                    icon: 'error',
+                    confirmButtonText: 'OK',
+                });
+            }
+        } catch (error) {
+            Swal.fire({
+                title: 'Error!',
+                text: 'Error adding to cart. Please try again.',
+                icon: 'error',
+                confirmButtonText: 'OK',
+            });
+        }
     }
 
-    function addToWishlist(productId) {
-        console.log(`Added product ${productId} to wishlist`);
-        // Implement actual wishlist functionality here
+    // Add to Wishlist functionality
+    async function addToWishlist(productId) {
+        try {
+            const response = await fetch('/wishlist/add', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ productId }),
+            });
+            const data = await response.json();
+            if (response.ok) {
+                Swal.fire({
+                    title: 'Success!',
+                    text: 'Product added to wishlist',
+                    icon: 'success',
+                    confirmButtonText: 'OK',
+                });
+            } else {
+                Swal.fire({
+                    title: 'Error!',
+                    text: data.message,
+                    icon: 'error',
+                    confirmButtonText: 'OK',
+                });
+            }
+        } catch (error) {
+            Swal.fire({
+                title: 'Error!',
+                text: 'Error adding to  in productDetail. Please try again.',
+                icon: 'error',
+                confirmButtonText: 'OK',
+            });
+        }
     }
 </script>
 

@@ -1,0 +1,76 @@
+<%- include("../partials/user/header") %>
+<link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+<style>
+    body {
+        font-family: 'Roboto', sans-serif;
+        background-color: #f5f5f5;
+    }
+    .success-container {
+        text-align: center;
+        padding: 3rem 1rem;
+        max-width: 600px;
+        margin: 0 auto;
+    }
+    .success-illustration {
+        width: 200px;
+        height: 200px;
+        margin: 0 auto 2rem;
+    }
+    .success-title {
+        font-size: 2rem;
+        font-weight: 600;
+        color: #1f2937;
+        margin-bottom: 1rem;
+    }
+    .success-message {
+        font-size: 1.1rem;
+        color: #4b5563;
+        margin-bottom: 2rem;
+    }
+    .success-buttons {
+        display: flex;
+        justify-content: center;
+        gap: 1rem;
+    }
+    .success-btn {
+        padding: 0.75rem 2rem;
+        border-radius: 0.5rem;
+        font-weight: 500;
+        transition: background-color 0.3s ease;
+    }
+    .btn-primary {
+        background-color: #3b82f6;
+        color: white;
+    }
+    .btn-primary:hover {
+        background-color: #2563eb;
+    }
+    .btn-secondary {
+        background-color: #e5e7eb;
+        color: #1f2937;
+    }
+    .btn-secondary:hover {
+        background-color: #d1d5db;
+    }
+</style>
+
+<!-- Main Content -->
+<div class="success-container">
+    <!-- Illustration (Using SVG for simplicity) -->
+    <svg class="success-illustration" viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <circle cx="100" cy="100" r="80" fill="#10b981" fill-opacity="0.1"/>
+        <path d="M70 100L90 120L130 80" stroke="#10b981" stroke-width="12" stroke-linecap="round" stroke-linejoin="round"/>
+        <circle cx="100" cy="100" r="60" fill="none" stroke="#10b981" stroke-width="8"/>
+    </svg>
+
+    <h1 class="success-title">Thank You for Your Order!</h1>
+    <p class="success-message">
+        Your order has been successfully placed. You'll receive a confirmation soon. We appreciate your trust in us!
+    </p>
+    <div class="success-buttons">
+        <a href="/order-details/<%= orderId %>" class="success-btn btn-primary">View Order Details</a>
+        <a href="/shop" class="success-btn btn-secondary">Continue Shopping</a>
+    </div>
+</div>
+
+<%- include("../partials/user/footer") %>

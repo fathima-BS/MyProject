@@ -1,0 +1,350 @@
+<%- include("../partials/user/header") %>
+<link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+<style>
+    body {
+        font-family: 'Roboto', sans-serif;
+        background-color: #f5f5f5;
+    }
+    .checkout-progress {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-bottom: 2rem;
+    }
+    .progress-step {
+        display: flex;
+        align-items: center;
+        font-size: 0.9rem;
+        color: #6b7280;
+    }
+    .progress-step.active {
+        color: #1f2937;
+        font-weight: 600;
+    }
+    .progress-step.completed .step-icon {
+        background-color: #10b981;
+        color: white;
+    }
+    .step-icon {
+        width: 1.5rem;
+        height: 1.5rem;
+        border-radius: 50%;
+        background-color: #d1d5db;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-right: 0.5rem;
+    }
+    .progress-line {
+        width: 2rem;
+        height: 2px;
+        background-color: #d1d5db;
+        margin: 0 0.5rem;
+    }
+    .address-card {
+        background-color: white;
+        padding: 1.5rem;
+        border-radius: 0.5rem;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        margin-bottom: 1rem;
+        position: relative;
+    }
+    .address-card.selected {
+        border: 2px solid #3b82f6;
+    }
+    .action-btn {
+        transition: background-color 0.2s ease;
+    }
+    .action-btn:hover {
+        background-color: #e5e7eb;
+    }
+    .proceed-btn {
+        transition: background-color 0.3s ease;
+    }
+    .proceed-btn:hover:not(:disabled) {
+        background-color: #1e3a8a;
+    }
+    .cart-item-img {
+        width: 60px;
+        height: 60px;
+        object-fit: cover;
+        border-radius: 0.5rem;
+        margin-right: 1rem;
+    }
+    .payment-option {
+        padding: 1rem;
+        border: 1px solid #d1d5db;
+        border-radius: 0.5rem;
+        margin-bottom: 1rem;
+        display: flex;
+        align-items: center;
+    }
+    .payment-option.selected {
+        border-color: #3b82f6;
+        background-color: #f0f7ff;
+    }
+</style>
+
+<!-- Main Content -->
+<div class="container mx-auto p-6 max-w-6xl">
+    <!-- Checkout Progress -->
+    <div class="checkout-progress">
+        <div class="progress-step completed">
+            <span class="step-icon">✔</span>
+            Cart
+        </div>
+        <div class="progress-line"></div>
+        <div class="progress-step active">
+            <span class="step-icon">2</span>
+            Address
+        </div>
+        <div class="progress-line"></div>
+        <div class="progress-step">
+            <span class="step-icon">3</span>
+            Payment
+        </div>
+    </div>
+
+    <!-- Checkout Content -->
+    <div class="flex flex-col lg:flex-row gap-8">
+        <!-- Order Summary -->
+        <div class="w-full lg:w-1/3 bg-white p-6 rounded-lg shadow-sm">
+            <h3 class="text-lg font-semibold text-gray-800 mb-4">Order Summary (<%= totalItems %> Items)</h3>
+            <!-- Cart Items with Photos -->
+            <% if (cartItems && cartItems.length > 0) { %>
+                <% cartItems.forEach(item => { %>
+                    <div class="flex items-center mb-4">
+                        <% if (item.productId && item.productId.productImage && item.productId.productImage.length > 0) { %>
+                            <img src="<%= item.productId.productImage[0] %>" alt="<%= item.productId.productName %>" class="cart-item-img">
+                        <% } else { %>
+                            <div class="cart-item-img bg-gray-200 flex items-center justify-center">
+                                <span class="text-gray-500 text-sm">No Image</span>
+                            </div>
+                        <% } %>
+                        <div class="flex-1">
+                            <p class="text-sm font-medium text-gray-800"><%= item.productId.productName %></p>
+                            <p class="text-xs text-gray-600">Qty: <%= item.quantity %></p>
+                            <p class="text-sm font-semibold text-gray-800">₹<%= (item.productId.salePrice * item.quantity).toLocaleString("en-IN") %></p>
+                        </div>
+                    </div>
+                <% }) %>
+            <% } %>
+            <div class="border-t pt-2 mt-4">
+                <div class="flex justify-between mb-2 text-gray-600">
+                    <span>Price</span>
+                    <span>₹<%= subtotal.toLocaleString("en-IN") %></span>
+                </div>
+                <div class="flex justify-between mb-2 text-gray-600">
+                    <span>Discount</span>
+                    <span>-₹<%= offerDiscount.toLocaleString("en-IN") %></span>
+                </div>
+                <% if (coupon > 0) { %>
+                    <div class="flex justify-between mb-2 text-gray-600">
+                        <span>Coupon Discount</span>
+                        <span>-₹<%= coupon.toLocaleString("en-IN") %></span>
+                    </div>
+                <% } %>
+                <div class="flex justify-between mb-2 text-gray-600">
+                    <span>Taxes (GST 5%)</span>
+                    <% let taxes = total * 0.05; %>
+                    <span>₹<%= taxes.toLocaleString("en-IN") %></span>
+                </div>
+                <div class="flex justify-between mb-2 text-gray-600">
+                    <span>Shipping</span>
+                    <span>Free</span>
+                </div>
+                <div class="flex justify-between font-semibold text-lg text-gray-800 border-t pt-2">
+                    <span>TOTAL</span>
+                    <% let finalTotal = total + taxes; %>
+                    <span>₹<%= finalTotal.toLocaleString("en-IN") %></span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Address Selection and Payment -->
+        <div class="w-full lg:w-2/3">
+            <!-- Address Selection -->
+            <% if (addresses && addresses.address && addresses.address.length > 0) { %>
+                <% addresses.address.forEach((address, index) => { %>
+                    <div class="address-card <%= index === 0 ? 'selected' : '' %>">
+                        <div class="flex justify-between items-start">
+                            <div class="flex items-start">
+                                <input type="radio" name="selectedAddress" value="<%= index %>" class="mt-1 mr-3" <%= index === 0 ? 'checked' : '' %>>
+                                <div>
+                                    <p class="font-semibold text-gray-800"><%= address.addressType %></p>
+                                    <p class="text-gray-600 text-sm mt-1">
+                                        <%= address.name %>, <%= address.phone %>, <br>
+                                        <%= address.landMark %>, <%= address.city %>, <br>
+                                        <%= address.State %> - <%= address.pincode %>
+                                    </p>
+                                    <% if (address.altPhone) { %>
+                                        <p class="text-gray-600 text-sm mt-1">Alternate Phone: <%= address.altPhone %></p>
+                                    <% } %>
+                                    <% if (index === 0) { %>
+                                        <p class="text-blue-600 text-sm mt-1 font-medium">Default Address</p>
+                                    <% } %>
+                                    <button class="text-blue-600 text-sm mt-2 font-medium deliver-btn" data-address-index="<%= index %>">
+                                        Deliver Here
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="flex space-x-2">
+                                <button class="action-btn text-gray-500 p-2 rounded edit-btn" data-address-index="<%= index %>">
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.536L16.732 3.732z"></path>
+                                    </svg>
+                                </button>
+                                <button class="action-btn text-gray-500 p-2 rounded remove-btn" data-address-index="<%= index %>">
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                                    </svg>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                <% }) %>
+            <% } else { %>
+                <div class="bg-white p-6 rounded-lg shadow-sm text-center">
+                    <p class="text-gray-600 text-lg">No addresses found. Please add an address to proceed.</p>
+                </div>
+            <% } %>
+
+            <!-- Add New Address -->
+            <div class="mt-4">
+                <a href="/addresses" class="border border-dashed border-gray-400 w-full py-3 text-gray-600 rounded-lg font-medium hover:bg-gray-100 transition text-center">
+                    + Add New Address
+                </a>
+            </div>
+
+            <!-- Payment Method -->
+            <div class="mt-6">
+                <h3 class="text-lg font-semibold text-gray-800 mb-4">Payment Method</h3>
+                <div class="payment-option selected">
+                    <input type="radio" name="paymentMethod" value="COD" class="mr-3" checked>
+                    <label>Cash on Delivery (COD)</label>
+                </div>
+            </div>
+
+            <!-- Place Order -->
+            <div class="mt-6">
+                <button id="placeOrder" class="w-full bg-blue-900 text-white py-3 rounded-lg font-medium proceed-btn <%= addresses && addresses.address && addresses.address.length === 0 ? 'opacity-50 cursor-not-allowed' : '' %>" 
+                        <%= addresses && addresses.address && addresses.address.length === 0 ? 'disabled' : '' %>>Place Order</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+// Deliver Here Button
+document.querySelectorAll('.deliver-btn').forEach(button => {
+    button.addEventListener('click', async () => {
+        const addressIndex = button.dataset.addressIndex;
+        try {
+            const response = await fetch('/select-address', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ addressIndex })
+            });
+            const data = await response.json();
+            if (data.success) {
+                // Update UI to reflect selected address
+                document.querySelectorAll('.address-card').forEach(card => card.classList.remove('selected'));
+                button.closest('.address-card').classList.add('selected');
+                document.querySelectorAll('input[name="selectedAddress"]').forEach(radio => radio.checked = false);
+                document.querySelector(`input[name="selectedAddress"][value="${addressIndex}"]`).checked = true;
+            } else {
+                Swal.fire({
+                    title: 'Error!',
+                    text: data.message,
+                    icon: 'error',
+                    confirmButtonText: 'OK',
+                });
+            }
+        } catch (error) {
+            Swal.fire({
+                title: 'Error!',
+                text: 'Error selecting address',
+                icon: 'error',
+                confirmButtonText: 'OK',
+            });
+        }
+    });
+});
+
+// Place Order Button
+document.getElementById('placeOrder').addEventListener('click', async () => {
+    const selectedAddress = document.querySelector('input[name="selectedAddress"]:checked');
+    const paymentMethod = document.querySelector('input[name="paymentMethod"]:checked');
+
+    if (!selectedAddress) {
+        Swal.fire({
+            title: 'Error!',
+            text: 'Please select an address to proceed',
+            icon: 'error',
+            confirmButtonText: 'OK',
+        });
+        return;
+    }
+
+    if (!paymentMethod) {
+        Swal.fire({
+            title: 'Error!',
+            text: 'Please select a payment method',
+            icon: 'error',
+            confirmButtonText: 'OK',
+        });
+        return;
+    }
+
+    const addressIndex = selectedAddress.value;
+    const paymentType = paymentMethod.value;
+
+    try {
+        // First, select the address
+        const addressResponse = await fetch('/select-address', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ addressIndex })
+        });
+        const addressData = await addressResponse.json();
+
+        if (!addressData.success) {
+            Swal.fire({
+                title: 'Error!',
+                text: addressData.message,
+                icon: 'error',
+                confirmButtonText: 'OK',
+            });
+            return;
+        }
+
+        // Then, place the order
+        const orderResponse = await fetch('/place-order', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ paymentMethod: paymentType })
+        });
+        const orderData = await orderResponse.json();
+
+        if (orderData.success) {
+            window.location.href = `/order-success?orderId=${orderData.orderId}`;
+        } else {
+            Swal.fire({
+                title: 'Error!',
+                text: orderData.message,
+                icon: 'error',
+                confirmButtonText: 'OK',
+            });
+        }
+    } catch (error) {
+        Swal.fire({
+            title: 'Error!',
+            text: 'Error placing order',
+            icon: 'error',
+            confirmButtonText: 'OK',
+        });
+    }
+});
+</script>
+<%- include("../partials/user/footer") %>

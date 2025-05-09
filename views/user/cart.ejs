@@ -1,0 +1,237 @@
+<%- include("../partials/user/header") %>
+<link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+<style>
+    body {
+        font-family: 'Roboto', sans-serif;
+        background-color: #f5f5f5;
+    }
+    .header-promo {
+        background: linear-gradient(90deg, #e5e7eb, #d1d5db);
+        color: #1f2937;
+    }
+    .cart-item {
+        transition: box-shadow 0.3s ease;
+    }
+    .cart-item:hover {
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+    }
+    .quantity-btn {
+        width: 40px;
+        height: 40px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: background-color 0.2s ease;
+    }
+    .quantity-btn:hover:not(:disabled) {
+        background-color: #e5e7eb;
+    }
+    .remove-btn {
+        transition: color 0.2s ease;
+    }
+    .remove-btn:hover {
+        color: #ef4444;
+    }
+    .checkout-btn {
+        transition: background-color 0.3s ease;
+    }
+    .checkout-btn:hover:not(:disabled) {
+        background-color: #1e3a8a;
+    }
+    .footer {
+        background-color: #1e2a44;
+        color: #d1d5db;
+    }
+    .footer a {
+        color: #d1d5db;
+        transition: color 0.2s ease;
+    }
+    .footer a:hover {
+        color: #ffffff;
+    }
+</style>
+
+<!-- Header Promo Banner -->
+<div class="header-promo text-center py-3 text-sm font-medium">
+    Early Friday Deal! Spend ₹2,000 or more & get ₹400 OFF instantly! Use code: <span class="font-bold">EARLYFRIDAY</span> at checkout. Hurry, limited time offer!
+</div>
+
+<!-- Main Content -->
+<div class="container mx-auto p-6 max-w-6xl">
+    <!-- Cart and Summary -->
+    <div class="flex flex-col lg:flex-row gap-8">
+        <!-- Cart Items -->
+        <div class="w-full lg:w-2/3">
+            <% if (cart && cart.items && cart.items.length > 0) { %>
+                <% cart.items.forEach(item => { %>
+                    <% if (item.productId) { %>
+                        <div class="bg-white p-6 rounded-lg shadow-sm mb-6 flex items-center cart-item">
+                            <img src="<%= item.productId.productImage[0] %>" alt="<%= item.productId.productName %>" class="w-24 h-24 object-cover mr-6 rounded">
+                            <div class="flex-1">
+                                <div class="flex justify-between items-center">
+                                    <h3 class="text-lg font-semibold text-gray-800"><%= item.productId.productName %></h3>
+                                    <button class="remove-btn text-gray-500" data-product-id="<%= item.productId._id %>">
+                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                                        </svg>
+                                    </button>
+                                </div>
+                                <p class="text-gray-600 text-sm mt-1">Size: <%= item.productId.size || 'Free Size' %></p>
+                                <div class="flex items-center mt-3 space-x-2">
+                                    <button class="decrement-quantity quantity-btn bg-gray-200 text-gray-600 rounded-l <%= item.quantity <= 1 || item.productId.quantity <= 0 ? 'opacity-50 cursor-not-allowed' : '' %>" 
+                                            data-product-id="<%= item.productId._id %>" <%= item.quantity <= 1 || item.productId.quantity <= 0 ? 'disabled' : '' %>>-</button>
+                                    <span class="quantity px-4 py-2 border-t border-b border-gray-200 text-gray-800 font-medium"><%= item.quantity %></span>
+                                    <button class="increment-quantity quantity-btn bg-gray-200 text-gray-600 rounded-r <%= item.quantity >= item.productId.quantity || item.quantity >= 5 || item.productId.quantity <= 0 ? 'opacity-50 cursor-not-allowed' : '' %>" 
+                                            data-product-id="<%= item.productId._id %>" <%= item.quantity >= item.productId.quantity || item.quantity >= 5 || item.productId.quantity <= 0 ? 'disabled' : '' %>>+</button>
+                                </div>
+                                <div class="flex items-center mt-3 space-x-3">
+                                    <span class="text-gray-500 line-through text-sm">₹<%= item.productId.regularPrice ? item.productId.regularPrice.toLocaleString("en-IN") : item.productId.salePrice.toLocaleString("en-IN") %></span>
+                                    <span class="text-lg font-semibold text-gray-800">₹<%= (item.productId.salePrice * item.quantity).toLocaleString("en-IN") %></span>
+                                </div>
+                                <% if (item.productId.quantity <= 0) { %>
+                                    <p class="text-red-500 mt-2 text-sm font-medium">Out of stock</p>
+                                <% } %>
+                            </div>
+                        </div>
+                    <% } %>
+                <% }) %>
+            <% } else { %>
+                <div class="bg-white p-8 rounded-lg shadow-sm text-center">
+                    <p class="text-gray-600 text-lg">Your cart is empty.</p>
+                    <a href="/shop" class="text-blue-600 hover:underline mt-4 inline-block font-medium">Continue Shopping</a>
+                </div>
+            <% } %>
+        </div>
+
+        <!-- Cart Summary -->
+        <div class="w-full lg:w-1/3 bg-white p-6 rounded-lg shadow-sm">
+            <h3 class="text-lg font-semibold text-gray-800 mb-4">Cart Summary</h3>
+            <% if (cart && cart.items && cart.items.length > 0) { %>
+                <% 
+                    let subtotal = 0;
+                    let totalItems = 0;
+                    cart.items.forEach(item => {
+                        if (item.productId) {
+                            subtotal += item.productId.salePrice * item.quantity;
+                            totalItems += item.quantity;
+                        }
+                    });
+                %>
+                <div class="flex justify-between mb-2 text-gray-600">
+                    <span>Subtotal (<%= totalItems %> Items)</span>
+                    <span>₹<%= subtotal.toLocaleString("en-IN") %></span>
+                </div>
+                <div class="flex justify-between font-semibold text-lg text-gray-800 border-t pt-2">
+                    <span>Total</span>
+                    <span>₹<%= subtotal.toLocaleString("en-IN") %></span>
+                </div>
+                <a href="/checkout" class="block w-full bg-blue-900 text-white py-2 rounded-lg mt-4 checkout-btn font-medium text-center <%= cart.items.some(item => item.productId.quantity <= 0) ? 'opacity-50 cursor-not-allowed' : '' %>"
+                   <%= cart.items.some(item => item.productId.quantity <= 0) ? 'onclick="return false;"' : '' %>>Proceed to Checkout</a>
+            <% } else { %>
+                <p class="text-gray-600">Your cart is empty.</p>
+            <% } %>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+// Increment quantity
+document.querySelectorAll('.increment-quantity').forEach(button => {
+    button.addEventListener('click', async () => {
+        if (button.disabled) return;
+        const productId = button.dataset.productId;
+        try {
+            const response = await fetch('/increment', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ productId })
+            });
+            const data = await response.json();
+            if (data.success) {
+                location.reload();
+            } else {
+                Swal.fire({
+                    title: 'Error!',
+                    text: data.message,
+                    icon: 'error',
+                    confirmButtonText: 'OK',
+                });
+            }
+        } catch (error) {
+            Swal.fire({
+                title: 'Error!',
+                text: 'Error updating quantity',
+                icon: 'error',
+                confirmButtonText: 'OK',
+            });
+        }
+    });
+});
+
+// Decrement quantity
+document.querySelectorAll('.decrement-quantity').forEach(button => {
+    button.addEventListener('click', async () => {
+        if (button.disabled) return;
+        const productId = button.dataset.productId;
+        try {
+            const response = await fetch('/decrement', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ productId })
+            });
+            const data = await response.json();
+            if (data.success) {
+                location.reload();
+            } else {
+                Swal.fire({
+                    title: 'Error!',
+                    text: data.message,
+                    icon: 'error',
+                    confirmButtonText: 'OK',
+                });
+            }
+        } catch (error) {
+            Swal.fire({
+                title: 'Error!',
+                text: 'Error updating quantity',
+                icon: 'error',
+                confirmButtonText: 'OK',
+            });
+        }
+    });
+});
+
+// Remove item
+document.querySelectorAll('.remove-btn').forEach(button => {
+    button.addEventListener('click', async () => {
+        const productId = button.dataset.productId;
+        try {
+            const response = await fetch('/remove', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ productId })
+            });
+            const data = await response.json();
+            if (data.success) {
+                location.reload();
+            } else {
+                Swal.fire({
+                    title: 'Error!',
+                    text: data.message,
+                    icon: 'error',
+                    confirmButtonText: 'OK',
+                });
+            }
+        } catch (error) {
+            Swal.fire({
+                title: 'Error!',
+                text: 'Error removing item',
+                icon: 'error',
+                confirmButtonText: 'OK',
+            });
+        }
+    });
+});
+</script>
+<%- include("../partials/user/footer") %>
