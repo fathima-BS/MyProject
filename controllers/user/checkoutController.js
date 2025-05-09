@@ -203,7 +203,7 @@ const placeOrder = async (req, res) => {
       totalPrice: subtotal,
       discount: offerDiscount + coupon,
       finalAmount,
-      address: checkoutSummary.selectedAddress,
+      address: userId, 
       invoiceDate: new Date(),
       status: 'Pending',
       createdOn: new Date(),

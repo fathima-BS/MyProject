@@ -3,113 +3,160 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+    <title>My Orders - My Store</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <style>
+        .status-pending, .status-processing, .status-shipped {
+            background-color: rgba(255, 187, 0, 0.1);
+            color: #f59e0b;
+        }
+        .status-delivered {
+            background-color: rgba(34, 197, 94, 0.1);
+            color: #22c55e;
+        }
+        .status-cancelled, .status-return-request, .status-returned {
+            background-color: rgba(239, 68, 68, 0.1);
+            color: #ef4444;
+        }
+        .pagination-active {
+            background-color: #1f2937;
+            color: white;
+        }
+    </style>
 </head>
-<style>
+<body class="bg-gray-50">
+    <!-- Header Include -->
+    <%- include("../../views/partials/user/header") %>
 
-    /* Recent Orders */
-    .section-title {
-      font-size: 18px;
-      font-weight: 700;
-      margin-bottom: 20px;
-      color: var(--secondary-color);
-    }
-    
-    .orders-table {
-      width: 100%;
-      border-collapse: collapse;
-    }
-    
-    .orders-table th,
-    .orders-table td {
-      padding: 12px 15px;
-      text-align: left;
-      border-bottom: 1px solid #e5e7eb;
-    }
-    
-    .orders-table th {
-      background-color: #f9fafb;
-      font-weight: 600;
-      color: #6b7280;
-    }
-    
-    .orders-table tbody tr:hover {
-      background-color: #f9fafb;
-    }
-    
-    .status-badge {
-      display: inline-block;
-      padding: 4px 12px;
-      border-radius: 20px;
-      font-size: 12px;
-      font-weight: 600;
-    }
-    
-    .status-delivered {
-      background-color: #d1fae5;
-      color: #065f46;
-    }
-    
-    .status-processing {
-      background-color: #fef3c7;
-      color: #92400e;
-    }
-    
-    .status-cancelled {
-      background-color: #fee2e2;
-      color: #b91c1c;
-    }
-</style>
-<body>
-    <!-- Recent Orders -->
-    <div class="profile-card">
-        <h3 class="section-title">Recent Orders</h3>
-        <table class="orders-table">
-          <thead>
-            <tr>
-              <th>Order #</th>
-              <th>Date</th>
-              <th>Items</th>
-              <th>Total</th>
-              <th>Status</th>
-              <th>Action</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td>#ORD-7865</td>
-              <td>Apr 28, 2025</td>
-              <td>3 items</td>
-              <td>$142.50</td>
-              <td><span class="status-badge status-delivered">Delivered</span></td>
-              <td><a href="#">View</a></td>
-            </tr>
-            <tr>
-              <td>#ORD-7852</td>
-              <td>Apr 12, 2025</td>
-              <td>1 item</td>
-              <td>$86.99</td>
-              <td><span class="status-badge status-processing">Processing</span></td>
-              <td><a href="#">View</a></td>
-            </tr>
-            <tr>
-              <td>#ORD-7841</td>
-              <td>Mar 28, 2025</td>
-              <td>2 items</td>
-              <td>$213.00</td>
-              <td><span class="status-badge status-delivered">Delivered</span></td>
-              <td><a href="#">View</a></td>
-            </tr>
-            <tr>
-              <td>#ORD-7830</td>
-              <td>Mar 15, 2025</td>
-              <td>4 items</td>
-              <td>$76.50</td>
-              <td><span class="status-badge status-cancelled">Cancelled</span></td>
-              <td><a href="#">View</a></td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
+    <div class="flex min-h-screen">
+        <!-- Sidebar Include -->
+        <div id="sidebar" class="hidden md:block">
+            <%- include('../../views/partials/user/sidebar', {active: 'orders'}) %>
+        </div>
+
+        <!-- Main Content -->
+        <div class="flex-1 max-w-6xl mx-auto px-4 py-6">
+            <!-- Breadcrumb Navigation -->
+            <div class="flex items-center text-sm mb-6">
+                <a href="/" style="text-decoration: none;" class="text-gray-700 hover:text-gray-900">Home</a>
+                <span class="mx-2">></span>
+                <a href="/my-account" style="text-decoration: none;" class="text-gray-700 hover:text-gray-900">My Account</a>
+                <span class="mx-2">></span>
+                <span class="text-gray-500">My Orders</span>
+            </div>
+
+            <h1 class="text-2xl font-semibold mb-6">My Orders</h1>
+
+            <!-- Orders List -->
+            <div class="space-y-4">
+                <% if (orders.length === 0) { %>
+                    <p class="text-gray-500 text-center">No orders found.</p>
+                <% } else { %>
+                    <% orders.forEach(order => { %>
+                        <div class="border border-gray-200 rounded-lg overflow-hidden">
+                            <a style="text-decoration: none; color: black;" href="/order-details/<%= order.orderId %>" class="block">
+                                <div class="flex justify-between items-start p-4 bg-white hover:bg-gray-50 transition-colors">
+                                    <div class="flex gap-4">
+                                        <!-- Order Image -->
+                                        <div class="w-20 h-20 flex-shrink-0">
+                                           <img 
+                                              src="<%= order.orderedItems[0]?.product?.productImage[0] || 'placeholder.jpg' %>" 
+                                              alt="<%= order.orderedItems[0]?.product?.productName || 'Product' %>" 
+                                              class="w-full h-full object-cover rounded"
+                                            />
+
+                                        </div>
+                                        
+                                        <!-- Order Details -->
+                                        <div>
+                                            <div class="text-sm text-gray-500 mb-1">Order ID: <%= order.orderId %></div>
+                                            <div class="font-medium mb-1">
+                                                <%= order.orderedItems[0]?.product?.productName || 'Unknown Product' %> 
+                                                <%= order.orderedItems.length > 1 ? `& ${order.orderedItems.length - 1} more item${order.orderedItems.length > 2 ? 's' : ''}` : '' %>
+                                            </div>
+                                            <div class="font-bold">₹<%= order.finalAmount.toLocaleString('en-IN') %></div>
+                                            <% if (order.status === 'Delivered' && order.invoiceDate) { %>
+                                                <div class="text-sm text-gray-500">Delivered <%= new Date(order.invoiceDate).toLocaleDateString('en-GB', { day: 'numeric', month: 'long' }) %></div>
+                                            <% } %>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="flex flex-col items-end">
+                                        <!-- Order Status -->
+                                        <div class="flex items-center mb-2">
+                                            <span class="status-<%= order.status.toLowerCase().replace(' ', '-') %> rounded-full px-3 py-1 text-xs font-medium">
+                                                <%= order.status %>
+                                            </span>
+                                        </div>
+                                        
+                                        <!-- Order Date -->
+                                        <div class="text-sm text-gray-500">
+                                            <%= new Date(order.createdOn).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }) %>
+                                        </div>
+                                        
+                                        <!-- Chevron -->
+                                        <div class="mt-2">
+                                            <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                                            </svg>
+                                        </div>
+                                    </div>
+                                </div>
+                            </a>
+                        </div>
+                    <% }) %>
+                <% } %>
+            </div>
+
+            <!-- Pagination -->
+            <% if (totalPages > 1) { %>
+                <div class="flex justify-center items-center mt-8">
+                    <!-- Previous Page -->
+                    <a href="/orders?filter=<%= filter %>&months=<%= months %>&page=<%= currentPage - 1 %>" class="w-10 h-10 flex items-center justify-center rounded-full border border-gray-300 mr-2 hover:bg-gray-100 <%= currentPage === 1 ? 'pointer-events-none opacity-50' : '' %>">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+                        </svg>
+                    </a>
+                    
+                    <!-- Page Numbers -->
+                    <% for (let i = 1; i <= totalPages; i++) { %>
+                        <% if (i === 1 || i === totalPages || (i >= currentPage - 1 && i <= currentPage + 1)) { %>
+                            <a href="/orders?filter=<%= filter %>&months=<%= months %>&page=<%= i %>" class="w-10 h-10 flex items-center justify-center rounded-full mx-1 <%= currentPage === i ? 'pagination-active' : 'border border-gray-300 hover:bg-gray-100' %>">
+                                <%= i %>
+                            </a>
+                        <% } else if (i === currentPage - 2 || i === currentPage + 2) { %>
+                            <span class="mx-1">...</span>
+                        <% } %>
+                    <% } %>
+                    
+                    <!-- Next Page -->
+                    <a href="/orders?filter=<%= filter %>&months=<%= months %>&page=<%= currentPage + 1 %>" class="w-10 h-10 flex items-center justify-center rounded-full border border-gray-300 ml-2 hover:bg-gray-100 <%= currentPage === totalPages ? 'pointer-events-none opacity-50' : '' %>">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                        </svg>
+                    </a>
+                </div>
+            <% } %>
+            
+            <!-- View All Link -->
+            <div class="text-right mt-4">
+                <a href="/orders?filter=all&months=all" class="text-blue-600 hover:text-blue-800 text-sm font-medium">View all</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer Include -->
+    <%- include('../../views/partials/user/footer') %>
+
+    <script>
+        // Time filter functionality
+        document.getElementById('timeFilter').addEventListener('change', function() {
+            const months = this.value;
+            const url = new URL(window.location);
+            url.searchParams.set('months', months);
+            url.searchParams.set('page', 1); // Reset to first page
+            window.location.href = url.toString();
+        });
+    </script>
 </body>
 </html>

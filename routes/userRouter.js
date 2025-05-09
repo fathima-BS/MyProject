@@ -6,6 +6,7 @@ const profileController = require('../controllers/user/profileController');
 const addressController = require('../controllers/user/addressController');
 const cartController = require('../controllers/user/cartController');
 const checkoutController=require('../controllers/user/checkoutController')
+const orderController = require('../controllers/user/orderController'); 
 const passport = require('passport');
 const { userAuth } = require('../middlewares/auth');
 
@@ -88,5 +89,8 @@ router.get('/checkout', userAuth, checkoutController.loadCheckout);
 router.post('/select-address', userAuth, checkoutController.selectAddress);
 router.post('/place-order', userAuth, checkoutController.placeOrder);
 router.get('/order-success', userAuth, checkoutController.loadOrderSuccess);
+
+//order
+router.get('/orders',userAuth, orderController.getMyOrders);
 
 module.exports = router;
