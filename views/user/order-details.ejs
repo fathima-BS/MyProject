@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -18,9 +19,11 @@
             color: #4b5563;
             transition: color 0.2s ease;
         }
+
         .breadcrumb a:hover {
             color: #1f2937;
         }
+
         .breadcrumb span {
             color: #9ca3af;
         }
@@ -34,6 +37,7 @@
             margin-bottom: 24px;
             transition: box-shadow 0.3s ease;
         }
+
         .card:hover {
             box-shadow: 0 6px 16px rgba(0, 0, 0, 0.1);
         }
@@ -49,6 +53,7 @@
             font-size: 14px;
             font-weight: 500;
         }
+
         .status-delivered {
             background-color: #d1fae5;
             color: #059669;
@@ -57,6 +62,7 @@
             font-size: 14px;
             font-weight: 500;
         }
+
         .status-cancelled,
         .status-return-request,
         .status-returned {
@@ -75,6 +81,7 @@
             justify-content: space-between;
             position: relative;
         }
+
         .step {
             display: flex;
             flex-direction: column;
@@ -82,6 +89,7 @@
             flex: 1;
             z-index: 1;
         }
+
         .step-circle {
             width: 36px;
             height: 36px;
@@ -93,30 +101,36 @@
             font-weight: 600;
             transition: all 0.3s ease;
         }
+
         .step-text {
             margin-top: 8px;
             font-size: 14px;
             font-weight: 500;
             transition: color 0.3s ease;
         }
+
         .step-date {
             margin-top: 4px;
             font-size: 12px;
             color: #6b7280;
         }
+
         .step-completed .step-circle {
             background-color: #059669;
             color: white;
         }
+
         .step-active .step-circle {
             background-color: #1f2937;
             color: white;
             box-shadow: 0 0 0 4px rgba(31, 41, 55, 0.1);
         }
+
         .step-active .step-text {
             color: #1f2937;
             font-weight: 600;
         }
+
         .step-line {
             position: absolute;
             top: 18px;
@@ -126,6 +140,7 @@
             background-color: #e5e7eb;
             z-index: 0;
         }
+
         .step-line-completed {
             background-color: #059669;
         }
@@ -139,9 +154,11 @@
             font-weight: 500;
             transition: background-color 0.3s ease;
         }
+
         .btn-primary:hover {
             background-color: #374151;
         }
+
         .btn-secondary {
             background-color: white;
             border: 1px solid #d1d5db;
@@ -151,6 +168,7 @@
             font-weight: 500;
             transition: all 0.3s ease;
         }
+
         .btn-secondary:hover {
             background-color: #f3f4f6;
             border-color: #9ca3af;
@@ -164,9 +182,11 @@
             padding: 16px 0;
             border-bottom: 1px solid #f3f4f6;
         }
+
         .order-item:last-child {
             border-bottom: none;
         }
+
         .order-item img {
             width: 80px;
             height: 80px;
@@ -174,26 +194,31 @@
             border-radius: 8px;
             margin-right: 16px;
         }
+
         .order-item h3 {
             font-size: 16px;
             font-weight: 600;
             color: #1f2937;
         }
+
         .order-item .price {
             font-size: 16px;
             font-weight: 600;
             color: #1f2937;
         }
+
         .order-item .quantity {
             font-size: 14px;
             color: #6b7280;
         }
+
         .order-item .actions a {
             color: #2563eb;
             font-size: 14px;
             font-weight: 500;
             transition: color 0.2s ease;
         }
+
         .order-item .actions a:hover {
             color: #1e40af;
         }
@@ -205,23 +230,28 @@
             border-radius: 12px;
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
         }
+
         .detail-section h2 {
             font-size: 18px;
             font-weight: 600;
             margin-bottom: 16px;
         }
+
         .detail-section .item {
             display: flex;
             align-items: flex-start;
             margin-bottom: 16px;
         }
+
         .detail-section .item svg {
             margin-right: 12px;
             color: #6b7280;
         }
+
         .detail-section .item div {
             flex: 1;
         }
+
         .summary-row {
             display: flex;
             justify-content: space-between;
@@ -229,10 +259,12 @@
             font-size: 14px;
             color: #6b7280;
         }
+
         .summary-row span:last-child {
             color: #1f2937;
             font-weight: 500;
         }
+
         .total-row {
             display: flex;
             justify-content: space-between;
@@ -255,6 +287,7 @@
             justify-content: center;
             z-index: 1000;
         }
+
         .modal-content {
             background-color: white;
             border-radius: 12px;
@@ -265,6 +298,7 @@
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
             position: relative;
         }
+
         .modal-header {
             padding: 16px 24px;
             border-bottom: 1px solid #e5e7eb;
@@ -272,14 +306,17 @@
             justify-content: space-between;
             align-items: center;
         }
+
         .modal-body {
             padding: 24px;
         }
+
         .modal-footer {
             padding: 16px 24px;
             border-top: 1px solid #e5e7eb;
             text-align: right;
         }
+
         .close-modal {
             background: none;
             border: none;
@@ -287,536 +324,646 @@
             cursor: pointer;
             color: #6b7280;
         }
+
         .close-modal:hover {
             color: #1f2937;
         }
+
         .invoice-preview table {
             width: 100%;
             border-collapse: collapse;
             margin-bottom: 20px;
         }
-        .invoice-preview th, .invoice-preview td {
+
+        .invoice-preview th,
+        .invoice-preview td {
             padding: 10px;
             text-align: left;
             border-bottom: 1px solid #e5e7eb;
         }
+
         .invoice-preview th {
             background-color: #f3f4f6;
             font-weight: 600;
             color: #1f2937;
         }
+
         .invoice-preview td {
             color: #4b5563;
         }
     </style>
 </head>
+
 <body>
     <%- include("../../views/partials/user/header") %>
 
-    <div class="flex min-h-screen">
-        <!-- Sidebar -->
-        <div id="sidebar" class="hidden md:block">
-            <%- include('../../views/partials/user/sidebar', {active: 'orders' }) %>
-        </div>
-
-        <!-- Main Content -->
-        <div class="flex-1 max-w-6xl mx-auto px-4 py-8">
-            <!-- Breadcrumb Navigation -->
-            <div class="breadcrumb flex items-center text-sm mb-6">
-                <a href="/" style="text-decoration: none;">Home</a>
-                <span class="mx-2">></span>
-                <a href="/my-account" style="text-decoration: none;">My Account</a>
-                <span class="mx-2">></span>
-                <a href="/orders" style="text-decoration: none;">My Orders</a>
-                <span class="mx-2">></span>
-                <span class="text-gray-500">Order #<%= order.orderId %></span>
+        <div class="flex min-h-screen">
+            <!-- Sidebar -->
+            <div id="sidebar" class="hidden md:block">
+                <%- include('../../views/partials/user/sidebar', {active: 'orders' }) %>
             </div>
 
-            <!-- Order Header -->
-            <div class="flex flex-col md:flex-row md:justify-between md:items-center mb-6">
-                <div>
-                    <div class="flex items-center">
-                        <a href="/orders" class="text-decoration-none text-black inline-flex items-center text-blue-600 hover:text-blue-800 mr-4">
-                            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
-                            </svg>
-                            Back to My Orders
-                        </a>
-                    </div>
-                    <div><h1 class="text-2xl font-semibold">Order #<%= order.orderId %></h1></div>
-                    <p class="text-gray-500 text-sm mt-1">Placed on <%= new Date(order.createdOn).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' }) %></p>
+            <!-- Main Content -->
+            <div class="flex-1 max-w-6xl mx-auto px-4 py-8">
+                <!-- Breadcrumb Navigation -->
+                <div class="breadcrumb flex items-center text-sm mb-6">
+                    <a href="/" style="text-decoration: none;">Home</a>
+                    <span class="mx-2">></span>
+                    <a href="/my-account" style="text-decoration: none;">My Account</a>
+                    <span class="mx-2">></span>
+                    <a href="/orders" style="text-decoration: none;">My Orders</a>
+                    <span class="mx-2">></span>
+                    <span class="text-gray-500">Order #<%= order.orderId %></span>
                 </div>
-                <div class="mt-4 md:mt-0 flex space-x-3">
-                    <button class="btn-secondary" onclick="showInvoiceModal()">
-                        <span class="flex items-center">
-                            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
-                            </svg>
-                            View Invoice
-                        </span>
-                    </button>
-                    <% if (order.status === 'Delivered') { %>
-                        <button class="btn-primary">
-                            <span class="flex items-center">
-                                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 15v-1a4 4 0 00-4-4H8m0 0l3 3m-3-3l3-3m9 14V5a2 2 0 00-2-2H6a2 2 0 00-2 2v16l4-2 4 2 4-2 4 2z"></path>
+
+                <!-- Order Header -->
+                <div class="flex flex-col md:flex-row md:justify-between md:items-center mb-6">
+                    <div>
+                        <div class="flex items-center">
+                            <a href="/orders"
+                                class="text-decoration-none text-black inline-flex items-center text-blue-600 hover:text-blue-800 mr-4">
+                                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                                    xmlns="http://www.w3.org/2000/svg">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
                                 </svg>
-                                Return Order
+                                Back to My Orders
+                            </a>
+                        </div>
+                        <div>
+                            <h1 class="text-2xl font-semibold">Order #<%= order.orderId %>
+                            </h1>
+                        </div>
+                        <p class="text-gray-500 text-sm mt-1">Placed on <%= new
+                                Date(order.createdOn).toLocaleDateString('en-GB', { day: 'numeric' , month: 'long' ,
+                                year: 'numeric' }) %>
+                        </p>
+                    </div>
+                    <div class="mt-4 md:mt-0 flex space-x-3">
+                        <button class="btn-secondary" onclick="showInvoiceModal()">
+                            <span class="flex items-center">
+                                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                                    xmlns="http://www.w3.org/2000/svg">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
+                                </svg>
+                                View Invoice
                             </span>
                         </button>
-                    <% } %>
-                </div>
-            </div>
-
-            <!-- Order Status Tracker -->
-            <div class="card">
-                <h2 class="text-lg font-semibold mb-6">Order Status</h2>
-                <div class="step-container">
-                    <div class="step-line <%= ['Processing', 'Shipped', 'Delivered'].includes(order.status) ? 'step-line-completed' : '' %>"></div>
-                    <% const steps = [
-                        { name: 'Ordered', date: new Date(order.createdOn).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' }), completed: true, active: false },
-                        { name: 'Processing', date: order.processingDate ? new Date(order.processingDate).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' }) : '', completed: ['Processing', 'Shipped', 'Delivered'].includes(order.status), active: order.status === 'Processing' },
-                        { name: 'Shipped', date: order.shippedDate ? new Date(order.shippedDate).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' }) : '', completed: ['Shipped', 'Delivered'].includes(order.status), active: order.status === 'Shipped' },
-                        { name: 'Delivered', date: order.deliveredDate ? new Date(order.deliveredDate).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' }) : '', completed: order.status === 'Delivered', active: order.status === 'Delivered' }
-                    ];
-                    steps.forEach((step, index) => {
-                        const stepClass = step.completed ? 'step-completed' : (step.active ? 'step-active' : '');
-                    %>
-                        <div class="step <%= stepClass %>">
-                            <div class="step-circle <%= step.completed ? 'bg-green-600' : (step.active ? 'bg-gray-800' : 'bg-gray-200 text-gray-600') %>">
-                                <% if (step.completed && !step.active) { %>
-                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                        <% if (order.status==='Delivered' ) { %>
+                            <button class="btn-primary">
+                                <span class="flex items-center">
+                                    <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                                        xmlns="http://www.w3.org/2000/svg">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M16 15v-1a4 4 0 00-4-4H8m0 0l3 3m-3-3l3-3m9 14V5a2 2 0 00-2-2H6a2 2 0 00-2 2v16l4-2 4 2 4-2 4 2z">
+                                        </path>
                                     </svg>
-                                <% } else { %>
-                                    <%= index + 1 %>
-                                <% } %>
-                            </div>
-                            <div class="step-text <%= step.active ? 'text-gray-800' : 'text-gray-600' %>">
-                                <%= step.name %>
-                            </div>
-                            <% if (step.date) { %>
-                                <div class="step-date"><%= step.date %></div>
+                                    Return Order
+                                </span>
+                            </button>
                             <% } %>
-                        </div>
-                    <% }) %>
+                    </div>
                 </div>
 
-                <% if (order.status === 'Shipped') { %>
-                    <div class="mt-6 p-4 border border-amber-200 bg-amber-50 rounded-lg">
-                        <div class="flex items-start">
-                            <svg class="w-5 h-5 text-amber-500 mt-0.5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                            </svg>
-                            <div>
-                                <p class="text-sm font-semibold text-gray-800">Your order is on the way!</p>
-                                <p class="text-sm text-gray-600 mt-1">Expected delivery on <%= new Date(order.expectedDeliveryDate).toLocaleDateString('en-GB', { day: 'numeric', month: 'long' }) %></p>
-                                <div class="mt-3">
-                                    <a href="#" class="text-blue-600 hover:text-blue-800 text-sm font-medium flex items-center">
-                                        <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                <!-- Order Status Tracker -->
+                <div class="card">
+                    <h2 class="text-lg font-semibold mb-6">Order Status</h2>
+                    <div class="step-container">
+                        <div
+                            class="step-line <%= ['Processing', 'Shipped', 'Delivered'].includes(order.status) ? 'step-line-completed' : '' %>">
+                        </div>
+                        <% const steps=[ { name: 'Ordered' , date: new Date(order.createdOn).toLocaleDateString('en-GB',
+                            { day: 'numeric' , month: 'short' }), completed: true, active: false }, { name: 'Processing'
+                            , date: order.processingDate ? new Date(order.processingDate).toLocaleDateString('en-GB', {
+                            day: 'numeric' , month: 'short' }) : '' , completed: ['Processing', 'Shipped' , 'Delivered'
+                            ].includes(order.status), active: order.status==='Processing' }, { name: 'Shipped' , date:
+                            order.shippedDate ? new Date(order.shippedDate).toLocaleDateString('en-GB', { day: 'numeric'
+                            , month: 'short' }) : '' , completed: ['Shipped', 'Delivered' ].includes(order.status),
+                            active: order.status==='Shipped' }, { name: 'Delivered' , date: order.deliveredDate ? new
+                            Date(order.deliveredDate).toLocaleDateString('en-GB', { day: 'numeric' , month: 'short' })
+                            : '' , completed: order.status==='Delivered' , active: order.status==='Delivered' } ];
+                            steps.forEach((step, index)=> {
+                            const stepClass = step.completed ? 'step-completed' : (step.active ? 'step-active' : '');
+                            %>
+                            <div class="step <%= stepClass %>">
+                                <div
+                                    class="step-circle <%= step.completed ? 'bg-green-600' : (step.active ? 'bg-gray-800' : 'bg-gray-200 text-gray-600') %>">
+                                    <% if (step.completed && !step.active) { %>
+                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                                            xmlns="http://www.w3.org/2000/svg">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                d="M5 13l4 4L19 7"></path>
                                         </svg>
-                                        Track Package
-                                    </a>
+                                        <% } else { %>
+                                            <%= index + 1 %>
+                                                <% } %>
                                 </div>
+                                <div class="step-text <%= step.active ? 'text-gray-800' : 'text-gray-600' %>">
+                                    <%= step.name %>
+                                </div>
+                                <% if (step.date) { %>
+                                    <div class="step-date">
+                                        <%= step.date %>
+                                    </div>
+                                    <% } %>
                             </div>
-                        </div>
+                            <% }) %>
                     </div>
-                <% } else if (order.status === 'Cancelled') { %>
-                    <div class="mt-6 p-4 border border-red-200 bg-red-50 rounded-lg">
-                        <div class="flex items-start">
-                            <svg class="w-5 h-5 text-red-500 mt-0.5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
-                            </svg>
-                            <div>
-                                <p class="text-sm font-semibold text-gray-800">Order Cancelled</p>
-                                <p class="text-sm text-gray-600 mt-1">This order was cancelled on <%= new Date(order.cancelledDate).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' }) %></p>
-                                <p class="text-sm text-gray-600 mt-1">Reason: <%= order.cancellationReason || 'Not specified' %></p>
-                            </div>
-                        </div>
-                    </div>
-                <% } %>
-            </div>
 
-            <!-- Order Items -->
-            <div class="card">
-                <h2 class="text-lg font-semibold mb-4">Order Items</h2>
-                <% (order.orderedItems || []).forEach((item, index) => { %>
-                    <div class="order-item">
-                        <img src="<%= item.product.productImage[0] || 'placeholder.jpg' %>" alt="<%= item.product.productName %>">
-                        <div class="flex-1">
-                            <div class="flex flex-col sm:flex-row sm:justify-between">
+                    <% if (order.status==='Shipped' ) { %>
+                        <div class="mt-6 p-4 border border-amber-200 bg-amber-50 rounded-lg">
+                            <div class="flex items-start">
+                                <svg class="w-5 h-5 text-amber-500 mt-0.5 mr-3" fill="none" stroke="currentColor"
+                                    viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                </svg>
                                 <div>
-                                    <h3><%= item.product.productName %></h3>
-                                    <div class="text-sm text-gray-500 mt-1">
-                                        <% if (item.variant) { %>
-                                            <span><%= item.variant.color || '' %> <%= item.variant.size || '' %></span>
-                                        <% } %>
+                                    <p class="text-sm font-semibold text-gray-800">Your order is on the way!</p>
+                                    <p class="text-sm text-gray-600 mt-1">Expected delivery on <%= new
+                                            Date(order.expectedDeliveryDate).toLocaleDateString('en-GB', {
+                                            day: 'numeric' , month: 'long' }) %>
+                                    </p>
+                                    <div class="mt-3">
+                                        <a href="#"
+                                            class="text-blue-600 hover:text-blue-800 text-sm font-medium flex items-center">
+                                            <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor"
+                                                viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                    d="M9 5l7 7-7 7"></path>
+                                            </svg>
+                                            Track Package
+                                        </a>
                                     </div>
                                 </div>
-                                <div class="mt-2 sm:mt-0 text-right">
-                                    <div class="price">₹<%= (item.price * item.quantity).toLocaleString('en-IN') %></div>
-                                    <div class="quantity mt-1">₹<%= item.price.toLocaleString('en-IN') %> x <%= item.quantity %></div>
-                                </div>
-                            </div>
-                            <% if (order.status === 'Delivered') { %>
-                                <div class="actions mt-3 flex items-center">
-                                    <a href="/review-product/<%= item.product._id %>">Write a Review</a>
-                                    <span class="mx-2 text-gray-300">|</span>
-                                    <a href="/report-issue/<%= item._id %>">Report Issue</a>
-                                </div>
-                            <% } %>
-                        </div>
-                    </div>
-                <% }) %>
-            </div>
-
-            <!-- Order Information -->
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <!-- Shipping Details -->
-                <div class="detail-section">
-                    <h2>Shipping Details</h2>
-                    <div class="item">
-                        <svg class="w-5 h-5 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
-                        </svg>
-                        <div>
-                            <% if (order.shippingAddress) { %>
-                                <div class="font-semibold"><%= order.shippingAddress.name || 'N/A' %></div>
-                                <div class="text-sm text-gray-600"><%= order.shippingAddress.addressLine1 || '' %></div>
-                                <% if (order.shippingAddress.addressLine2) { %>
-                                    <div class="text-sm text-gray-600"><%= order.shippingAddress.addressLine2 %></div>
-                                <% } %>
-                                <div class="text-sm text-gray-600"><%= order.shippingAddress.city || '' %>, <%= order.shippingAddress.state || '' %></div>
-                                <div class="text-sm text-gray-600">PIN: <%= order.shippingAddress.zipCode || 'N/A' %></div>
-                            <% } else { %>
-                                <div class="text-sm text-red-600">Shipping address not available.</div>
-                            <% } %>
-                        </div>
-                    </div>
-                    <% if (order.trackingId) { %>
-                        <div class="item">
-                            <svg class="w-5 h-5 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17a2 2 0 11-4 0 2 2 0 014 0zM19 17a2 2 0 11-4 0 2 2 0 014 0z"></path>
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16V6a1 1 0 00-1-1H4a1 1 0 00-1 1v10a1 1 0 001 1h1m8-1a1 1 0 01-1 1H9m4-1V8a1 1 0 011-1h2.586a1 1 0 01.707.293l3.414 3.414a1 1 0 01.293.707V16a1 1 0 01-1 1h-1m-6-1a1 1 0 001 1h1M5 17a2 2 0 104 0m-4 0a2 2 0 114 0m6 0a2 2 0 104 0m-4 0a2 2 0 114 0"></path>
-                            </svg>
-                            <div>
-                                <div class="font-semibold">Shipping Method</div>
-                                <div class="text-sm text-gray-600"><%= order.shippingMethod || 'Standard Shipping' %></div>
-                                <div class="text-sm text-gray-600">Tracking ID: <%= order.trackingId %></div>
-                                <div class="mt-2">
-                                    <a href="/track/<%= order.trackingId %>" class="text-blue-600 hover:text-blue-800 text-sm font-medium">Track Package</a>
-                                </div>
                             </div>
                         </div>
-                    <% } %>
+                        <% } else if (order.status==='Cancelled' ) { %>
+                            <div class="mt-6 p-4 border border-red-200 bg-red-50 rounded-lg">
+                                <div class="flex items-start">
+                                    <svg class="w-5 h-5 text-red-500 mt-0.5 mr-3" fill="none" stroke="currentColor"
+                                        viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M6 18L18 6M6 6l12 12"></path>
+                                    </svg>
+                                    <div>
+                                        <p class="text-sm font-semibold text-gray-800">Order Cancelled</p>
+                                        <p class="text-sm text-gray-600 mt-1">This order was cancelled on <%= new
+                                                Date(order.cancelledDate).toLocaleDateString('en-GB', { day: 'numeric' ,
+                                                month: 'long' , year: 'numeric' }) %>
+                                        </p>
+                                        <p class="text-sm text-gray-600 mt-1">Reason: <%= order.cancellationReason
+                                                || 'Not specified' %>
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                            <% } %>
                 </div>
 
-                <!-- Payment Info & Summary -->
-                <div>
-                    <div class="detail-section mb-6">
-                        <h2>Payment Information</h2>
-                        <div class="item">
-                            <svg class="w-5 h-5 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"></path>
-                            </svg>
-                            <div>
-                                <div class="font-semibold">Payment Method</div>
-                                <div class="text-sm text-gray-600"><%= order.paymentMethod || 'N/A' %></div>
-                                <% if (order.paymentMethod === 'Credit Card' || order.paymentMethod === 'Debit Card') { %>
-                                    <div class="text-sm text-gray-600">**** **** **** <%= order.cardLastFour || 'N/A' %></div>
-                                <% } %>
-                                <div class="text-sm text-gray-600 mt-1">Status: <span class="font-semibold text-green-600">Paid</span></div>
+                <!-- Order Items -->
+                <div class="card">
+                    <h2 class="text-lg font-semibold mb-4">Order Items</h2>
+                    <% (order.orderedItems || []).forEach((item, index)=> { %>
+                        <div class="order-item">
+                            <img src="<%= item.product.productImage[0] || 'placeholder.jpg' %>"
+                                alt="<%= item.product.productName %>">
+                            <div class="flex-1">
+                                <div class="flex flex-col sm:flex-row sm:justify-between">
+                                    <div>
+                                        <h3>
+                                            <%= item.product.productName %>
+                                        </h3>
+                                        <div class="text-sm text-gray-500 mt-1">
+                                            <% if (item.variant) { %>
+                                                <span>
+                                                    <%= item.variant.color || '' %>
+                                                        <%= item.variant.size || '' %>
+                                                </span>
+                                                <% } %>
+                                        </div>
+                                    </div>
+                                    <div class="mt-2 sm:mt-0 text-right">
+                                        <div class="price">₹<%= (item.price * item.quantity).toLocaleString('en-IN') %>
+                                        </div>
+                                        <div class="quantity mt-1">₹<%= item.price.toLocaleString('en-IN') %> x <%=
+                                                    item.quantity %>
+                                        </div>
+                                    </div>
+                                </div>
+                                <% if (order.status==='Delivered' ) { %>
+                                    <div class="actions mt-3 flex items-center">
+                                        <a href="/review-product/<%= item.product._id %>">Write a Review</a>
+                                        <span class="mx-2 text-gray-300">|</span>
+                                        <a href="/report-issue/<%= item._id %>">Report Issue</a>
+                                    </div>
+                                    <% } %>
                             </div>
                         </div>
-                        <div class="item">
-                            <svg class="w-5 h-5 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707 .293l5.414 5.414a1 1 0 01.293 .707V19a2 2 0 01-2 2z"></path>
-                            </svg>
-                            <div>
-                                <div class="font-semibold">Billing Address</div>
-                                <div class="text-sm text-gray-600">Same as shipping address</div>
-                            </div>
-                        </div>
-                    </div>
+                        <% }) %>
+                </div>
 
+                <!-- Order Information -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <!-- Shipping Details -->
                     <div class="detail-section">
-                        <h2>Order Summary</h2>
-                        <div>
-                            <div class="summary-row">
-                                <span>Subtotal</span>
-                                <% if (order.subtotal) { %>
-                                    <span>₹<%= order.subtotal.toLocaleString('en-IN') %></span>
-                                <% } else { %>
-                                    <span>₹0.00</span>
-                                <% } %>
+                        <h2>Shipping Details</h2>
+                        <div class="item">
+                            <svg class="w-5 h-5 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                                xmlns="http://www.w3.org/2000/svg">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z">
+                                </path>
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                            </svg>
+                            <div>
+                                <% if (order.address) { %>
+                                    <div class="font-semibold">
+                                        <%= order.address.name || 'N/A' %>
+                                    </div>
+                                    <div class="text-md text-gray-600">
+                                        <%= order.address.city || '' %>
+                                    </div>
+                                    <% if (order.address.landMark) { %>
+                                        <div class="text-md text-gray-600">
+                                            <%= order.address.landMark %>
+                                        </div>
+                                        <% } %>
+                                            <div class="text-md text-gray-600">
+                                                <%= order.address.State || '' %>, <%= order.address.State || '' %>
+                                            </div>
+                                            <div class="text-md text-gray-600">PIN: <%= order.address.pincode || 'N/A'
+                                                    %>
+                                            </div>
+                                            <% } else { %>
+                                                <div class="text-md text-red-600">Shipping address not available.</div>
+                                                <% } %>
                             </div>
-                            <div class="summary-row">
-                                <span>Shipping</span>
-                                <% if (order.shippingCost) { %>
-                                    <span>₹<%= order.shippingCost.toLocaleString('en-IN') %></span>
-                                <% } else { %>
-                                    <span>₹0.00</span>
-                                <% } %>
-                            </div>
-                            <% if (order.discount > 0) { %>
-                                <div class="summary-row">
-                                    <span>Discount</span>
-                                    <span class="text-green-600">-₹<%= order.discount.toLocaleString('en-IN') %></span>
+                        </div>
+                        <% if (order.trackingId) { %>
+                            <div class="item">
+                                <svg class="w-5 h-5 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                                    xmlns="http://www.w3.org/2000/svg">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M9 17a2 2 0 11-4 0 2 2 0 014 0zM19 17a2 2 0 11-4 0 2 2 0 014 0z"></path>
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M13 16V6a1 1 0 00-1-1H4a1 1 0 00-1 1v10a1 1 0 001 1h1m8-1a1 1 0 01-1 1H9m4-1V8a1 1 0 011-1h2.586a1 1 0 01.707.293l3.414 3.414a1 1 0 01.293.707V16a1 1 0 01-1 1h-1m-6-1a1 1 0 001 1h1M5 17a2 2 0 104 0m-4 0a2 2 0 114 0m6 0a2 2 0 104 0m-4 0a2 2 0 114 0">
+                                    </path>
+                                </svg>
+                                <div>
+                                    <div class="font-semibold">Shipping Method</div>
+                                    <div class="text-sm text-gray-600">
+                                        <%= order.shippingMethod || 'Standard Shipping' %>
+                                    </div>
+                                    <div class="text-sm text-gray-600">Tracking ID: <%= order.trackingId %>
+                                    </div>
+                                    <div class="mt-2">
+                                        <a href="/track/<%= order.trackingId %>"
+                                            class="text-blue-600 hover:text-blue-800 text-sm font-medium">Track
+                                            Package</a>
+                                    </div>
                                 </div>
-                            <% } %>
-                            <div class="summary-row">
-                                <span>Tax</span>
-                                <% if (order.tax) { %>
-                                    <span>₹<%= order.tax.toLocaleString('en-IN') %></span>
-                                <% } else { %>
-                                    <span>₹0.00</span>
-                                <% } %>
                             </div>
-                            <div class="total-row">
-                                <span>Total</span>
-                                <span>₹<%= order.finalAmount.toLocaleString('en-IN') %></span>
+                            <% } %>
+                    </div>
+
+                    <!-- Payment Info & Summary -->
+                    <div>
+                        <div class="detail-section mb-6">
+                            <h2>Payment Information</h2>
+                            <div class="item">
+                                <svg class="w-5 h-5 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                                    xmlns="http://www.w3.org/2000/svg">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z">
+                                    </path>
+                                </svg>
+                                <div>
+                                    <div class="font-semibold">Payment Method</div>
+                                    <div class="text-sm text-gray-600">
+                                        <%= order.paymentMethod || 'N/A' %>
+                                    </div>
+                                    <% if (order.paymentMethod==='Credit Card' || order.paymentMethod==='Debit Card' ) {
+                                        %>
+                                        <div class="text-sm text-gray-600">**** **** **** <%= order.cardLastFour
+                                                || 'N/A' %>
+                                        </div>
+                                        <div class="text-sm text-gray-600 mt-1">Status: <span
+                                                class="font-semibold text-green-600">Paid</span></div>
+                                        <% } %>
+                                </div>
+                            </div>
+                            <div class="item">
+                                <svg class="w-5 h-5 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                                    xmlns="http://www.w3.org/2000/svg">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707 .293l5.414 5.414a1 1 0 01.293 .707V19a2 2 0 01-2 2z">
+                                    </path>
+                                </svg>
+                                <div>
+                                    <div class="font-semibold">Billing Address</div>
+                                    <div class="text-sm text-gray-600">Same as shipping address</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="detail-section">
+                            <h2>Order Summary</h2>
+                            <div>
+                                <div class="summary-row">
+                                    <span>Subtotal</span>
+                                    <% if (order.finalAmount) { %>
+                                        <span>₹<%= order.finalAmount.toLocaleString('en-IN') %></span>
+                                        <% } else { %>
+                                            <span>₹0.00</span>
+                                            <% } %>
+                                </div>
+                                <div class="summary-row">
+                                    <span>Shipping</span>
+                                    <% if (order.shippingCost) { %>
+                                        <span>₹<%= order.shippingCost.toLocaleString('en-IN') %></span>
+                                        <% } else { %>
+                                            <span>₹0.00</span>
+                                            <% } %>
+                                </div>
+                                <% if (order.discount> 0) { %>
+                                    <div class="summary-row">
+                                        <span>Discount</span>
+                                        <span class="text-green-600">-₹<%= order.discount.toLocaleString('en-IN') %>
+                                                </span>
+                                    </div>
+                                    <% } %>
+                                        <div class="summary-row">
+                                            <span>Tax</span>
+                                            <% if (order.tax) { %>
+                                                <span>₹<%= order.tax.toLocaleString('en-IN') %></span>
+                                                <% } else { %>
+                                                    <span>₹0.00</span>
+                                                    <% } %>
+                                        </div>
+                                        <div class="total-row">
+                                            <span>Total</span>
+                                            <span>₹<%= order.finalAmount.toLocaleString('en-IN') %></span>
+                                        </div>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
-    </div>
 
-    <!-- Invoice Modal -->
-    <div id="invoiceModal" class="modal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h2 class="text-lg font-semibold">Invoice - Order #<%= order.orderId %></h2>
-                <button class="close-modal" onclick="closeInvoiceModal()">×</button>
-            </div>
-            <div class="modal-body">
-                <div class="invoice-preview">
-                    <div class="mb-4">
-                        <p><strong>Placed on:</strong> <%= new Date(order.createdOn).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' }) %></p>
-                        <p><strong>Customer Name:</strong> <%= order.shippingAddress?.name || 'N/A' %></p>
-                        <p><strong>Shipping Address:</strong> <%= order.shippingAddress ? (order.shippingAddress.addressLine1 || '') + (order.shippingAddress.addressLine2 ? ', ' + order.shippingAddress.addressLine2 : '') + ', ' + (order.shippingAddress.city || '') + ', ' + (order.shippingAddress.state || '') + ', PIN: ' + (order.shippingAddress.zipCode || 'N/A') : 'N/A' %></p>
-                        <p><strong>Payment Method:</strong> <%= order.paymentMethod || 'N/A' %><% if(order.paymentMethod === 'Credit Card' || order.paymentMethod === 'Debit Card') { %> (**** **** **** <%= order.cardLastFour || 'N/A' %>)<% } %></p>
-                        <p><strong>Order Status:</strong> <%= order.status || 'N/A' %></p>
-                    </div>
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>Item</th>
-                                <th>Variant</th>
-                                <th>Quantity</th>
-                                <th>Price</th>
-                                <th>Total</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <% (order.orderedItems || []).forEach((item) => { %>
+        <!-- Invoice Modal -->
+        <div id="invoiceModal" class="modal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2 class="text-lg font-semibold">Invoice - Order #<%= order.orderId %>
+                    </h2>
+                    <button class="close-modal" onclick="closeInvoiceModal()">×</button>
+                </div>
+                <div class="modal-body">
+                    <div class="invoice-preview">
+                        <div class="mb-4">
+                            <p><strong>Placed on:</strong>
+                                <%= new Date(order.createdOn).toLocaleDateString('en-GB', { day: 'numeric' ,
+                                    month: 'long' , year: 'numeric' }) %>
+                            </p>
+                            <p><strong>Customer Name:</strong>
+                                <%= order.address.name || 'N/A' %>
+                            </p>
+                            <p><strong>Shipping Address:</strong>
+                                <%= order.address ? (order.address.city || '' ) + (order.address.landMark ? ', ' +
+                                    order.address.landMark : '' ) + ', ' + (order.address.State || '' ) + ', PIN: ' +
+                                    (order.address.pincode || 'N/A' ) : 'N/A' %>
+                            </p>
+                            <p><strong>Payment Method:</strong>
+                                <%= order.paymentMethod || 'N/A' %>
+                                    <% if(order.paymentMethod==='Credit Card' || order.paymentMethod==='Debit Card' ) {
+                                        %> (**** **** **** <%= order.cardLastFour || 'N/A' %>)<% } %>
+                            </p>
+                            <p><strong>Order Status:</strong>
+                                <%= order.status || 'N/A' %>
+                            </p>
+                        </div>
+                        <table>
+                            <thead>
                                 <tr>
-                                    <td><%= item.product.productName || 'N/A' %></td>
-                                    <td><%= item.variant ? (item.variant.color || '') + ' ' + (item.variant.size || '') : 'N/A' %></td>
-                                    <td><%= item.quantity || '0' %></td>
-                                    <td>₹<%= item.price ? item.price.toLocaleString('en-IN') : '0.00' %></td>
-                                    <td>₹<%= item.price && item.quantity ? (item.price * item.quantity).toLocaleString('en-IN') : '0.00' %></td>
+                                    <th>Item</th>
+                                    <th>Quantity</th>
+                                    <th>Price</th>
+                                    <th>Total</th>
                                 </tr>
-                            <% }) %>
-                        </tbody>
-                    </table>
-                    <div>
-                        <p><strong>Subtotal:</strong> ₹<%= order.subtotal ? order.subtotal.toLocaleString('en-IN') : '0.00' %></p>
-                        <p><strong>Shipping:</strong> ₹<%= order.shippingCost ? order.shippingCost.toLocaleString('en-IN') : '0.00' %></p>
-                        <% if (order.discount > 0) { %>
-                            <p><strong>Discount:</strong> -₹<%= order.discount.toLocaleString('en-IN') %></p>
-                        <% } %>
-                        <p><strong>Tax:</strong> ₹<%= order.tax ? order.tax.toLocaleString('en-IN') : '0.00' %></p>
-                        <p><strong>Total:</strong> ₹<%= order.finalAmount ? order.finalAmount.toLocaleString('en-IN') : '0.00' %></p>
+                            </thead>
+                            <tbody>
+                                <% (order.orderedItems || []).forEach((item)=> { %>
+                                    <tr>
+                                        <td>
+                                            <%= item.product.productName || 'N/A' %>
+                                        </td>
+                                        <td>
+                                            <%= item.quantity || '0' %>
+                                        </td>
+                                        <td>₹<%= item.price ? item.price.toLocaleString('en-IN') : '0.00' %>
+                                        </td>
+                                        <td>₹<%= item.price && item.quantity ? (item.price *
+                                                item.quantity).toLocaleString('en-IN') : '0.00' %>
+                                        </td>
+                                    </tr>
+                                    <% }) %>
+                            </tbody>
+                        </table>
+                        <div>
+                            <p><strong>Subtotal:</strong> ₹<%= order.finalAmount ?
+                                    order.finalAmount.toLocaleString('en-IN') : '0.00' %>
+                            </p>
+                            <p><strong>Shipping:</strong> ₹<%= order.shippingCost ?
+                                    order.shippingCost.toLocaleString('en-IN') : '0.00' %>
+                            </p>
+                            <% if (order.discount> 0) { %>
+                                <p><strong>Discount:</strong> -₹<%= order.discount.toLocaleString('en-IN') %>
+                                </p>
+                                <% } %>
+                                    <p><strong>Tax:</strong> ₹<%= order.tax ? order.tax.toLocaleString('en-IN') : '0.00'
+                                            %>
+                                    </p>
+                                    <p><strong>Total:</strong> ₹<%= order.finalAmount ?
+                                            order.finalAmount.toLocaleString('en-IN') : '0.00' %>
+                                    </p>
+                        </div>
                     </div>
                 </div>
-            </div>
-            <div class="modal-footer">
-                <button class="btn-primary" onclick="downloadInvoice()">Download Invoice</button>
+                <div class="modal-footer">
+                    <button class="btn-primary" onclick="downloadInvoice()">Download Invoice</button>
+                </div>
             </div>
         </div>
-    </div>
 
-    <%- include('../../views/partials/user/footer') %>
+        <%- include('../../views/partials/user/footer') %>
 
-    <script>
-        function showInvoiceModal() {
-            document.getElementById('invoiceModal').style.display = 'flex';
-        }
+            <script>
+                function showInvoiceModal() {
+                    document.getElementById('invoiceModal').style.display = 'flex';
+                }
 
-        function closeInvoiceModal() {
-            document.getElementById('invoiceModal').style.display = 'none';
-        }
+                function closeInvoiceModal() {
+                    document.getElementById('invoiceModal').style.display = 'none';
+                }
 
-        function confirmCancel() {
-            if (confirm("Are you sure you want to cancel this order?")) {
-                window.location.href = "/cancel-order/<%= order.orderId %>";
-            }
-        }
+                function confirmCancel() {
+                    if (confirm("Are you sure you want to cancel this order?")) {
+                        window.location.href = "/cancel-order/<%= order.orderId %>";
+                    }
+                }
 
-        function downloadInvoice() {
-            // All required data rendered from EJS server-side
-            const orderId = "<%= order.orderId || 'N/A' %>";
-            const orderDate = new Date("<%= order.createdOn %>").toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' });
-            const customerName = "<%= order.shippingAddress?.name || 'N/A' %>";
-            const shippingAddress = `<%= order.shippingAddress ? (order.shippingAddress.addressLine1 || '') + (order.shippingAddress.addressLine2 ? ', ' + order.shippingAddress.addressLine2 : '') + ', ' + (order.shippingAddress.city || '') + ', ' + (order.shippingAddress.state || '') + ', PIN: ' + (order.shippingAddress.zipCode || 'N/A') : 'N/A' %>`;
-            const paymentMethod = `<%= order.paymentMethod || 'N/A' %><% if(order.paymentMethod === 'Credit Card' || order.paymentMethod === 'Debit Card') { %> (**** **** **** <%= order.cardLastFour || 'N/A' %>)<% } %>`;
-            const orderStatus = "<%= order.status || 'N/A' %>";
+                function downloadInvoice() {
+                    // All required data rendered from EJS server-side
+                    const orderId = "<%= order.orderId || 'N/A' %>";
+                    const orderDate = new Date("<%= order.createdOn %>").toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' });
+                    const customerName = "<%= order.address?.name || 'N/A' %>";
+                    const shippingAddress = `<%= order.address ? (order.address.city || '') + (order.address.landMark ? ', ' + order.address.landMark : '') + ', ' + (order.address.State || '') + ', PIN: ' + (order.address.pincode || 'N/A') : 'N/A' %>`;
+                    console.log(shippingAddress)
+                    const paymentMethod = `<%= order.paymentMethod || 'N/A' %><% if(order.paymentMethod === 'Credit Card' || order.paymentMethod === 'Debit Card') { %> (**** **** **** <%= order.cardLastFour || 'N/A' %>)<% } %>`;
+                    const orderStatus = "<%= order.status || 'N/A' %>";
 
-            const orderedItems = `<% (order.orderedItems || []).forEach((item) => { %>
+                    // Check if jsPDF is loaded
+                    if (typeof jsPDF === 'undefined') {
+                        // Load jsPDF dynamically if not already loaded
+                        const script = document.createElement('script');
+                        script.src = 'https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js';
+                        script.onload = function () {
+                            // Load html2canvas after jsPDF loads
+                            const canvas = document.createElement('script');
+                            canvas.src = 'https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js';
+                            canvas.onload = generatePDF;
+                            document.head.appendChild(canvas);
+                        };
+                        document.head.appendChild(script);
+                    } else {
+                        generatePDF();
+                    }
+
+                    function generatePDF() {
+                        // Create a temporary div to hold our invoice content
+                        const tempDiv = document.createElement('div');
+                        tempDiv.className = 'invoice-container';
+                        tempDiv.style.width = '800px';
+                        tempDiv.style.backgroundColor = 'white';
+                        tempDiv.style.padding = '30px';
+                        tempDiv.style.fontFamily = 'Arial, sans-serif';
+                        tempDiv.style.position = 'absolute';
+                        tempDiv.style.left = '-9999px';
+
+                        // Format ordered items for PDF
+                        let orderedItemsHtml = '';
+        <% (order.orderedItems || []).forEach((item) => { %>
+                            orderedItemsHtml += `
                 <tr>
                     <td><%= item.product.productName || 'N/A' %></td>
-                    <td><%= item.variant ? (item.variant.color || '') + ' ' + (item.variant.size || '') : 'N/A' %></td>
                     <td><%= item.quantity || '0' %></td>
                     <td>₹<%= item.price ? item.price.toLocaleString('en-IN') : '0.00' %></td>
                     <td>₹<%= item.price && item.quantity ? (item.price * item.quantity).toLocaleString('en-IN') : '0.00' %></td>
                 </tr>
-            <% }) %>`;
-
-            const subtotal = "₹<%= order.subtotal ? order.subtotal.toLocaleString('en-IN') : '0.00' %>";
-            const shippingCost = "₹<%= order.shippingCost ? order.shippingCost.toLocaleString('en-IN') : '0.00' %>";
-            const discount = "<%= order.discount || 0 %>";
-            const discountHtml = discount > 0 ? `<div><strong>Discount:</strong> -₹<%= order.discount.toLocaleString('en-IN') %></div>` : '';
-            const tax = "₹<%= order.tax ? order.tax.toLocaleString('en-IN') : '0.00' %>";
-            const total = "₹<%= order.finalAmount ? order.finalAmount.toLocaleString('en-IN') : '0.00' %>";
-
-            const invoiceContent = `
-                <!DOCTYPE html>
-                <html lang="en">
-                <head>
-                    <meta charset="UTF-8">
-                    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-                    <title>Invoice - Order #${orderId}</title>
-                    <style>
-                        body {
-                            font-family: Arial, sans-serif;
-                            margin: 0;
-                            padding: 20px;
-                            background-color: #f9fafb;
-                        }
-                        .invoice-container {
-                            max-width: 800px;
-                            margin: 0 auto;
-                            background-color: white;
-                            padding: 30px;
-                            border-radius: 8px;
-                            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-                        }
-                        .header {
-                            text-align: center;
-                            margin-bottom: 30px;
-                        }
-                        .header h1 {
-                            margin: 0;
-                            font-size: 24px;
-                            color: #1f2937;
-                        }
-                        .details, .items, .summary {
-                            margin-bottom: 30px;
-                        }
-                        .details div, .summary div {
-                            margin-bottom: 10px;
-                            font-size: 14px;
-                        }
-                        .details strong, .summary strong {
-                            display: inline-block;
-                            width: 150px;
-                            color: #1f2937;
-                        }
-                        .items table {
-                            width: 100%;
-                            border-collapse: collapse;
-                            margin-bottom: 20px;
-                        }
-                        .items th, .items td {
-                            padding: 10px;
-                            text-align: left;
-                            border-bottom: 1px solid #e5e7eb;
-                        }
-                        .items th {
-                            background-color: #f3f4f6;
-                            font-weight: 600;
-                            color: #1f2937;
-                        }
-                        .items td {
-                            color: #4b5563;
-                        }
-                        .total {
-                            font-weight: 600;
-                            font-size: 16px;
-                            text-align: right;
-                            color: #1f2937;
-                        }
-                        .footer {
-                            text-align: center;
-                            font-size: 12px;
-                            color: #6b7280;
-                            margin-top: 30px;
-                        }
-                    </style>
-                </head>
-                <body>
-                    <div class="invoice-container">
-                        <div class="header">
-                            <h1>Invoice - Order #${orderId}</h1>
-                            <p>Placed on ${orderDate}</p>
-                        </div>
-
-                        <div class="details">
-                            <div><strong>Customer Name:</strong> ${customerName}</div>
-                            <div><strong>Shipping Address:</strong> ${shippingAddress}</div>
-                            <div><strong>Payment Method:</strong> ${paymentMethod}</div>
-                            <div><strong>Order Status:</strong> ${orderStatus}</div>
-                        </div>
-
-                        <div class="items">
-                            <table>
-                                <thead>
-                                    <tr>
-                                        <th>Item</th>
-                                        <th>Variant</th>
-                                        <th>Quantity</th>
-                                        <th>Price</th>
-                                        <th>Total</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    ${orderedItems}
-                                </tbody>
-                            </table>
-                        </div>
-
-                        <div class="summary">
-                            <div><strong>Subtotal:</strong> ${subtotal}</div>
-                            <div><strong>Shipping:</strong> ${shippingCost}</div>
-                            ${discountHtml}
-                            <div><strong>Tax:</strong> ${tax}</div>
-                            <div class="total"><strong>Total:</strong> ${total}</div>
-                        </div>
-
-                        <div class="footer">
-                            <p>Thank you for shopping with My Store!</p>
-                            <p>Contact us at support@mystore.com for any queries.</p>
-                        </div>
-                    </div>
-                </body>
-                </html>
             `;
+        <% }) %>
 
-            const blob = new Blob([invoiceContent], { type: 'text/html' });
-            const url = window.URL.createObjectURL(blob);
-            const link = document.createElement('a');
-            link.href = url;
-            link.download = `Invoice-Order-${orderId}.html`;
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-            window.URL.revokeObjectURL(url);
-            closeInvoiceModal();
-        }
-    </script>
+        const subtotal = "₹<%= order.finalAmount ? order.finalAmount.toLocaleString('en-IN') : '0.00' %>";
+                        const shippingCost = "₹<%= order.shippingCost ? order.shippingCost.toLocaleString('en-IN') : '0.00' %>";
+                        const discount = "<%= order.discount || 0 %>";
+                        const discountHtml = discount > 0 ? `<div><strong>Discount:</strong> -₹<%= order.discount.toLocaleString('en-IN') %></div>` : '';
+                        const tax = "₹<%= order.tax ? order.tax.toLocaleString('en-IN') : '0.00' %>";
+                        const total = "₹<%= order.finalAmount ? order.finalAmount.toLocaleString('en-IN') : '0.00' %>";
+
+                        // Create invoice HTML
+                        tempDiv.innerHTML = `
+            <div style="text-align: center; margin-bottom: 30px;">
+                <h1 style="margin: 0; font-size: 25px; color: #1f2937;">Cario</h1><br>
+                <h1 style="margin: 0; font-size: 15px; color: #1f2937;">Invoice - #${orderId}</h1>
+            </div>
+
+            <div style="margin-bottom: 30px;">
+                <div style="margin-bottom: 10px; font-size: 14px;"><strong style="display: inline-block; width: 150px; color: #1f2937;">Customer Name:</strong> ${customerName}</div>
+                <div style="margin-bottom: 10px; font-size: 14px;"><strong style="display: inline-block; width: 150px; color: #1f2937;">Shipping Address:</strong> ${shippingAddress}</div>
+                <div style="margin-bottom: 10px; font-size: 14px;"><strong style="display: inline-block; width: 150px; color: #1f2937;">Payment Method:</strong> ${paymentMethod}</div>
+                <div style="margin-bottom: 10px; font-size: 14px;"><strong style="display: inline-block; width: 150px; color: #1f2937;">Order Status:</strong> ${orderStatus}</div>
+                <div style="margin-bottom: 10px; font-size: 14px;"><strong style="display: inline-block; width: 150px; color: #1f2937;">Order Date:</strong> ${orderDate}</div>
+            </div>
+
+            <div style="margin-bottom: 30px;">
+                <table style="width: 100%; border-collapse: collapse; margin-bottom: 20px;">
+                    <thead>
+                        <tr>
+                            <th style="padding: 10px; text-align: left; border-bottom: 1px solid #e5e7eb; background-color: #f3f4f6; font-weight: 600; color: #1f2937;">Item</th>
+                            <th style="padding: 10px; text-align: left; border-bottom: 1px solid #e5e7eb; background-color: #f3f4f6; font-weight: 600; color: #1f2937;">Quantity</th>
+                            <th style="padding: 10px; text-align: left; border-bottom: 1px solid #e5e7eb; background-color: #f3f4f6; font-weight: 600; color: #1f2937;">Price</th>
+                            <th style="padding: 10px; text-align: left; border-bottom: 1px solid #e5e7eb; background-color: #f3f4f6; font-weight: 600; color: #1f2937;">Total</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${orderedItemsHtml}
+                    </tbody>
+                </table>
+            </div>
+
+            <div style="margin-bottom: 30px;">
+                <div style="margin-bottom: 10px; font-size: 14px;"><strong style="display: inline-block; width: 150px; color: #1f2937;">Subtotal:</strong> ${subtotal}</div>
+                <div style="margin-bottom: 10px; font-size: 14px;"><strong style="display: inline-block; width: 150px; color: #1f2937;">Shipping:</strong> ${shippingCost}</div>
+                ${discountHtml}
+                <div style="margin-bottom: 10px; font-size: 14px;"><strong style="display: inline-block; width: 150px; color: #1f2937;">Tax:</strong> ${tax}</div>
+                <div style="font-weight: 600; font-size: 16px; text-align: right; color: #1f2937;"><strong>Total:</strong> ${total}</div>
+            </div>
+
+            <div style="text-align: center; font-size: 12px; color: #6b7280; margin-top: 30px;">
+                <p>Thank you for shopping with My Store!</p>
+                <p>Contact us at support@cario.com for any queries.</p>
+            </div>
+        `;
+
+                        document.body.appendChild(tempDiv);
+
+                        // Use html2canvas to capture the invoice as an image
+                        html2canvas(tempDiv).then(canvas => {
+                            // Remove the temporary div
+                            document.body.removeChild(tempDiv);
+
+                            // Create PDF
+                            const pdf = new jspdf.jsPDF({
+                                orientation: 'portrait',
+                                unit: 'mm',
+                                format: 'a4'
+                            });
+
+                            // Canvas dimensions
+                            const imgData = canvas.toDataURL('image/png');
+                            const imgWidth = 210; // A4 width in mm
+                            const pageHeight = 297; // A4 height in mm
+                            const imgHeight = canvas.height * imgWidth / canvas.width;
+                            let heightLeft = imgHeight;
+                            let position = 0;
+
+                            // Add image to PDF (first page)
+                            pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
+                            heightLeft -= pageHeight;
+
+                            // Add new pages if needed for long invoices
+                            while (heightLeft >= 0) {
+                                position = heightLeft - imgHeight;
+                                pdf.addPage();
+                                pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
+                                heightLeft -= pageHeight;
+                            }
+
+                            // Save PDF
+                            pdf.save(`Invoice-Order-${orderId}.pdf`);
+
+                            // Close modal if it exists
+                            if (typeof closeInvoiceModal === 'function') {
+                                closeInvoiceModal();
+                            }
+                        });
+                    }
+                }
+            </script>
 </body>
+
 </html>

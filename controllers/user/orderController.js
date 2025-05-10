@@ -1,4 +1,5 @@
 const Order = require('../../models/orderSchema');
+const Address = require('../../models/addressSchema');
 
 const getMyOrders = async (req, res) => {
   try {
@@ -24,7 +25,7 @@ const getMyOrders = async (req, res) => {
     const skip = (page - 1) * limit;
 
     const orders = await Order.find({
-      address: req.user._id,
+      userId: req.user._id,
       ...statusFilter,
     })
       .populate('orderedItems.product')
@@ -33,7 +34,7 @@ const getMyOrders = async (req, res) => {
       .limit(limit);
 
     const totalOrders = await Order.countDocuments({
-      address: req.user._id,
+      userId: req.user._id,
       ...statusFilter,
     });
 
@@ -49,43 +50,35 @@ const getMyOrders = async (req, res) => {
     });
   } catch (error) {
     console.error('Error loading orders:', error.message, error.stack);
-    res.status(500).render('error', { message: 'Something went wrong while fetching orders.' });
+    res.status(500).render('page404', { message: 'Something went wrong while fetching orders.' });
   }
 };
 
 const orderDetails = async (req, res) => {
   try {
     const orderId = req.params.id;
-    
-    const statusFilter = {}; 
-    const skip = 0; 
-    const limit = 10;
 
     const order = await Order.findOne({
-      address: req.user._id,
-      ...statusFilter,
+      orderId: orderId,
+      userId: req.user._id,
     })
-      .populate('orderedItems.product')
-      .sort({ createdOn: -1 })
-      .skip(skip)
-      .limit(limit);
+    .populate('orderedItems.product');
 
-    const totalOrders = await Order.countDocuments({
-      address: req.user._id,
-      ...statusFilter,
-    });
+    if (!order) {
+      return res.status(404).render('page404', { message: 'Order not found.' });
+    }
+
+    console.log(order)
 
     res.render('order-details', { 
       orderId,
-      totalOrders,
       order
     });
   } catch (error) {
     console.error(error);
-    res.status(500).send('Something went wrong');
+    res.status(500).render('page404', { message: 'Something went wrong while fetching order details.' });
   }
 };
-
 
 
 module.exports = {

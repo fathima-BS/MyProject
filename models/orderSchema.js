@@ -7,6 +7,11 @@ const orderSchema = new Schema({
         type: String,
         unique: true
     },
+    userId:{
+        type: Schema.Types.ObjectId,
+        ref: "User",
+        required: true
+    },
     orderedItems: [{
         product: {
             type: Schema.Types.ObjectId,
@@ -20,6 +25,10 @@ const orderSchema = new Schema({
         price: {
             type: Number,
             default: 0
+        },
+        status:{
+            type: String,
+            enum: ['Pending', 'Processing', 'Shipped', 'Delivered', 'Cancelled', 'Return Request', 'Returned']
         }
     }],
     totalPrice: {
@@ -35,9 +44,13 @@ const orderSchema = new Schema({
         required: true
     },
     address: {
-        type: Schema.Types.ObjectId,
-        ref: "User",
-        required: true
+        addressType: { type: String },
+        name: { type: String },
+        city: { type: String },
+        landMark: { type: String },
+        State: { type: String },
+        pincode: { type: Number },
+        phone: { type: String }
     },
     invoiceDate: {
         type: Date
@@ -46,6 +59,10 @@ const orderSchema = new Schema({
         type: String,
         required: true,
         enum: ['Pending', 'Processing', 'Shipped', 'Delivered', 'Cancelled', 'Return Request', 'Returned']
+    },
+    paymentMethod: {
+        type: String,
+        required: true
     },
     createdOn: {
         type: Date,

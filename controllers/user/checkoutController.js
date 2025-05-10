@@ -167,6 +167,7 @@ const placeOrder = async (req, res) => {
     }
 
     const checkoutSummary = req.session.checkoutSummary || {};
+
     if (!checkoutSummary.selectedAddress) {
       return res.status(400).json({ success: false, message: 'Please select an address' });
     }
@@ -180,7 +181,7 @@ const placeOrder = async (req, res) => {
       const regularPrice = Number(item.productId.regularPrice) || salePrice;
       const quantity = Number(item.quantity) || 1;
       subtotal += salePrice * quantity;
-      offerDiscount += (regularPrice - salePrice) * quantity;
+      // offerDiscount += (regularPrice - salePrice) * quantity;
       return {
         product: item.productId._id,
         quantity,
@@ -188,23 +189,24 @@ const placeOrder = async (req, res) => {
       };
     });
 
-    let total = subtotal - coupon;
-    if (total < 0) total = 0;
-    const taxes = total * 0.05; // 5% GST
-    const finalAmount = total + taxes;
+    let total = subtotal;
+    const finalAmount = total;
 
     // Generate unique orderId
     const orderId = `ORD-${Date.now()}-${Math.floor(Math.random() * 1000)}`;
 
+    console.log(checkoutSummary.selectedAddress,'12345678')
     // Create order
     const order = new Order({
       orderId,
+      userId:userId,
       orderedItems,
       totalPrice: subtotal,
-      discount: offerDiscount + coupon,
+      // discount: offerDiscount + coupon,
       finalAmount,
-      address: userId, 
+      address: checkoutSummary.selectedAddress || null, 
       invoiceDate: new Date(),
+      paymentMethod: paymentMethod,
       status: 'Pending',
       createdOn: new Date(),
       couponApplied: coupon > 0,
