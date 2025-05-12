@@ -1,0 +1,552 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Order Details</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <style>
+        :root {
+            --primary-color: #6366F1;
+            --secondary-color: #1E293B;
+            --success-color: #10B981;
+            --danger-color: #EF4444;
+            --text-color: #F1F5F9;
+            --text-muted: #94A3B8;
+            --border-color: rgba(148, 163, 184, 0.2);
+            --card-bg: #1E293B;
+            --card-header-bg: #0F172A;
+            --table-header-bg: #334155;
+            --hover-color: #4F46E5;
+            --button-shadow: 0 4px 6px -1px rgba(99, 102, 241, 0.2);
+        }
+
+        .btn-accept {
+            background-color: var(--success-color);
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 6px -1px rgba(16, 185, 129, 0.2);
+            font-weight: 500;
+        }
+
+        .btn-accept:hover {
+            background-color: #059669;
+            transform: translateY(-1px);
+        }
+
+        .btn-reject {
+            background-color: var(--danger-color);
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 6px -1px rgba(239, 68, 68, 0.2);
+            font-weight: 500;
+        }
+
+        .btn-reject:hover {
+            background-color: #DC2626;
+            transform: translateY(-1px);
+        }
+
+        button:disabled {
+            background-color: #475569;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        body {
+            font-family: 'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #111827;
+            color: var(--text-color);
+            margin: 0;
+            padding: 0;
+            line-height: 1.6;
+        }
+
+        .main-content {
+            margin-left: 220px;
+            padding: 30px;
+            transition: margin-left 0.3s;
+        }
+
+        .card {
+            background-color: var(--card-bg);
+            border-radius: 12px;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.2);
+            margin-bottom: 30px;
+            padding: 0;
+            border: 1px solid var(--border-color);
+            overflow: hidden;
+        }
+
+        .card-header {
+            background-color: var(--card-header-bg);
+            border-bottom: 1px solid var(--border-color);
+            padding: 20px 25px;
+        }
+
+        .card-title {
+            font-size: 22px;
+            font-weight: 600;
+            margin: 0;
+            color: var(--text-color);
+        }
+
+        .card-body {
+            padding: 25px;
+        }
+
+        .detail-row {
+            margin-bottom: 20px;
+        }
+
+        .detail-label {
+            font-weight: 600;
+            color: var(--text-muted);
+            margin-right: 10px;
+            display: block;
+            margin-bottom: 4px;
+        }
+
+        .detail-value {
+            color: var(--text-color);
+            font-weight: 500;
+        }
+
+        .detail-phone {
+            margin-top: 8px;
+            color: var(--text-muted);
+        }
+
+        .table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+            margin-top: 15px;
+            color: var(--text-color);
+        }
+
+        .table th {
+            background-color: var(--table-header-bg);
+            color: var(--text-color);
+            padding: 15px;
+            text-align: left;
+            font-weight: 600;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .table td {
+            padding: 18px 15px;
+            border-bottom: 1px solid var(--border-color);
+            vertical-align: middle;
+        }
+
+        .table tr:last-child td {
+            border-bottom: none;
+        }
+
+        .table .product-image {
+            width: 60px;
+            height: 60px;
+            border-radius: 8px;
+            overflow: hidden;
+            background-color: var(--secondary-color);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .table .product-image svg {
+            width: 32px;
+            height: 32px;
+            opacity: 0.8;
+        }
+
+        .total-row {
+            font-weight: 700;
+            font-size: 16px;
+        }
+
+        .total-row td {
+            background-color: rgba(99, 102, 241, 0.1);
+        }
+
+        .status-badge {
+            padding: 6px 12px;
+            border-radius: 50px;
+            font-size: 12px;
+            font-weight: 600;
+            text-align: center;
+            display: inline-block;
+            min-width: 80px;
+        }
+
+        .status-pending {
+            background-color: rgba(245, 158, 11, 0.15);
+            color: #F59E0B;
+            border: 1px solid rgba(245, 158, 11, 0.3);
+        }
+
+        .status-processing {
+            background-color: rgba(139, 92, 246, 0.15);
+            color: #8B5CF6;
+            border: 1px solid rgba(139, 92, 246, 0.3);
+        }
+
+        .status-shipped {
+            background-color: rgba(59, 130, 246, 0.15);
+            color: #3B82F6;
+            border: 1px solid rgba(59, 130, 246, 0.3);
+        }
+
+        .status-out-for-delivery {
+            background-color: rgba(59, 130, 246, 0.15);
+            color: #3B82F6;
+            border: 1px solid rgba(59, 130, 246, 0.3);
+        }
+
+        .status-delivered {
+            background-color: rgba(16, 185, 129, 0.15);
+            color: #10B981;
+            border: 1px solid rgba(16, 185, 129, 0.3);
+        }
+
+        .status-cancelled {
+            background-color: rgba(239, 68, 68, 0.15);
+            color: #EF4444;
+            border: 1px solid rgba(239, 68, 68, 0.3);
+        }
+
+        .status-return-request {
+            background-color: rgba(139, 92, 246, 0.15);
+            color: #8B5CF6;
+            border: 1px solid rgba(139, 92, 246, 0.3);
+        }
+
+        .status-returned {
+            background-color: rgba(139, 92, 246, 0.15);
+            color: #8B5CF6;
+            border: 1px solid rgba(139, 92, 246, 0.3);
+        }
+
+        .btn {
+            border-radius: 8px;
+            font-weight: 500;
+            padding: 12px 18px;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            font-size: 14px;
+            box-shadow: var(--button-shadow);
+        }
+
+        .btn:hover {
+            transform: translateY(-1px);
+        }
+
+        .btn-primary {
+            background-color: var(--primary-color);
+            border-color: var(--primary-color);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background-color: var(--hover-color);
+            border-color: var(--hover-color);
+        }
+
+        .form-select {
+            background-color: var(--secondary-color);
+            color: var(--text-color);
+            border: 1px solid var(--border-color);
+            padding: 12px;
+            background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%23f1f5f9' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M2 5l6 6 6-6'/%3e%3c/svg%3e");
+            background-size: 16px 12px;
+        }
+
+        .form-select:focus {
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2);
+            border-color: var(--primary-color);
+        }
+
+        h2 {
+            color: var(--primary-color);
+            font-weight: 600;
+            margin-bottom: 20px;
+            font-size: 20px;
+        }
+
+        .swal2-popup {
+            background-color: var(--card-bg);
+            color: var(--text-color);
+            border-radius: 12px;
+            border: 1px solid var(--border-color);
+        }
+
+        .swal2-title, .swal2-content {
+            color: var(--text-color);
+        }
+
+        .swal2-confirm {
+            background-color: var(--primary-color);
+            border-radius: 8px;
+        }
+
+        .swal2-cancel {
+            background-color: var(--danger-color);
+            border-radius: 8px;
+        }
+
+        @media (max-width: 768px) {
+            .main-content {
+                margin-left: 0;
+                padding: 20px;
+            }
+        }
+
+        @media (max-width: 576px) {
+            .card-body {
+                padding: 15px;
+            }
+
+            .btn {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <%- include("../partials/admin/sidebar") %>
+
+    <div class="main-content">
+        <div class="card">
+            <div class="card-header">
+                <h1 class="card-title">Order Details</h1>
+            </div>
+            <div class="card-body">
+                <h2>Order Information</h2>
+                <div class="row">
+                    <div class="col-md-8">
+                        <div class="detail-row">
+                            <span class="detail-label">Order ID:</span>
+                            <span class="detail-value"><%= order.orderId %></span>
+                        </div>
+                        <div class="detail-row">
+                            <span class="detail-label">Customer Name:</span>
+                            <span class="detail-value">
+                                    <%= order.address?.name || 'N/A' %>
+                            </span>
+                        </div>
+                        <div class="detail-row">
+                            <span class="detail-label">Order Date:</span>
+                            <span class="detail-value">
+                                <%= new Date(order.createdOn).toDateString() %>
+                            </span>
+                        </div>
+                        <div class="detail-row">
+                            <span class="detail-label">Shipping Address:</span>
+                            <span class="detail-value">
+                                <%= order.address.name %>, <%= order.address.city %>, <%= order.address.State %> - <%= order.address.pincode %>
+                                <div class="detail-phone">
+                                    Phone: <span style="color: white;"><%= order.address.phone %>
+                                    <%= order.address.altPhone ? `| Alt: ${order.address.altPhone}` : '' %></span>
+                                </div>
+                            </span>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <% if (['Pending', 'Processing', 'Shipped', 'Out for Delivery'].includes(order.status)) { %>
+                            <select class="form-select" id="status-<%= order.orderId %>">
+                                <option value="Pending" <%= order.status === ' organizersPending' ? 'selected' : '' %>>Pending</option>
+                                <option value="Processing" <%= order.status === 'Processing' ? 'selected' : '' %>>Processing</option>
+                                <option value="Shipped" <%= order.status === 'Shipped' ? 'selected' : '' %>>Shipped</option>
+                                <option value="Out for Delivery" <%= order.status === 'Out for Delivery' ? 'selected' : '' %>>Out for Delivery</option>
+                                <option value="Delivered" <%= order.status === 'Delivered' ? 'selected' : '' %>>Delivered</option>
+                                <option value="Cancelled" <%= order.status === 'Cancelled' ? 'selected' : '' %>>Cancelled</option>
+                            </select>
+                            <button class="btn btn-primary w-100 mt-2" onclick="updateStatus('<%= order.orderId %>')">Update Status</button>
+                        <% } else { %>
+                            <p class="text-success fw-bold">Status: <span class="status-badge status-<%= order.status.toLowerCase().replace(/ /g, '-') %>"><%= order.status %></span></p>
+                        <% } %>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-header">
+                <h2 class="card-title">Order Items</h2>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Product</th>
+                                <th>Product Name</th>
+                                <th>Quantity</th>
+                                <th>Unit Price</th>
+                                <th>Total Price</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <% order.orderedItems.forEach(item => { %>
+                                <tr>
+                                    <td>
+                                        <div class="product-image">
+                                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 512">
+                                                <path fill="#ffffff" d="M36.8 192l566.3 0c20.3 0 36.8-16.5 36.8-36.8c0-7.3-2.2-14.4-6.2-20.4L558.2 21.4C549.3 8 534.4 0 518.3 0L121.7 0c-16 0-31 8-39.9 21.4L6.2 134.7c-4 6.1-6.2 13.2-6.2 20.4C0 175.5 16.5 192 36.8 192zM64 224l0 160 0 80c0 26.5 21.5 48 48 48l224 0c26.5 0 48-21.5 48-48l0-80 0-160-64 0 0 160-192 0 0-160-64 0zm448 0l0 256c0 17.7 14.3 32 32 32s32-14.3 32-32l0-256-64 0z"/>
+                                            </svg>
+                                        </div>
+                                    </td>
+                                    <td style="color: rgb(255, 255, 255);"><%= item.product?.productName || 'Unknown Product' %></td>
+                                    <td style="color: rgb(255, 255, 255);"><%= item.quantity %></td>
+                                    <td style="color: rgb(255, 255, 255);">₹<%= item.price.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) %></td>
+                                    <td style="color: rgb(255, 255, 255);">₹<%= (item.price * item.quantity).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) %></td>
+                                    <td>
+                                        <span class="status-badge status-<%= item.status.toLowerCase().replace(/ /g, '-') %>">
+                                            <%= item.status %>
+                                        </span>
+                                    </td>
+                                </tr>
+                            <% }) %>
+                            <tr class="total-row">
+                                <td style="color: rgb(255, 255, 255);" colspan="4" class="text-end">Total</td>
+                                <td style="color: rgb(255, 255, 255);">₹<%= order.finalAmount.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) %></td>
+                                <td></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <% if (order.orderedItems.some(item => item.status === 'Return Request')) { %>
+            <div class="card">
+                <div class="card-header">
+                    <h2 class="card-title">Return Requests</h2>
+                </div>
+                <div class="card-body">
+                    <% order.orderedItems.forEach(item => { %>
+                        <% if (item.status === 'Return Request') { %>
+                            <div class="mb-3">
+                                <p><strong>Product:</strong> <%= item.product?.productName || 'Unknown Product' %></p>
+                                <p><strong>Return Reason:</strong> Requested by user</p>
+                                <button onclick="orderReturn('<%= order.orderId %>', '<%= item.product._id %>', 'accept')" class="btn-accept">Accept</button>
+                                <button onclick="orderReturn('<%= order.orderId %>', '<%= item.product._id %>', 'reject')" class="btn-reject">Reject</button>
+                            </div>
+                        <% } %>
+                    <% }) %>
+                </div>
+            </div>
+        <% } %>
+    </div>
+
+    <script>
+        function updateStatus(orderId) {
+            const statusValue = document.querySelector(`#status-${orderId}`).value;
+            Swal.fire({
+                title: 'Update Status?',
+                text: `Are you sure you want to update the order status to ${statusValue}?`,
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonColor: '#6366F1',
+                cancelButtonColor: '#EF4444',
+                confirmButtonText: 'Yes, update it!'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    fetch(`/admin/orders/${orderId}/status`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ status: statusValue })
+                    })
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data.success) {
+                                Swal.fire({
+                                    title: 'Updated!',
+                                    text: 'Order status has been updated successfully.',
+                                    icon: 'success',
+                                    toast: true,
+                                    position: 'bottom-end',
+                                    showConfirmButton: false,
+                                    timer: 3000,
+                                    timerProgressBar: true
+                                }).then(() => {
+                                    location.reload();
+                                });
+                            } else {
+                                Swal.fire({
+                                    title: 'Error!',
+                                    text: 'Failed to update status.',
+                                    icon: 'error'
+                                });
+                            }
+                        })
+                        .catch(error => {
+                            console.error('Error updating status:', error);
+                            Swal.fire({
+                                title: 'Error!',
+                                text: 'Something went wrong.',
+                                icon: 'error'
+                            });
+                        });
+                }
+            });
+        }
+
+        function orderReturn(orderId, productId, action) {
+            const buttons = document.querySelectorAll(`[onclick*='${orderId}'][onclick*='${productId}']`);
+            buttons.forEach(button => button.disabled = true);
+            fetch(`/admin/returnOrder?orderId=${orderId}&productId=${productId}&action=${action}`, {
+                method: 'GET'
+            })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        Swal.fire({
+                            title: 'Updated!',
+                            text: data.message || 'Return request processed successfully.',
+                            icon: 'success',
+                            toast: true,
+                            position: 'bottom-end',
+                            showConfirmButton: false,
+                            timer: 3000,
+                            timerProgressBar: true
+                        }).then(() => {
+                            location.reload();
+                        });
+                    } else {
+                        Swal.fire({
+                            title: 'Error!',
+                            text: data.message || 'Failed to process return request.',
+                            icon: 'error'
+                        });
+                        buttons.forEach(button => button.disabled = false);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error processing return:', error);
+                    Swal.fire({
+                        title: 'Error!',
+                        text: 'Something went wrong.',
+                        icon: 'error'
+                    });
+                    buttons.forEach(button => button.disabled = false);
+                });
+        }
+    </script>
+</body>
+</html>

@@ -149,6 +149,7 @@ const selectAddress = async (req, res) => {
   }
 };
 
+
 const placeOrder = async (req, res) => {
   try {
     const userId = req.session.user;
@@ -167,7 +168,6 @@ const placeOrder = async (req, res) => {
     }
 
     const checkoutSummary = req.session.checkoutSummary || {};
-
     if (!checkoutSummary.selectedAddress) {
       return res.status(400).json({ success: false, message: 'Please select an address' });
     }
@@ -176,37 +176,39 @@ const placeOrder = async (req, res) => {
     let subtotal = 0;
     let offerDiscount = 0;
     let coupon = cart.coupon && Number(cart.coupon.amount) ? Number(cart.coupon.amount) : 0;
+
     const orderedItems = cart.items.map(item => {
       const salePrice = Number(item.price) || Number(item.productId.salePrice);
       const regularPrice = Number(item.productId.regularPrice) || salePrice;
       const quantity = Number(item.quantity) || 1;
       subtotal += salePrice * quantity;
-      // offerDiscount += (regularPrice - salePrice) * quantity;
+      offerDiscount += (regularPrice - salePrice) * quantity;
       return {
         product: item.productId._id,
         quantity,
         price: salePrice,
+        status: 'Pending', // Set initial status for each item as per schema
       };
     });
 
-    let total = subtotal;
+    let total = subtotal - coupon;
+    if (total < 0) total = 0;
     const finalAmount = total;
 
     // Generate unique orderId
     const orderId = `ORD-${Date.now()}-${Math.floor(Math.random() * 1000)}`;
 
-    console.log(checkoutSummary.selectedAddress,'12345678')
     // Create order
     const order = new Order({
       orderId,
-      userId:userId,
+      userId,
       orderedItems,
       totalPrice: subtotal,
-      // discount: offerDiscount + coupon,
+      discount: offerDiscount + coupon,
       finalAmount,
-      address: checkoutSummary.selectedAddress || null, 
+      address: checkoutSummary.selectedAddress,
       invoiceDate: new Date(),
-      paymentMethod: paymentMethod,
+      paymentMethod,
       status: 'Pending',
       createdOn: new Date(),
       couponApplied: coupon > 0,
@@ -235,6 +237,7 @@ const placeOrder = async (req, res) => {
     res.status(500).json({ success: false, message: 'Error placing order' });
   }
 };
+
 
 const loadOrderSuccess = async (req, res) => {
   try {

@@ -92,6 +92,9 @@ router.get('/order-success', userAuth, checkoutController.loadOrderSuccess);
 
 //order
 router.get('/orders',userAuth, orderController.getMyOrders);
-router.get('/order-details/:id', userAuth, orderController.orderDetails);
+router.get('/order-details/:id',userAuth, orderController.orderDetails);
+router.post('/returnItem', orderController.requestReturnItem);
+router.post('/cancelItem', orderController.cancelItem);
+
 
 module.exports = router;

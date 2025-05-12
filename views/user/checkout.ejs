@@ -316,7 +316,7 @@ document.getElementById('placeOrder').addEventListener('click', async () => {
         if (!addressData.success) {
             Swal.fire({
                 title: 'Error!',
-                text: addressData.message,
+                text: addressData.message || 'Failed to select address',
                 icon: 'error',
                 confirmButtonText: 'OK',
             });
@@ -336,15 +336,16 @@ document.getElementById('placeOrder').addEventListener('click', async () => {
         } else {
             Swal.fire({
                 title: 'Error!',
-                text: orderData.message,
+                text: orderData.message || 'Failed to place order',
                 icon: 'error',
                 confirmButtonText: 'OK',
             });
         }
     } catch (error) {
+        console.error('Error during order placement:', error);
         Swal.fire({
             title: 'Error!',
-            text: 'Error placing order',
+            text: 'An unexpected error occurred while placing the order',
             icon: 'error',
             confirmButtonText: 'OK',
         });

@@ -1,0 +1,754 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Order Management</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <link rel="stylesheet" href="/css/sideBar.css">
+    <style>
+        :root {
+            --primary-color: #4778FF;
+            --secondary-color: #2A2A2A;
+            --success-color: #2ecc71;
+            --danger-color: #e74c3c;
+            --warning-color: #f39c12;
+            --light-color: #ecf0f1;
+            --dark-color: #1E1E1E;
+            --accent-color: #9747FF;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--dark-color);
+            color: #fff;
+            margin: 0;
+            padding: 0;
+        }
+
+        .header-container {
+            position: fixed;
+            top: 20px;
+            right: 30px;
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            z-index: 90;
+        }
+        
+        /* Sidebar */
+        .sidebar {
+            background-color: var(--secondary-color);
+            width: 250px;
+            height: 100vh;
+            position: fixed;
+            left: 0;
+            top: 0;
+            transition: all 0.3s ease;
+            z-index: 100;
+            box-shadow: 2px 0 10px rgba(0,0,0,0.2);
+        }
+        
+        .sidebar-header {
+            padding: 20px;
+            font-size: 1.4rem;
+            font-weight: 600;
+            color: white;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .sidebar-menu {
+            margin-top: 20px;
+        }
+        
+        .sidebar-link {
+            display: flex;
+            align-items: center;
+            padding: 15px 20px;
+            color: #ccc;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            gap: 15px;
+        }
+        
+        .sidebar-link i {
+            width: 20px;
+            text-align: center;
+        }
+        
+        .sidebar-link:hover, .sidebar-link.active {
+            background-color: var(--primary-color);
+            color: white;
+        }
+        
+        .sidebar-link.active {
+            border-left: 5px solid white;
+            font-weight: 500;
+        }
+        
+        /* Search container */
+        .search-container {
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+            
+        .search-input {
+            background-color: #2A2A2A;
+            border: 1px solid #333;
+            border-radius: 20px;
+            color: white;
+            padding: 8px 15px 8px 40px;
+            width: 250px;
+            transition: all 0.3s ease;
+        }
+            
+        .search-input:focus {
+            outline: none;
+            border-color: #9747FF;
+            width: 280px;
+            box-shadow: 0 0 5px rgba(151, 71, 255, 0.5);
+        }
+            
+        .search-icon {
+            position: absolute;
+            left: 15px;
+            color: #999;
+            pointer-events: none;
+        }
+        
+        .admin-profile {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            cursor: pointer;
+            padding: 5px;
+            border-radius: 25px;
+            transition: background-color 0.3s;
+            background-color: #2A2A2A;
+            padding: 5px 15px;
+            margin-bottom: 15px;
+            border-radius: 30px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+        }
+        
+        .admin-profile:hover {
+            background-color: #2A2A2A;
+        }
+        
+        .admin-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            overflow: hidden;
+            background-color: #333;
+            display: flex;
+            align-items: center;
+            margin-right: 10px;
+        }
+        
+        .admin-avatar img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        
+        .admin-name {
+            font-size: 14px;
+            font-weight: 500;
+            color: white;
+            white-space: nowrap;
+        }
+        
+        /* Main Content */
+        .main-content {
+            margin-left: 250px;
+            margin-top: 60px;
+            padding: 20px;
+            transition: margin-left 0.3s;
+        }   
+        
+        .page-title {
+            font-weight: 600;
+            margin-bottom: 30px;
+            font-size: 28px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        /* Card */
+        .dashboard-card {
+            background-color: var(--secondary-color);
+            border-radius: 12px;
+            margin-bottom: 30px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+        
+        .card-header {
+            padding: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .card-title {
+            font-size: 18px;
+            font-weight: 600;
+            margin: 0;
+        }
+        
+        .card-actions {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .card-body {
+            padding: 20px;
+        }
+        
+        /* Table */
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        
+        .data-table th {
+            background-color: rgba(0, 0, 0, 0.2);
+            color: #ccc;
+            padding: 12px 15px;
+            text-align: left;
+            font-weight: 500;
+            font-size: 14px;
+        }
+        
+        .data-table td {
+            padding: 15px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            color: #fff;
+            vertical-align: middle;
+        }
+        
+        .data-table tr:last-child td {
+            border-bottom: none;
+        }
+        
+        .data-table tr:hover td {
+            background-color: rgba(255, 255, 255, 0.05);
+        }
+        
+        /* Buttons */
+        .btn {
+            border-radius: 6px;
+            font-weight: 500;
+            padding: 8px 16px;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            font-size: 12px;
+            letter-spacing: 0.5px;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+        }
+        
+        .btn-primary {
+            background-color: var(--primary-color);
+            border-color: var(--primary-color);
+        }
+        
+        .btn-primary:hover {
+            background-color: #3565d8;
+            border-color: #3565d8;
+        }
+        
+        .btn-success {
+            background-color: var(--success-color);
+            border-color: var(--success-color);
+        }
+        
+        .btn-success:hover {
+            background-color: #27ae60;
+            border-color: #27ae60;
+        }
+        
+        .btn-danger {
+            background-color: var(--danger-color);
+            border-color: var(--danger-color);
+        }
+        
+        .btn-danger:hover {
+            background-color: #c0392b;
+            border-color: #c0392b;
+        }
+        
+        .btn-warning {
+            background-color: var(--warning-color);
+            border-color: var(--warning-color);
+            color: white;
+        }
+        
+        .btn-warning:hover {
+            background-color: #d35400;
+            border-color: #d35400;
+            color: white;
+        }
+        
+        /* Order Image */
+        .order-image {
+            width: 80px;
+            height: 80px;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+        }
+        
+        .order-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.3s ease;
+        }
+        
+        .order-image:hover img {
+            transform: scale(1.05);
+        }
+        
+        /* Status Badge */
+        .status-badge {
+            padding: 5px 10px;
+            border-radius: 50px;
+            font-size: 12px;
+            font-weight: 500;
+            text-align: center;
+            display: inline-block;
+            min-width: 80px;
+        }
+        
+        .status-pending {
+            background-color: rgba(243, 156, 18, 0.2);
+            color: #f39c12;
+            border: 1px solid rgba(243, 156, 18, 0.5);
+        }
+        
+        .status-processing {
+            background-color: rgba(243, 156, 18, 0.2);
+            color: #f39c12;
+            border: 1px solid rgba(243, 156, 18, 0.5);
+        }
+        
+        .status-shipped {
+            background-color: rgba(52, 152, 219, 0.2);
+            color: #3498db;
+            border: 1px solid rgba(52, 152, 219, 0.5);
+        }
+        
+        .status-delivered {
+            background-color: rgba(46, 204, 113, 0.2);
+            color: #2ecc71;
+            border: 1px solid rgba(46, 204, 113, 0.5);
+        }
+        
+        .status-cancelled {
+            background-color: rgba(231, 76, 60, 0.2);
+            color: #e74c3c;
+            border: 1px solid rgba(231, 76, 60, 0.5);
+        }
+
+        .status-return-request {
+            background-color: rgba(155, 89, 182, 0.2);
+            color: #9b59b6;
+            border: 1px solid rgba(155, 89, 182, 0.5);
+        }
+
+        .status-returned {
+            background-color: rgba(155, 89, 182, 0.2);
+            color: #9b59b6;
+            border: 1px solid rgba(155, 89, 182, 0.5);
+        }
+        
+        /* Action Buttons */
+        .action-btns {
+            display: flex;
+            gap: 5px;
+        }
+        
+        .action-btn {
+            width: 36px;
+            height: 36px;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+            color: white;
+            cursor: pointer;
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+        
+        .action-btn:hover {
+            background-color: rgba(255, 255, 255, 0.2);
+        }
+        
+        .action-btn-view {
+            background-color: rgba(71, 120, 255, 0.2);
+        }
+        
+        .action-btn-view:hover {
+            background-color: var(--primary-color);
+        }
+        
+        /* Pagination */
+        .pagination {
+            display: flex;
+            justify-content: center;
+            margin-top: 30px;
+            gap: 5px;
+        }
+        
+        .page-item .page-link {
+            background-color: var(--secondary-color);
+            border: none;
+            color: #fff;
+            border-radius: 6px;
+            padding: 8px 14px;
+            transition: all 0.3s ease;
+        }
+        
+        .page-item.active .page-link {
+            background-color: var(--primary-color);
+            color: white;
+        }
+        
+        .page-item .page-link:hover {
+            background-color: rgba(71, 120, 255, 0.5);
+        }
+        
+        /* Filter */
+        .filter-container {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+        
+        .filter-select {
+            background-color: var(--secondary-color);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 6px;
+            color: white;
+            padding: 8px 12px;
+            min-width: 150px;
+        }
+        
+        .filter-select:focus {
+            outline: none;
+            border-color: var(--primary-color);
+        }
+        
+        /* Notification */
+        .notification {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            padding: 12px 20px;
+            border-radius: 8px;
+            color: white;
+            font-weight: 500;
+            z-index: 1000;
+            transform: translateY(20px);
+            opacity: 0;
+            transition: transform 0.3s ease, opacity 0.3s ease;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.2);
+        }
+        
+        .notification.show {
+            transform: translateY(0);
+            opacity: 1;
+        }
+        
+        .notification.success {
+            background-color: var(--success-color);
+        }
+        
+        .notification.error {
+            background-color: var(--danger-color);
+        }
+        
+        /* Responsive */
+        @media (max-width: 992px) {
+            .sidebar {
+                width: 200px;
+            }
+            
+            .main-content {
+                margin-left: 200px;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .sidebar {
+                transform: translateX(-100%);
+            }
+            
+            .sidebar.active {
+                transform: translateX(0);
+            }
+            
+            .main-content {
+                margin-left: 0;
+            }
+            
+            .menu-toggle {
+                display: block;
+                position: fixed;
+                top: 20px;
+                left: 20px;
+                z-index: 200;
+                background-color: var(--primary-color);
+                width: 40px;
+                height: 40px;
+                border-radius: 50%;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                color: white;
+                cursor: pointer;
+                box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+            }
+            
+            .header-container {
+                top: 10px;
+                right: 15px;
+            }
+            
+            .search-input {
+                width: 200px;
+            }
+            
+            .search-input:focus {
+                width: 220px;
+            }
+        }
+        
+        @media (max-width: 576px) {
+            .page-title {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 15px;
+            }
+            
+            .filter-container {
+                flex-direction: column;
+                width: 100%;
+            }
+            
+            .filter-select {
+                width: 100%;
+            }
+            
+            .header-container {
+                position: static;
+                justify-content: space-between;
+                padding: 10px;
+                width: 100%;
+                box-sizing: border-box;
+            }
+
+            .data-table {
+                font-size: 12px;
+            }
+            
+            .data-table th, .data-table td {
+                padding: 10px 8px;
+            }
+            
+            .action-btns {
+                flex-wrap: wrap;
+            }
+            
+            .main-content {
+                padding-top: 120px;
+            }
+        }
+
+        /* Dark theme styling for SweetAlert */
+        .swal2-popup {
+            background-color: #333 !important;
+            color: #fff !important;
+        }
+
+        .swal2-title,
+        .swal2-content {
+            color: #fff !important;
+        }
+
+        .swal2-confirm {
+            background-color: var(--primary-color) !important;
+        }
+
+        .swal2-cancel {
+            background-color: var(--danger-color) !important;
+        }
+    </style>
+</head>
+<body>
+    <!-- Menu Toggle Button (Mobile) -->
+    <%- include("../partials/admin/sidebar") %>
+    
+    <!-- Main Content -->
+    <div class="main-content">
+        <div class="page-title">
+            <h1>Order Management</h1>
+            <div class="filter-container">
+                <div class="search-container">
+                    <i class="fas fa-search search-icon"></i>
+                    <input type="text" id="searchInput" class="search-input" placeholder="Search by Order ID..." value="<%= search %>">
+                </div>
+                <select class="filter-select" id="statusFilter" onchange="filterOrders()">
+                    <option value="all" <%= status === 'all' ? 'selected' : '' %>>All Status</option>
+                    <option value="Pending" <%= status === 'Pending' ? 'selected' : '' %>>Pending</option>
+                    <option value="Processing" <%= status === 'Processing' ? 'selected' : '' %>>Processing</option>
+                    <option value="Shipped" <%= status === 'Shipped' ? 'selected' : '' %>>Shipped</option>
+                    <option value="Out for Delivery" <%= status === 'Out for Delivery' ? 'selected' : '' %>>Out for Delivery</option>
+                    <option value="Delivered" <%= status === 'Delivered' ? 'selected' : '' %>>Delivered</option>
+                    <option value="Cancelled" <%= status === 'Cancelled' ? 'selected' : '' %>>Cancelled</option>
+                    <option value="Return Request" <%= status === 'Return Request' ? 'selected' : '' %>>Return Request</option>
+                    <option value="Returned" <%= status === 'Returned' ? 'selected' : '' %>>Returned</option>
+                </select>
+                <select class="filter-select" id="dateFilter" onchange="filterOrders()">
+                    <option value="all" <%= months === 'all' ? 'selected' : '' %>>All Time</option>
+                    <option value="1" <%= months === '1' ? 'selected' : '' %>>Last Month</option>
+                    <option value="3" <%= months === '3' ? 'selected' : '' %>>Last 3 Months</option>
+                    <option value="6" <%= months === '6' ? 'selected' : '' %>>Last 6 Months</option>
+                </select>
+                <select class="filter-select" id="sortFilter" onchange="filterOrders()">
+                    <option value="createdOn" <%= sortBy === 'createdOn' ? 'selected' : '' %>>Sort by Date</option>
+                    <option value="orderId" <%= sortBy === 'orderId' ? 'selected' : '' %>>Sort by Order ID</option>
+                    <option value="finalAmount" <%= sortBy === 'finalAmount' ? 'selected' : '' %>>Sort by Amount</option>
+                </select>
+                <button class="btn btn-warning" onclick="clearSearch()">Clear Search</button>
+            </div>
+        </div>
+        
+        <!-- Orders Table -->
+        <div class="dashboard-card">
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Image</th>
+                                <th>Order ID</th>
+                                <th>Customer Name</th>
+                                <th>Order Date</th>
+                                <th>Total Amount</th>
+                                <th>Status</th>
+                                <th>View</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <% orders.forEach(order => { %>
+                                <tr>
+                                    <td>
+                                        <div class="order-image">
+                                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 512">
+                                                <path fill="#ffffff" d="M36.8 192l566.3 0c20.3 0 36.8-16.5 36.8-36.8c0-7.3-2.2-14.4-6.2-20.4L558.2 21.4C549.3 8 534.4 0 518.3 0L121.7 0c-16 0-31 8-39.9 21.4L6.2 134.7c-4 6.1-6.2 13.2-6.2 20.4C0 175.5 16.5 192 36.8 192zM64 224l0 160 0 80c0 26.5 21.5 48 48 48l224 0c26.5 0 48-21.5 48-48l0-80 0-160-64 0 0 160-192 0 0-160-64 0zm448 0l0 256c0 17.7 14.3 32 32 32s32-14.3 32-32l0-256-64 0z"/>
+                                            </svg>
+                                        </div>
+                                    </td>
+                                    <td><%= order.orderId %></td>
+                                    <td><%= order.address?.name || 'N/A' %></td>
+                                    <td><%= new Date(order.createdOn).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' }) %></td>
+                                    <td>₹<%= order.finalAmount.toLocaleString('en-IN') %></td>
+                                    <td>
+                                        <span class="status-badge status-<%= order.status.toLowerCase().replace(/ /g, '-') %>">
+                                            <%= order.status %>
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <div class="action-btns">
+                                            <a href="/admin/orders/<%= order.orderId %>" class="action-btn action-btn-view" aria-label="View order details">
+                                                <i class="fas fa-eye"></i>
+                                            </a>
+                                        </div>
+                                    </td>
+                                </tr>
+                            <% }) %>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Pagination -->
+        <nav aria-label="Page navigation">
+            <ul class="pagination">
+                <% if (currentPage > 1) { %>
+                    <li class="page-item">
+                        <a class="page-link" href="/admin/orders?page=<%= currentPage - 1 %>&search=<%= search ? encodeURIComponent(search) : '' %>&status=<%= status || 'all' %>&months=<%= months || 'all' %>&sortBy=<%= sortBy || 'createdOn' %>">Previous</a>
+                    </li>
+                <% } %>
+                <% for (let j = 1; j <= totalPages; j++) { %>
+                    <li class="page-item <%= j === currentPage ? 'active' : '' %>">
+                        <a class="page-link" href="/admin/orders?page=<%= j %>&search=<%= search ? encodeURIComponent(search) : '' %>&status=<%= status || 'all' %>&months=<%= months || 'all' %>&sortBy=<%= sortBy || 'createdOn' %>"><%= j %></a>
+                    </li>
+                <% } %>
+                <% if (currentPage < totalPages) { %>
+                    <li class="page-item">
+                        <a class="page-link" href="/admin/orders?page=<%= currentPage + 1 %>&search=<%= search ? encodeURIComponent(search) : '' %>&status=<%= status || 'all' %>&months=<%= months || 'all' %>&sortBy=<%= sortBy || 'createdOn' %>">Next</a>
+                    </li>
+                <% } %>
+            </ul>
+        </nav>
+    </div>
+        
+    <script>
+        // Filter orders by status, date, and search
+        function filterOrders() {
+            const status = document.getElementById('statusFilter').value;
+            const dateRange = document.getElementById('dateFilter').value;
+            const search = document.getElementById('searchInput').value;
+            const sortBy = document.getElementById('sortFilter').value;
+            
+            window.location.href = `/admin/orders?status=${status}&months=${dateRange}&search=${encodeURIComponent(search)}&sortBy=${sortBy}`;
+        }
+
+        // Clear search and reset filters
+        function clearSearch() {
+            window.location.href = '/admin/orders';
+        }
+
+        // Trigger search on Enter key
+        document.getElementById('searchInput').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                filterOrders();
+            }
+        });
+
+        // Show notification function
+        function showNotification(message, type = 'success') {
+            Swal.fire({
+                title: type === 'success' ? 'Success!' : 'Error!',
+                text: message,
+                icon: type,
+                toast: true,
+                position: 'bottom-end',
+                showConfirmButton: false,
+                timer: 3000,
+                timerProgressBar: true,
+                background: '#333',
+                color: '#fff'
+            });
+        }
+    </script>
+</body>
+</html>

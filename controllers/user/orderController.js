@@ -1,5 +1,8 @@
+
 const Order = require('../../models/orderSchema');
 const Address = require('../../models/addressSchema');
+
+const ITEMS_PER_PAGE = 10;
 
 const getMyOrders = async (req, res) => {
   try {
@@ -7,45 +10,45 @@ const getMyOrders = async (req, res) => {
       return res.redirect('/login');
     }
 
-    const filter = req.query.filter || 'all';
-    const page = parseInt(req.query.page) || 1;
-    const limit = 10;
-    const months = req.query.months ? parseInt(req.query.months) : 3;
+    const { filter = 'all', page = 1, months = 'all', search = '' } = req.query;
+    let query = { userId: req.user._id };
 
-    let statusFilter = {};
+    // Search by orderId
+    if (search) {
+      query.orderId = { $regex: search, $options: 'i' };
+    }
+
+    // Filter by status
     if (filter !== 'all') {
-      statusFilter.status = filter;
+      query.status = filter;
     }
+
+    // Filter by date range
     if (months !== 'all') {
-      const dateFilter = new Date();
-      dateFilter.setMonth(dateFilter.getMonth() - months);
-      statusFilter.createdOn = { $gte: dateFilter };
+      const dateThreshold = new Date();
+      dateThreshold.setMonth(dateThreshold.getMonth() - parseInt(months));
+      query.createdOn = { $gte: dateThreshold };
     }
 
-    const skip = (page - 1) * limit;
+    // Pagination
+    const totalOrders = await Order.countDocuments(query);
+    const totalPages = Math.ceil(totalOrders / ITEMS_PER_PAGE);
+    const currentPage = parseInt(page) || 1;
 
-    const orders = await Order.find({
-      userId: req.user._id,
-      ...statusFilter,
-    })
+    // Fetch orders
+    const orders = await Order.find(query)
       .populate('orderedItems.product')
       .sort({ createdOn: -1 })
-      .skip(skip)
-      .limit(limit);
-
-    const totalOrders = await Order.countDocuments({
-      userId: req.user._id,
-      ...statusFilter,
-    });
-
-    const totalPages = Math.ceil(totalOrders / limit);
+      .skip((currentPage - 1) * ITEMS_PER_PAGE)
+      .limit(ITEMS_PER_PAGE);
 
     res.render('order', {
       orders,
       filter,
-      currentPage: page,
+      currentPage,
       totalPages,
       months,
+      search,
       user: req.user,
     });
   } catch (error) {
@@ -57,31 +60,121 @@ const getMyOrders = async (req, res) => {
 const orderDetails = async (req, res) => {
   try {
     const orderId = req.params.id;
-
-    const order = await Order.findOne({
-      orderId: orderId,
-      userId: req.user._id,
-    })
-    .populate('orderedItems.product');
+    const order = await Order.findOne({ orderId, userId: req.user._id })
+      .populate('orderedItems.product');
 
     if (!order) {
       return res.status(404).render('page404', { message: 'Order not found.' });
     }
 
-    console.log(order)
-
-    res.render('order-details', { 
-      orderId,
-      order
-    });
+    res.render('order-details', { orderId, order });
   } catch (error) {
     console.error(error);
     res.status(500).render('page404', { message: 'Something went wrong while fetching order details.' });
   }
 };
 
+// Handle Return Request for Item
+const requestReturnItem = async (req, res) => {
+  try {
+    const { orderId, productId } = req.query;
+    const order = await Order.findOne({ orderId });
+
+    if (!order) {
+      return res.status(404).json({ success: false, message: 'Order not found' });
+    }
+
+    const item = order.orderedItems.find(item => item.product.toString() === productId);
+    if (!item) {
+      return res.status(404).json({ success: false, message: 'Item not found in order' });
+    }
+
+    if (item.status !== 'Delivered') {
+      return res.status(400).json({ success: false, message: 'Item cannot be returned' });
+    }
+
+    item.status = 'Return Request';
+    await order.save();
+
+    res.json({ success: true, message: 'Return request submitted' });
+  } catch (error) {
+    console.error('Error requesting return:', error);
+    res.status(500).json({ success: false, message: 'Server error' });
+  }
+};
+
+// Handle Cancel Request for Item
+const cancelItem = async (req, res) => {
+  try {
+    const { orderId, productId } = req.query;
+    const order = await Order.findOne({ orderId });
+
+    if (!order) {
+      return res.status(404).json({ success: false, message: 'Order not found' });
+    }
+
+    const item = order.orderedItems.find(item => item.product.toString() === productId);
+    if (!item) {
+      return res.status(404).json({ success: false, message: 'Item not found in order' });
+    }
+
+    if (item.status !== 'Pending' && item.status !== 'Processing') {
+      return res.status(400).json({ success: false, message: 'Item cannot be cancelled' });
+    }
+
+    item.status = 'Cancelled';
+    await order.save();
+
+    res.json({ success: true, message: 'Item cancelled successfully' });
+  } catch (error) {
+    console.error('Error cancelling item:', error);
+    res.status(500).json({ success: false, message: 'Server error' });
+  }
+};
+
+
+// const requestReturn = async (req, res) => {
+//   try {
+//     const { orderId, productId } = req.body;
+
+//     // Ensure the user is authenticated and owns the order
+//     const order = await Order.findOne({ orderId, userId: req.user._id });
+//     if (!order) {
+//       return res.status(404).json({ success: false, message: 'Order not found or you are not authorized' });
+//     }
+
+//     // Find the item in orderedItems
+//     const item = order.orderedItems.find(i => i.product.toString() === productId);
+//     if (!item) {
+//       return res.status(404).json({ success: false, message: 'Item not found in order' });
+//     }
+
+//     // Check if return is allowed (item must be delivered)
+//     if (item.status !== 'Delivered') {
+//       return res.status(400).json({ success: false, message: 'Return request not allowed for this item' });
+//     }
+
+//     // Set item status to 'Return Request'
+//     item.status = 'Return Request';
+//     await order.save();
+
+//     res.json({ success: true, message: 'Return request submitted successfully' });
+//   } catch (error) {
+//     console.error('Error requesting return:', error);
+//     res.status(500).json({ success: false, message: 'Error submitting return request' });
+//   }
+// };
 
 module.exports = {
   getMyOrders,
-  orderDetails
+  orderDetails,
+ requestReturnItem,
+  cancelItem,
 };
+
+
+
+
+
+
+  

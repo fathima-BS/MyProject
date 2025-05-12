@@ -530,34 +530,52 @@
         const imagePreviewWrapper = document.getElementById('image-preview-wrapper');
         const applyCropBtn = document.getElementById('apply-crop-btn');
         const cancelCropBtn = document.getElementById('cancel-crop-btn');
-        const croppedImageData = document.getElementById('cropped-image-data');
         const editProfileForm = document.getElementById('editProfileForm');
         const emailInput = document.getElementById('email');
         const verifyEmailBtn = document.getElementById('verify-email-btn');
         const emailMessage = document.getElementById('email-message');
         const originalEmail = emailInput.value;
+        let croppedBlob = null; // Store the cropped image Blob
 
         // Image upload and crop functionality
-        imageInput.addEventListener('change', function(event) {
-            const file = event.target.files[0];
-            if (file) {
-                const reader = new FileReader();
-                reader.onload = function(e) {
-                    imageToCrop.src = e.target.result;
-                    imagePreviewWrapper.style.display = 'block';
-                    if (cropper) {
-                        cropper.destroy();
-                    }
-                    cropper = new Cropper(imageToCrop, {
-                        aspectRatio: 1,
-                        viewMode: 1,
-                        autoCropArea: 0.8,
-                        responsive: true
-                    });
-                };
-                reader.readAsDataURL(file);
+       imageInput.addEventListener('change', function(event) {
+    const file = event.target.files[0];
+    const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png'];
+
+    if (file) {
+        // 🔴 File type check
+        if (!allowedTypes.includes(file.type)) {
+            Swal.fire({
+                icon: 'error',
+                title: 'Invalid Image Type',
+                text: 'Only JPG, JPEG, and PNG images are allowed.'
+            });
+            // Reset input so user can pick again
+            imageInput.value = '';
+            return;
+        }
+
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            imageToCrop.src = e.target.result;
+            imagePreviewWrapper.style.display = 'block';
+
+            if (cropper) {
+                cropper.destroy();
             }
-        });
+
+            cropper = new Cropper(imageToCrop, {
+                aspectRatio: 1,
+                viewMode: 1,
+                autoCropArea: 0.8,
+                responsive: true
+            });
+        };
+
+        reader.readAsDataURL(file);
+    }
+});
+
 
         applyCropBtn.addEventListener('click', function() {
             if (cropper) {
@@ -566,8 +584,8 @@
                     height: 200
                 });
                 canvas.toBlob(function(blob) {
+                    croppedBlob = blob; // Store the Blob
                     const url = URL.createObjectURL(blob);
-                    croppedImageData.value = url;
                     imagePreviewWrapper.style.display = 'none';
                     cropper.destroy();
                     cropper = null;
@@ -576,6 +594,8 @@
                     if (previewImg) {
                         previewImg.src = url;
                     }
+                    // Clear the original file input to avoid sending it
+                    imageInput.value = '';
                 }, 'image/jpeg', 0.8);
             }
         });
@@ -587,10 +607,10 @@
                 cropper = null;
             }
             imageInput.value = '';
-            croppedImageData.value = '';
+            croppedBlob = null;
         });
 
-        // Email verification
+        // Email verification (unchanged)
         if (!emailInput.disabled) {
             emailInput.addEventListener('input', function() {
                 if (emailInput.value !== originalEmail) {
@@ -641,17 +661,18 @@
         editProfileForm.addEventListener('submit', async function(event) {
             event.preventDefault();
 
-            const formData = new FormData(editProfileForm);
-
-            // If cropped image exists, append it
-            if (croppedImageData.value) {
-                try {
-                    const response = await fetch(croppedImageData.value);
-                    const blob = await response.blob();
-                    formData.append('profileImage', blob, 'cropped-image.jpg');
-                } catch (error) {
-                    console.error('Error appending cropped image:', error);
-                }
+            const formData = new FormData();
+            // Manually add form fields (exclude original profileImage input)
+            formData.append('fullName', document.getElementById('fullName').value);
+            formData.append('birthdate', document.getElementById('birthdate').value);
+            formData.append('phone', document.getElementById('phone').value);
+            formData.append('email', document.getElementById('email').value);
+            
+            // Append the cropped image or original image
+            if (croppedBlob) {
+                formData.append('profileImage', croppedBlob, 'cropped-image.jpg');
+            } else if (imageInput.files[0]) {
+                formData.append('profileImage', imageInput.files[0]);
             }
 
             try {

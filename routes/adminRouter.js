@@ -4,7 +4,8 @@ const adminController=require('../controllers/admin/adminController')
 const categoryController=require('../controllers/admin/categoryController')
 const brandController=require('../controllers/admin/brandController')
 const userController=require('../controllers/admin/userController')
-const productController=require('../controllers/admin/productController')
+const productController=require('../controllers/admin/productController');
+const adminOrderController = require('../controllers/admin/adminOrderController')
 const {adminAuth}=require('../middlewares/auth')
 
 
@@ -42,7 +43,14 @@ router.get('/get-product/:id',adminAuth, productController.getProduct);
 router.post('/edit-product',adminAuth, productController.editProduct);
 router.patch('/delete-product/:id',adminAuth, productController.deleteProduct);
 router.patch('/unlist-product/:id',adminAuth,productController.unlistProduct)
-router.patch('/list-product/:id',adminAuth,productController.listProduct)
+router.patch('/list-product/:id',adminAuth,productController.listProduct);
 
+
+// Order Management Routes
+router.get('/orders',adminAuth, adminOrderController.listOrders);
+router.get('/orders/:orderId',adminAuth, adminOrderController.viewOrderDetails);
+router.post('/orders/:orderId/status',adminAuth, adminOrderController.updateOrderStatus);
+router.get('/returnOrder',adminAuth, adminOrderController.handleReturnRequest);
+router.get('/returnOrder',adminAuth, adminOrderController.handleReturnRequest);
 
 module.exports=router
