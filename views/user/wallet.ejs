@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Wallet - My Store</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f9fafb;
+            color: #1f2937;
+        }
+
+        /* Breadcrumb Styling */
+        .breadcrumb a {
+            color: #4b5563;
+            transition: color 0.2s ease;
+        }
+
+        .breadcrumb a:hover {
+            color: #1f2937;
+        }
+
+        .breadcrumb span {
+            color: #9ca3af;
+        }
+
+        /* Card Styling */
+        .card {
+            background-color: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+            padding: 24px;
+            margin-bottom: 24px;
+            transition: box-shadow 0.3s ease;
+        }
+
+        .card:hover {
+            box-shadow: 0 6px 16px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Transaction Table */
+        .transaction-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 16px;
+        }
+
+        .transaction-table th,
+        .transaction-table td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #f3f4f6;
+        }
+
+        .transaction-table th {
+            background-color: #f3f4f6;
+            font-weight: 600;
+            color: #1f2937;
+            font-size: 14px;
+        }
+
+        .transaction-table td {
+            color: #4b5563;
+            font-size: 14px;
+        }
+
+        .credit {
+            color: #059669;
+            font-weight: 500;
+        }
+
+        .debit {
+            color: #dc2626;
+            font-weight: 500;
+        }
+
+        /* Buttons */
+        .btn-primary {
+            background-color: #1f2937;
+            color: white;
+            padding: 10px 16px;
+            border-radius: 8px;
+            font-weight: 500;
+            transition: background-color 0.3s ease;
+            text-decoration: none;
+        }
+
+        .btn-primary:hover {
+            background-color: #374151;
+        }
+    </style>
+</head>
+
+<body>
+    <%- include("../partials/user/header") %>
+
+    <div class="flex min-h-screen">
+        <!-- Sidebar -->
+        <div id="sidebar" class="hidden md:block">
+            <%- include("../partials/user/sidebar", { active: 'wallet' }) %>
+        </div>
+
+        <!-- Main Content -->
+        <div class="flex-1 max-w-6xl mx-auto px-4 py-8">
+            <!-- Breadcrumb Navigation -->
+            <div class="breadcrumb flex items-center text-sm mb-6">
+                <a href="/" style="text-decoration: none;">Home</a>
+                <span class="mx-2">></span>
+                <a href="/userProfile" style="text-decoration: none;">My Account</a>
+                <span class="mx-2">></span>
+                <span class="text-gray-500">My Wallet</span>
+            </div>
+
+            <!-- Wallet Balance -->
+            <div class="card">
+                <div class="flex justify-between items-center">
+                    <div>
+                        <h2 class="text-lg font-semibold mb-2">Wallet Balance</h2>
+                        <p class="text-2xl font-bold text-green-600">₹<%= wallet.balance.toLocaleString('en-IN') %></p>
+                    </div>
+                    
+                </div>
+            </div>
+
+            <!-- Transaction History -->
+            <div class="card">
+                <h2 class="text-lg font-semibold mb-4">Transaction History</h2>
+                <% if (wallet.transactions && wallet.transactions.length > 0) { %>
+                    <table class="transaction-table">
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>Description</th>
+                                <th>Type</th>
+                                <th>Amount</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <% wallet.transactions.forEach(transaction => { %>
+                                <tr>
+                                    <td><%= new Date(transaction.date).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }) %></td>
+                                    <td><%= transaction.description %></td>
+                                    <td>
+                                        <span class="<%= transaction.type === 'credit' ? 'credit' : 'debit' %>">
+                                            <%= transaction.type.charAt(0).toUpperCase() + transaction.type.slice(1) %>
+                                        </span>
+                                    </td>
+                                    <td>₹<%= transaction.amount.toLocaleString('en-IN') %></td>
+                                </tr>
+                            <% }) %>
+                        </tbody>
+                    </table>
+                <% } else { %>
+                    <p class="text-gray-600">No transactions found.</p>
+                <% } %>
+            </div>
+        </div>
+    </div>
+
+    <%- include("../partials/user/footer") %>
+</body>
+
+</html>

@@ -48,9 +48,9 @@ router.patch('/list-product/:id',adminAuth,productController.listProduct);
 
 // Order Management Routes
 router.get('/orders',adminAuth, adminOrderController.listOrders);
-router.get('/orders/:orderId',adminAuth, adminOrderController.viewOrderDetails);
-router.post('/orders/:orderId/status',adminAuth, adminOrderController.updateOrderStatus);
-router.get('/returnOrder',adminAuth, adminOrderController.handleReturnRequest);
-router.get('/returnOrder',adminAuth, adminOrderController.handleReturnRequest);
+router.get('/orders/:id', adminAuth, adminOrderController.getOrderDetails);
+router.post('/orders/:orderId/status', adminAuth, adminOrderController.updateOrderStatus);
+router.get('/returnOrder', adminAuth, adminOrderController.handleReturnRequest);
+
 
 module.exports=router

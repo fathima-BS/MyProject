@@ -36,13 +36,25 @@ const profileStorage = multer.diskStorage({
 
 // File filter for both product and profile images
 const fileFilter = (req, file, cb) => {
-    const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png'];
+    const allowedTypes = [
+        'image/jpeg',
+        'image/jpg',
+        'image/png',
+        'image/gif',
+        'image/webp',
+        'image/bmp',
+        'image/svg+xml',
+        'image/tiff',
+        'image/x-icon'
+    ];
+
     if (allowedTypes.includes(file.mimetype)) {
         cb(null, true);
     } else {
-        cb(new Error('Invalid file type. Only JPEG, JPG, and PNG are allowed.'), false);
+        cb(new Error('Invalid file type. Only image files are allowed.'), false);
     }
 };
+
 
 // Multer instance for product images (up to 3 images)
 const productUpload = multer({
