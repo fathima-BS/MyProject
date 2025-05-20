@@ -4,97 +4,133 @@ const Product = require('../../models/productSchema');
 const Address = require('../../models/addressSchema');
 const Order = require('../../models/orderSchema');
 const Wallet = require('../../models/walletSchema')
+const Offer=require('../../models/offerSchema')
 
 const loadCheckout = async (req, res) => {
-    try {
-        const userId = req.session.user;
-        if (!userId) {
-            return res.redirect('/login?error=Please login to proceed to checkout');
-        }
-
-        const user = await User.findById(userId).lean();
-        if (!user) {
-            return res.status(404).json({ message: 'User not found' });
-        }
-
-        let cart = await Cart.findOne({ userId }).populate('items.productId');
-        if (!cart || cart.items.length === 0) {
-            return res.redirect('/cart');
-        }
-
-        const addressDoc = await Address.findOne({ userId }).lean();
-
-        let cartItems = [];
-        let subtotal = 0;
-        let offerDiscount = 0;
-        let coupon = 0;
-        let total = 0;
-        let totalItems = 0;
-
-        cartItems = cart.items
-            .filter(item => {
-                const isValid =
-                    item.productId &&
-                    item.productId._id &&
-                    item.productId.salePrice != null &&
-                    item.productId.isListed &&
-                    item.productId.quantity > 0 &&
-                    item.quantity <= item.productId.quantity &&
-                    item.price != null &&
-                    item.totalPrice != null;
-                if (!isValid) {
-                    console.log('Filtered out invalid item:', item);
-                }
-                return isValid;
-            })
-            .map(item => {
-                const salePrice = Number(item.price) || Number(item.productId.salePrice);
-                const regularPrice = Number(item.productId.regularPrice) || salePrice;
-                const quantity = Number(item.quantity) || 1;
-
-                const totalPrice = salePrice * quantity;
-                subtotal += totalPrice;
-                offerDiscount += (regularPrice - salePrice) * quantity;
-                totalItems += quantity;
-
-                return {
-                    ...item.toObject(),
-                    totalPrice,
-                };
-            });
-
-        if (cartItems.length !== cart.items.length) {
-            cart.items = cartItems;
-            await cart.save();
-        }
-
-        if (cartItems.length === 0) {
-            return res.redirect('/cart');
-        }
-
-        total = subtotal;
-        if (cart.coupon && Number(cart.coupon.amount)) {
-            coupon = Number(cart.coupon.amount) || 0;
-            total -= coupon;
-        }
-
-        if (total < 0) {
-            total = 0;
-        }
-
-        res.render('checkout', {
-            cartItems,
-            subtotal,
-            offerDiscount,
-            coupon,
-            total,
-            totalItems,
-            addresses: addressDoc || { address: [] },
-        });
-    } catch (error) {
-        console.error('Error loading checkout:', error);
-        res.status(500).send('Server Error');
+  try {
+    const userId = req.session.user;
+    if (!userId) {
+      return res.redirect('/login?error=Please login to proceed to checkout');
     }
+
+    const user = await User.findById(userId).lean();
+    if (!user) {
+      return res.status(404).render('error', { message: 'User not found' });
+    }
+
+    const cart = await Cart.findOne({ userId })
+      .populate({
+        path: 'items.productId',
+        populate: { path: 'category' } // Populate category for Category offers
+      })
+      .lean();
+
+    if (!cart || !cart.items || cart.items.length === 0) {
+      return res.redirect('/cart');
+    }
+
+    const addressDoc = await Address.findOne({ userId }).lean();
+    const currentDate = new Date();
+
+    let cartItems = [];
+    let subtotal = 0;
+    let offerDiscount = 0;
+    let coupon = 0;
+    let total = 0;
+    let totalItems = 0;
+
+    // Process cart items with offer logic
+    cartItems = await Promise.all(cart.items
+      .filter(item => {
+        const isValid =
+          item.productId &&
+          item.productId._id &&
+          item.productId.salePrice != null &&
+          item.productId.isListed &&
+          item.productId.quantity > 0 &&
+          item.quantity <= item.productId.quantity;
+        if (!isValid) {
+          console.log('Filtered out invalid item:', item);
+        }
+        return isValid;
+      })
+      .map(async (item) => {
+        // Fetch offers for the product
+        const productOffer = await Offer.findOne({
+          offerType: 'Product',
+          applicableTo: item.productId._id,
+          isActive: true,
+          validFrom: { $lte: currentDate },
+          validUpto: { $gte: currentDate }
+        }).lean();
+
+        const categoryOffer = item.productId.category ? await Offer.findOne({
+          offerType: 'Category',
+          applicableTo: item.productId.category._id,
+          isActive: true,
+          validFrom: { $lte: currentDate },
+          validUpto: { $gte: currentDate }
+        }).lean() : null;
+
+        let finalOffer = null;
+        if (productOffer && categoryOffer) {
+          finalOffer = productOffer.discountAmount > categoryOffer.discountAmount ? productOffer : categoryOffer;
+        } else if (productOffer) {
+          finalOffer = productOffer;
+        } else if (categoryOffer) {
+          finalOffer = categoryOffer;
+        }
+
+        const salePrice = Number(item.productId.salePrice);
+        const regularPrice = Number(item.productId.regularPrice) || salePrice;
+        const quantity = Number(item.quantity) || 1;
+        const discountedPrice = finalOffer
+          ? salePrice * (1 - finalOffer.discountAmount / 100)
+          : salePrice;
+
+        const saleTotal = salePrice * quantity;
+        const discountTotal = (salePrice - discountedPrice) * quantity;
+        subtotal += saleTotal;
+        offerDiscount += discountTotal;
+        totalItems += quantity;
+
+        return {
+          ...item,
+          finalOffer,
+          discountedPrice,
+          saleTotal,
+          regularPrice,
+          salePrice
+        };
+      }));
+
+    if (cartItems.length === 0) {
+      return res.redirect('/cart');
+    }
+
+    total = subtotal - offerDiscount;
+    if (cart.coupon && Number(cart.coupon.amount)) {
+      coupon = Number(cart.coupon.amount) || 0;
+      total -= coupon;
+    }
+
+    if (total < 0) {
+      total = 0;
+    }
+
+    res.render('checkout', {
+      cartItems,
+      subtotal: subtotal.toFixed(2),
+      offerDiscount: offerDiscount.toFixed(2),
+      coupon: coupon.toFixed(2),
+      total: total.toFixed(2),
+      totalItems,
+      addresses: addressDoc || { address: [] },
+    });
+  } catch (error) {
+    console.error('Error loading checkout:', error.message, error.stack);
+    res.status(500).render('error', { message: 'Unable to load checkout page' });
+  }
 };
 
 const loadPayment = async (req, res) => {

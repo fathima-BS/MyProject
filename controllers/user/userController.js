@@ -6,6 +6,7 @@ const Cart = require('../../models/cartSchema');
 const Wishlist = require('../../models/wishlistSchema');
 const nodemailer = require('nodemailer');
 const mongoose = require('mongoose');
+const Offer=require('../../models/offerSchema')
 const bcrypt = require('bcrypt');
 
 const pageNotFound = async (req, res) => {
@@ -196,8 +197,8 @@ const loadHomePage = async (req, res) => {
     const userId = req.session.user;
     const userData = userId ? await User.findById(userId).lean() : null;
 
-    const listedCategories = await Category.find({ isListed: true, isDeleted: false }).select('_id');
-    const listedBrands = await Brand.find({ isListed: true, isDeleted: false }).select('_id');
+    const listedCategories = await Category.find({ isListed: true, isDeleted: false }).select('_id').lean();
+    const listedBrands = await Brand.find({ isListed: true, isDeleted: false }).select('_id').lean();
 
     const products = await Product.find({
       isDeleted: false,
@@ -209,15 +210,61 @@ const loadHomePage = async (req, res) => {
       .sort({ createdAt: -1 })
       .limit(8)
       .populate('brand')
+      .populate('category') 
       .lean();
+
+  
+
+    let productsWithOffers = products;
+    if (Offer) {
+      const currentDate = new Date();
+      productsWithOffers = await Promise.all(products.map(async (product) => {
+        const productOffer = await Offer.findOne({
+          offerType: 'Product',
+          applicableTo: product._id,
+          isActive: true,
+          validFrom: { $lte: currentDate },
+          validUpto: { $gte: currentDate }
+        }).lean();
+
+        const categoryOffer = product.category ? await Offer.findOne({
+          offerType: 'Category',
+          applicableTo: product.category._id,
+          isActive: true,
+          validFrom: { $lte: currentDate },
+          validUpto: { $gte: currentDate }
+        }).lean() : null;
+
+        let finalOffer = null;
+        if (productOffer && categoryOffer) {
+          finalOffer = productOffer.discountAmount > categoryOffer.discountAmount ? productOffer : categoryOffer;
+        } else if (productOffer) {
+          finalOffer = productOffer;
+        } else if (categoryOffer) {
+          finalOffer = categoryOffer;
+        }
+
+        const discountedPrice = finalOffer
+          ? product.salePrice * (1 - finalOffer.discountAmount / 100)
+          : product.salePrice;
+
+        return {
+          ...product,
+          finalOffer,
+          discountedPrice
+        };
+      }));
+    } else {
+      console.warn('Offer model not defined, skipping offer logic');
+    }
 
     res.render('home', {
       user: userData,
-      productData: products,
+      productData: productsWithOffers,
     });
   } catch (err) {
-    console.error('Error loading home page:', err);
-    res.redirect('/pageNotFound');
+    console.error('Error loading home page:', err.message, err.stack);
+    res.status(500).render('error', { message: 'Unable to load home page' });
   }
 };
 
@@ -313,14 +360,54 @@ const loadShopPage = async (req, res) => {
       .populate('category')
       .lean();
 
-    console.log(`Products found: ${products.length}`);
+ 
+
+    const currentDate = new Date();
+
+    // Add offer data for each product
+    const productsWithOffers = await Promise.all(products.map(async (product) => {
+      const productOffer = await Offer.findOne({
+        offerType: 'Product',
+        applicableTo: product._id,
+        isActive: true,
+        validFrom: { $lte: currentDate },
+        validUpto: { $gte: currentDate }
+      }).lean();
+
+      const categoryOffer = product.category ? await Offer.findOne({
+        offerType: 'Category',
+        applicableTo: product.category._id,
+        isActive: true,
+        validFrom: { $lte: currentDate },
+        validUpto: { $gte: currentDate }
+      }).lean() : null;
+
+      let finalOffer = null;
+      if (productOffer && categoryOffer) {
+        finalOffer = productOffer.discountAmount > categoryOffer.discountAmount ? productOffer : categoryOffer;
+      } else if (productOffer) {
+        finalOffer = productOffer;
+      } else if (categoryOffer) {
+        finalOffer = categoryOffer;
+      }
+
+      const discountedPrice = finalOffer
+        ? product.salePrice * (1 - finalOffer.discountAmount / 100)
+        : product.salePrice;
+
+      return {
+        ...product,
+        finalOffer,
+        discountedPrice
+      };
+    }));
 
     const totalProducts = await Product.countDocuments(filter);
     const totalPages = Math.ceil(totalProducts / perPage);
     const currentPage = Math.max(1, Math.min(parseInt(page) || 1, totalPages));
 
     res.render('shop', {
-      products,
+      products: productsWithOffers,
       totalPages,
       currentPage,
       search: search || '',
@@ -334,16 +421,11 @@ const loadShopPage = async (req, res) => {
       message: req.session.userMsg || null,
     });
     req.session.userMsg = null;
-  } catch (error) {
-    console.error('Error loading shop page:', error);
+  }  catch (error) {
+    console.log('Error loading shop page:', error);
     res.redirect('/pageNotFound');
   }
 };
-
-
-
-
-
 
 
 const logout = async (req, res) => {

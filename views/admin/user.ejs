@@ -75,19 +75,26 @@
     </div>
 
     <div class="pagination">
+        <span class="page-info">Page <%= currentPage %> of <%= totalPages %></span>
         <% if (currentPage > 1) { %>
             <a href="/admin/user?page=<%= currentPage - 1 %>&search=<%= typeof search !== 'undefined' ? encodeURIComponent(search) : '' %>" style="text-decoration: none;">
                 <button class="nav-btn">Previous</button>
             </a>
         <% } %>
-        <button class="page-btn active"><%= currentPage %></button>
+        <% for (let j = 1; j <= totalPages; j++) { %>
+            <a href="/admin/user?page=<%= j %>&search=<%= typeof search !== 'undefined' ? encodeURIComponent(search) : '' %>" style="text-decoration: none;">
+                <button class="page-btn <%= (j === currentPage) ? 'active' : '' %>">
+                    <%= j %>
+                </button>
+            </a>
+        <% } %>
         <% if (currentPage < totalPages) { %>
             <a href="/admin/user?page=<%= currentPage + 1 %>&search=<%= typeof search !== 'undefined' ? encodeURIComponent(search) : '' %>" style="text-decoration: none;">
                 <button class="nav-btn">Next</button>
             </a>
         <% } %>
     </div>
- </div>
+</div>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
     <script>
         function unblockUser(userId) {

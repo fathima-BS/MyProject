@@ -96,14 +96,7 @@
                                         name="salePrice" step="0.01">
                                 </div>
                             </div>
-                            <div class="row mb-3">
-                                <div class="col">
-                                    <label for="productOffer" class="form-label text-white">Product Offer (%)</label>
-                                    <input type="number" class="form-control bg-dark text-white" id="productOffer"
-                                        name="productOffer" value="0">
-                                </div>
-                                
-                            </div>
+                            
                             <div class="mb-3">
                                 <label for="productDescription" class="form-label text-white">Description</label>
                                 <textarea class="form-control bg-dark text-white" id="productDescription"
@@ -411,7 +404,7 @@
                 const quantity = document.getElementById("productQuantity").value.trim();
                 const regularPrice = document.getElementById("regularPrice").value.trim();
                 const salePrice = document.getElementById("salePrice").value.trim();
-                const productOffer = document.getElementById("productOffer").value.trim();
+                
                 const description = document.getElementById("productDescription").value.trim();
                 const category = document.getElementById("productCategory").value;
                 const brand = document.getElementById("productBrand").value;
@@ -479,16 +472,7 @@
                     }); 
                 }
 
-                if (productOffer === "" || isNaN(productOffer) || parseFloat(productOffer) < 0 || parseFloat(productOffer) > 100) {
-                    return Swal.fire({
-                        icon: "warning",
-                        title: "Invalid Product Offer",
-                        text: "Product Offer must be between 0 and 100.",
-                        timer: 3000,
-                        showConfirmButton: false,
-                    });
-                }
-
+              
                 if (!description) {
                     return Swal.fire({
                         icon: "warning",
@@ -548,7 +532,7 @@
                 formData.append("quantity", quantity);
                 formData.append("regularPrice", regularPrice);
                 formData.append("salePrice", salePrice);
-                formData.append("productOffer", productOffer);
+               
                 formData.append("description", description);
                 formData.append("category", category);
                 formData.append("brand", brand);
@@ -700,7 +684,7 @@
                         document.getElementById("productQuantity").value = product.quantity;
                         document.getElementById("regularPrice").value = product.regularPrice;
                         document.getElementById("salePrice").value = product.salePrice;
-                        document.getElementById("productOffer").value = product.productOffer;
+                     
                         document.getElementById("productDescription").value = product.description;
                         document.getElementById("productCategory").value = product.category._id;
                         document.getElementById("productBrand").value = product.brand._id;

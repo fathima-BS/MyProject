@@ -1,0 +1,506 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Manage Coupons</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <link rel="stylesheet" href="/css/admin/coupon.css">
+</head>
+<body>
+  <%- include("../partials/admin/sidebar", { activePage: 'coupons' }) %>
+
+  <!-- Add Coupon Modal -->
+  <div class="modal fade" id="addCouponModal" tabindex="-1" aria-labelledby="addCouponModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <form id="addCouponForm">
+        <div class="modal-content bg-dark text-white">
+          <div class="modal-header">
+            <h5 class="modal-title" id="addCouponModalLabel">Add Coupon</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body">
+            <div class="mb-3">
+              <label for="couponName" class="form-label">Coupon Name</label>
+              <input type="text" class="form-control bg-dark text-white" id="couponName" name="name">
+              <span id="addCouponForm-name-error" class="text-danger"></span>
+            </div>
+            <div class="mb-3">
+              <label for="couponCode" class="form-label">Coupon Code</label>
+              <input type="text" class="form-control bg-dark text-white" id="couponCode" name="couponCode">
+              <span id="addCouponForm-couponCode-error" class="text-danger"></span>
+            </div>
+            <div class="mb-3">
+              <label for="description" class="form-label">Description</label>
+              <textarea class="form-control bg-dark text-white" id="description" name="description" rows="3"></textarea>
+              <span id="addCouponForm-description-error" class="text-danger"></span>
+            </div>
+            <div class="mb-3">
+              <label for="minimumCartValue" class="form-label">Minimum Cart Value</label>
+              <input type="number" class="form-control bg-dark text-white" id="minimumCartValue" name="minimumPrice" step="0.01" min="0">
+              <span id="addCouponForm-minimumPrice-error" class="text-danger"></span>
+            </div>
+            <div class="mb-3">
+              <label for="offerAmount" class="form-label">Offer Amount</label>
+              <input type="number" class="form-control bg-dark text-white" id="offerAmount" name="offerPrice" step="0.01" min="0">
+              <span id="addCouponForm-offerPrice-error" class="text-danger"></span>
+            </div>
+            <div class="mb-3">
+              <label for="validFrom" class="form-label">Valid From</label>
+              <input type="date" class="form-control bg-dark text-white" id="validFrom" name="createdOn">
+              <span id="addCouponForm-createdOn-error" class="text-danger"></span>
+            </div>
+            <div class="mb-3">
+              <label for="validUpto" class="form-label">Valid Upto</label>
+              <input type="date" class="form-control bg-dark text-white" id="validUpto" name="expireOn">
+              <span id="addCouponForm-expireOn-error" class="text-danger"></span>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            <button type="submit" class="btn btn-primary">Save Coupon</button>
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Edit Coupon Modal -->
+  <div class="modal fade" id="editCouponModal" tabindex="-1" aria-labelledby="editCouponModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <form id="editCouponForm">
+        <div class="modal-content bg-dark text-white">
+          <div class="modal-header">
+            <h5 class="modal-title" id="editCouponModalLabel">Edit Coupon</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body">
+            <div class="mb-3">
+              <label for="editCouponName" class="form-label">Coupon Name</label>
+              <input type="text" class="form-control bg-dark text-white" id="editCouponName" name="name">
+              <span id="editCouponForm-name-error" class="text-danger"></span>
+            </div>
+            <div class="mb-3">
+              <label for="editCouponCode" class="form-label">Coupon Code</label>
+              <input type="text" class="form-control bg-dark text-white" id="editCouponCode" name="couponCode">
+              <span id="editCouponForm-couponCode-error" class="text-danger"></span>
+            </div>
+            <div class="mb-3">
+              <label for="editDescription" class="form-label">Description</label>
+              <textarea class="form-control bg-dark text-white" id="editDescription" name="description" rows="3"></textarea>
+              <span id="editCouponForm-description-error" class="text-danger"></span>
+            </div>
+            <div class="mb-3">
+              <label for="editMinimumCartValue" class="form-label">Minimum Cart Value</label>
+              <input type="number" class="form-control bg-dark text-white" id="editMinimumCartValue" name="minimumPrice" step="0.01" min="0">
+              <span id="editCouponForm-minimumPrice-error" class="text-danger"></span>
+            </div>
+            <div class="mb-3">
+              <label for="editOfferAmount" class="form-label">Offer Amount</label>
+              <input type="number" class="form-control bg-dark text-white" id="editOfferAmount" name="offerPrice" step="0.01" min="0">
+              <span id="editCouponForm-offerPrice-error" class="text-danger"></span>
+            </div>
+            <div class="mb-3">
+              <label for="editValidFrom" class="form-label">Valid From</label>
+              <input type="date" class="form-control bg-dark text-white" id="editValidFrom" name="createdOn">
+              <span id="editCouponForm-createdOn-error" class="text-danger"></span>
+            </div>
+            <div class="mb-3">
+              <label for="editValidUpto" class="form-label">Valid Upto</label>
+              <input type="date" class="form-control bg-dark text-white" id="editValidUpto" name="expireOn">
+              <span id="editCouponForm-expireOn-error" class="text-danger"></span>
+            </div>
+            <input type="hidden" id="couponId" name="couponId">
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            <button type="submit" class="btn btn-primary">Save Coupon</button>
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <div class="container">
+    <div class="header">
+      <h2>Manage Coupons</h2>
+      <button class="btn add-btn bg-primary" data-bs-toggle="modal" data-bs-target="#addCouponModal">ADD COUPON +</button>
+    </div>
+
+    <div class="search-container">
+      <form action="/admin/coupons" method="get" id="searchForm">
+        <div class="input-group">
+          <input type="text" class="search-input bg-dark text-white" name="search" placeholder="Search by coupon name or code"
+                 value="<%= typeof search !== 'undefined' ? search : '' %>">
+          <button type="submit" class="btn btn-outline-primary">Search</button>
+        </div>
+      </form>
+      <% if (typeof search !== 'undefined' && search.trim()) { %>
+        <form action="/admin/coupons" method="get" style="display: inline;">
+          <button type="submit" class="clear-btn" id="clearSearch">Clear</button>
+        </form>
+      <% } %>
+    </div>
+
+    <div class="table-responsive">
+      <table class="table table-dark">
+        <thead>
+          <tr>
+            <th>COUPON NAME</th>
+            <th>COUPON CODE</th>
+            <th>MIN CART VALUE</th>
+            <th>COUPON AMOUNT</th>
+            <th>VALID FROM</th>
+            <th>VALID UPTO</th>
+            <th>ACTIONS</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% if (coupons && coupons.length > 0) { %>
+            <% coupons.forEach((coupon, index) => { %>
+              <tr>
+                <td><%= coupon.name %></td>
+                <td><%= coupon.couponCode %></td>
+                <td>₹<%= coupon.minimumPrice.toFixed(2) %></td>
+                <td>₹<%= coupon.offerPrice.toFixed(2) %></td>
+                <td><%= coupon.createdOn.toLocaleDateString() %></td>
+                <td><%= coupon.expireOn.toLocaleDateString() %></td>
+                <td>
+                  <button class="action-btn edit-btn" onclick='editCoupon(<%- JSON.stringify(coupon) %>)'>
+                    <i class="fas fa-edit"></i>
+                  </button>
+                  <button class="action-btn delete-btn" onclick="deleteCoupon('<%= coupon._id %>')">
+                    <i class="fas fa-trash"></i>
+                  </button>
+                </td>
+              </tr>
+            <% }) %>
+          <% } else { %>
+            <tr>
+              <td colspan="7">No coupons found</td>
+            </tr>
+          <% } %>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="pagination">
+      <span class="page-info">Page <%= currentPage %> of <%= totalPages %></span>
+      <% if (currentPage > 1) { %>
+        <a href="/admin/coupons?page=<%= currentPage - 1 %>&search=<%= typeof search !== 'undefined' ? encodeURIComponent(search) : '' %>"
+           style="text-decoration: none;">
+          <button class="nav-btn">Previous</button>
+        </a>
+      <% } %>
+      <% for (let j = 1; j <= totalPages; j++) { %>
+        <a href="/admin/coupons?page=<%= j %>&search=<%= typeof search !== 'undefined' ? encodeURIComponent(search) : '' %>"
+           style="text-decoration: none;">
+          <button class="page-btn <%= (j === currentPage) ? 'active' : '' %>">
+            <%= j %>
+          </button>
+        </a>
+      <% } %>
+      <% if (currentPage < totalPages) { %>
+        <a href="/admin/coupons?page=<%= currentPage + 1 %>&search=<%= typeof search !== 'undefined' ? encodeURIComponent(search) : '' %>"
+           style="text-decoration: none;">
+          <button class="nav-btn">Next</button>
+        </a>
+      <% } %>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', function () {
+      // Utility function to clear all error messages in a form
+      function clearErrors(formId) {
+        const errorElements = document.querySelectorAll(`#${formId} .text-danger`);
+        errorElements.forEach(element => {
+          element.textContent = '';
+        });
+      }
+
+      // Format date to YYYY-MM-DD for input fields
+      function formatDateForInput(dateString) {
+        if (!dateString) return '';
+        const date = new Date(dateString);
+        return date.toISOString().split('T')[0];
+      }
+
+      // Validate form data and display any errors
+      function validateForm(formId) {
+        const form = document.getElementById(formId);
+        if (!form) return false;
+        
+        clearErrors(formId);
+        let isValid = true;
+        
+        // Get all form input elements
+        const inputs = {
+          name: form.querySelector('[name="name"]'),
+          couponCode: form.querySelector('[name="couponCode"]'),
+          description: form.querySelector('[name="description"]'),
+          minimumPrice: form.querySelector('[name="minimumPrice"]'),
+          offerPrice: form.querySelector('[name="offerPrice"]'),
+          createdOn: form.querySelector('[name="createdOn"]'),
+          expireOn: form.querySelector('[name="expireOn"]')
+        };
+        
+        // Validation rules
+        if (!inputs.name || !inputs.name.value.trim()) {
+          showError(formId, 'name', 'Coupon Name is required');
+          isValid = false;
+        }
+        
+        if (!inputs.couponCode || !inputs.couponCode.value.trim()) {
+          showError(formId, 'couponCode', 'Coupon Code is required');
+          isValid = false;
+        }
+        
+        if (inputs.description && inputs.description.value.trim().length > 80) {
+          showError(formId, 'description', 'Description must not exceed 80 characters');
+          isValid = false;
+        }
+        
+        if (inputs.minimumPrice) {
+          const minPrice = inputs.minimumPrice.value.trim() === '' ? 0 : parseFloat(inputs.minimumPrice.value);
+          if (isNaN(minPrice) || minPrice < 0) {
+            showError(formId, 'minimumPrice', 'Minimum Cart Value must be a non-negative number');
+            isValid = false;
+          }
+        }
+        
+        if (inputs.offerPrice) {
+          const offerAmount = inputs.offerPrice.value.trim() === '' ? 0 : parseFloat(inputs.offerPrice.value);
+          if (isNaN(offerAmount) || offerAmount < 0) {
+            showError(formId, 'offerPrice', 'Offer Amount must be a non-negative number');
+            isValid = false;
+          }
+        }
+        
+        if (!inputs.createdOn || !inputs.createdOn.value) {
+          showError(formId, 'createdOn', 'Valid From date is required');
+          isValid = false;
+        }
+        
+        if (!inputs.expireOn || !inputs.expireOn.value) {
+          showError(formId, 'expireOn', 'Valid Upto date is required');
+          isValid = false;
+        }
+        
+        if (inputs.createdOn && inputs.expireOn && 
+            inputs.createdOn.value && inputs.expireOn.value && 
+            new Date(inputs.createdOn.value) >= new Date(inputs.expireOn.value)) {
+          showError(formId, 'expireOn', 'Valid Upto must be after Valid From');
+          isValid = false;
+        }
+        
+        return isValid;
+      }
+      
+      // Show error message for a specific field
+      function showError(formId, fieldName, message) {
+        const errorElement = document.getElementById(`${formId}-${fieldName}-error`);
+        if (errorElement) {
+          element.textContent = message;
+        } else {
+          console.warn(`Error element not found for ${fieldName} in form ${formId}`);
+        }
+      }
+      
+      // Get form data as an object
+      function getFormData(formId) {
+        const form = document.getElementById(formId);
+        if (!form) return null;
+        
+        const formData = {
+          name: form.querySelector('[name="name"]')?.value.trim() || '',
+          couponCode: form.querySelector('[name="couponCode"]')?.value.trim() || '',
+          description: form.querySelector('[name="description"]')?.value.trim() || '',
+          minimumPrice: parseFloat(form.querySelector('[name="minimumPrice"]')?.value || 0),
+          offerPrice: parseFloat(form.querySelector('[name="offerPrice"]')?.value || 0),
+          createdOn: form.querySelector('[name="createdOn"]')?.value || '',
+          expireOn: form.querySelector('[name="expireOn"]')?.value || ''
+        };
+        
+        // Add couponId if it exists (for edit form)
+        const couponIdField = form.querySelector('[name="couponId"]');
+        if (couponIdField && couponIdField.value) {
+          formData.couponId = couponIdField.value;
+        }
+        
+        return formData;
+      }
+      
+      // Submit form data to the server
+      function submitFormData(url, formData, modalId, successMessage) {
+        fetch(url, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(formData),
+          redirect: 'manual'
+        })
+        .then(response => {
+          // Handle potential redirect (auth issues)
+          if (response.status === 0 || response.type === 'opaqueredirect') {
+            throw new Error('Request was redirected (possibly due to authentication failure)');
+          }
+          if (!response.ok) {
+            return response.json().then(data => {
+              throw new Error(data.message || `Server error: ${response.status}`);
+            });
+          }
+          return response.json();
+        })
+        .then(data => {
+          if (data.success) {
+            Swal.fire({
+              icon: 'success',
+              title: successMessage || data.message || 'Operation successful',
+              timer: 1500
+            }).then(() => {
+              // Close modal and reload page
+              if (modalId) {
+                const modalElement = document.getElementById(modalId);
+                if (modalElement) {
+                  const modal = bootstrap.Modal.getInstance(modalElement);
+                  if (modal) modal.hide();
+                }
+              }
+              location.reload();
+            });
+          } else {
+            Swal.fire({
+              icon: 'error',
+              title: 'Error',
+              text: data.message || 'Operation failed',
+              timer: 2000
+            });
+          }
+        })
+        .catch(error => {
+          Swal.fire({
+            icon: 'error',
+            title: 'Error',
+            text: error.message || 'Something went wrong',
+            timer: 2000
+          });
+        });
+      }
+
+      // Set up Add Coupon form submission
+      const addCouponForm = document.getElementById('addCouponForm');
+      if (addCouponForm) {
+        addCouponForm.addEventListener('submit', function (e) {
+          e.preventDefault();
+          
+          if (validateForm('addCouponForm')) {
+            const formData = getFormData('addCouponForm');
+            submitFormData('/admin/coupons/add', formData, 'addCouponModal', 'Coupon added successfully');
+          }
+        });
+      }
+ 
+      // Set up Edit Coupon form submission
+      const editCouponForm = document.getElementById('editCouponForm');
+      if (editCouponForm) {
+        editCouponForm.addEventListener('submit', function (e) {
+          e.preventDefault();
+          
+          if (validateForm('editCouponForm')) {
+            const formData = getFormData('editCouponForm');
+            submitFormData('/admin/coupons/edit', formData, 'editCouponModal', 'Coupon updated successfully');
+          }
+        });
+      }
+
+      // Edit Coupon function (global scope for button click handlers)
+      window.editCoupon = function(coupon) {
+        document.getElementById('editCouponForm-name-error').textContent = '';
+        document.getElementById('editCouponForm-couponCode-error').textContent = '';
+        document.getElementById('editCouponForm-description-error').textContent = '';
+        document.getElementById('editCouponForm-minimumPrice-error').textContent = '';
+        document.getElementById('editCouponForm-offerPrice-error').textContent = '';
+        document.getElementById('editCouponForm-createdOn-error').textContent = '';
+        document.getElementById('editCouponForm-expireOn-error').textContent = '';
+        
+        document.getElementById('editCouponName').value = coupon.name || '';
+        document.getElementById('editCouponCode').value = coupon.couponCode || '';
+        document.getElementById('editDescription').value = coupon.description || '';
+        document.getElementById('editMinimumCartValue').value = coupon.minimumPrice || 0;
+        document.getElementById('editOfferAmount').value = coupon.offerPrice || 0;
+        document.getElementById('editValidFrom').value = formatDateForInput(coupon.createdOn);
+        document.getElementById('editValidUpto').value = formatDateForInput(coupon.expireOn);
+        document.getElementById('couponId').value = coupon._id || '';
+        
+        const modal = new bootstrap.Modal(document.getElementById('editCouponModal'));
+        modal.show();
+      };
+
+      // Delete Coupon function (global scope for button click handlers)
+      window.deleteCoupon = function(id) {
+        Swal.fire({
+          title: 'Are you sure?',
+          text: "You are about to delete this coupon!",
+          icon: 'warning',
+          showCancelButton: true,
+          confirmButtonColor: '#3085d6',
+          cancelButtonColor: '#d33',
+          confirmButtonText: 'Yes, delete it!'
+        }).then((result) => {
+          if (result.isConfirmed) {
+            fetch(`/admin/coupons/delete/${id}`, {
+              method: 'DELETE',
+              headers: {
+                'Content-Type': 'application/json'
+              },
+              redirect: 'manual'
+            })
+            .then(response => {
+              if (response.status === 0 || response.type === 'opaqueredirect') {
+                throw new Error('Request was redirected (possibly due to authentication failure)');
+              }
+              if (!response.ok) {
+                return response.json().then(data => {
+                  throw new Error(data.message || `Server error: ${response.status}`);
+                });
+              }
+              return response.json();
+            })
+            .then(data => {
+              if (data.success) {
+                Swal.fire({
+                  icon: 'success',
+                  title: data.message || 'Coupon deleted successfully',
+                  timer: 1500
+                }).then(() => {
+                  location.reload();
+                });
+              } else {
+                Swal.fire({
+                  icon: 'error',
+                  title: 'Error',
+                  text: data.message || 'Error while deleting coupon',
+                  timer: 2000
+                });
+              }
+            })
+            .catch(error => {
+              Swal.fire({
+                icon: 'error',
+                title: 'Error',
+                text: error.message || 'Something went wrong',
+                timer: 2000
+              });
+            });
+          }
+        });
+      };
+    });
+  </script>
+</body>
+</html>

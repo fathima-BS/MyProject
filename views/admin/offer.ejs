@@ -1,0 +1,612 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Manage Offers</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+  <link rel="stylesheet" href="/css/admin/offer.css">
+</head>
+<body>
+  <%- include("../partials/admin/sidebar", { activePage: 'offers' }) %>
+
+  <!-- Add Offer Modal -->
+  <div class="modal fade" id="addOfferModal" tabindex="-1" aria-labelledby="addOfferModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <form id="addOfferForm">
+        <div class="modal-content bg-dark text-white">
+          <div class="modal-header">
+            <h5 class="modal-title" id="addOfferModalLabel">Add New Offer</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body">
+            <div class="mb-3">
+              <label for="offerName" class="form-label">Offer Name</label>
+              <input type="text" class="form-control bg-dark text-white" id="offerName" name="offerName">
+              <span id="addOfferForm-offerName-error" class="text-danger"></span>
+            </div>
+            <div class="mb-3">
+              <label for="description" class="form-label">Description</label>
+              <textarea class="form-control bg-dark text-white" id="description" name="description" rows="3"></textarea>
+              <span id="addOfferForm-description-error" class="text-danger"></span>
+            </div>
+            <!-- Hidden input for discountType -->
+            <input type="hidden" id="discountType" name="discountType" value="percentage">
+            <div class="mb-3">
+              <label for="discountAmount" class="form-label">Discount Percentage</label>
+              <input type="number" class="form-control bg-dark text-white" id="discountAmount" name="discountAmount" step="0.01" min="0" placeholder="Enter % (e.g., 10)">
+              <span id="addOfferForm-discountAmount-error" class="text-danger"></span>
+            </div>
+            <div class="mb-3">
+              <label for="validFrom" class="form-label">Valid From</label>
+              <input type="date" class="form-control bg-dark text-white" id="validFrom" name="validFrom">
+              <span id="addOfferForm-validFrom-error" class="text-danger"></span>
+            </div>
+            <div class="mb-3">
+              <label for="validUpto" class="form-label">Valid Upto</label>
+              <input type="date" class="form-control bg-dark text-white" id="validUpto" name="validUpto">
+              <span id="addOfferForm-validUpto-error" class="text-danger"></span>
+            </div>
+            <div class="mb-3">
+              <label for="offerType" class="form-label">Offer Applies To</label>
+              <select class="form-control bg-dark text-white" id="offerType" name="offerType">
+                <option value="" selected disabled>Select Type</option>
+                <option value="Brand">Brand</option>
+                <option value="Category">Category</option>
+                <option value="Product">Product</option>
+              </select>
+              <span id="addOfferForm-offerType-error" class="text-danger"></span>
+            </div>
+            <div class="mb-3" id="applicableToContainer" style="display: none;">
+              <label for="applicableTo" class="form-label">Applicable To</label>
+              <select class="form-control bg-dark text-white" id="applicableTo" name="applicableTo">
+                <option value="" selected disabled>Select Applicable</option>
+              </select>
+              <span id="addOfferForm-applicableTo-error" class="text-danger"></span>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            <button type="submit" class="btn btn-primary">Create Offer</button>
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Edit Offer Modal -->
+  <div class="modal fade" id="editOfferModal" tabindex="-1" aria-labelledby="editOfferModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <form id="editOfferForm">
+        <div class="modal-content bg-dark text-white">
+          <div class="modal-header">
+            <h5 class="modal-title" id="editOfferModalLabel">Edit Offer</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body">
+            <div class="mb-3">
+              <label for="editOfferName" class="form-label">Offer Name</label>
+              <input type="text" class="form-control bg-dark text-white" id="editOfferName" name="offerName">
+              <span id="editOfferForm-offerName-error" class="text-danger"></span>
+            </div>
+            <div class="mb-3">
+              <label for="editDescription" class="form-label">Description</label>
+              <textarea class="form-control bg-dark text-white" id="editDescription" name="description" rows="3"></textarea>
+              <span id="editOfferForm-description-error" class="text-danger"></span>
+            </div>
+            <!-- Hidden input for discountType -->
+            <input type="hidden" id="editDiscountType" name="discountType" value="percentage">
+            <div class="mb-3">
+              <label for="editDiscountAmount" class="form-label">Discount Percentage</label>
+              <input type="number" class="form-control bg-dark text-white" id="editDiscountAmount" name="discountAmount" step="0.01" min="0">
+              <span id="editOfferForm-discountAmount-error" class="text-danger"></span>
+            </div>
+            <div class="mb-3">
+              <label for="editValidFrom" class="form-label">Valid From</label>
+              <input type="date" class="form-control bg-dark text-white" id="editValidFrom" name="validFrom">
+              <span id="editOfferForm-validFrom-error" class="text-danger"></span>
+            </div>
+            <div class="mb-3">
+              <label for="editValidUpto" class="form-label">Valid Upto</label>
+              <input type="date" class="form-control bg-dark text-white" id="editValidUpto" name="validUpto">
+              <span id="editOfferForm-validUpto-error" class="text-danger"></span>
+            </div>
+            <div class="mb-3">
+              <label for="editOfferType" class="form-label">Offer Applies To</label>
+              <select class="form-control bg-dark text-white" id="editOfferType" name="offerType">
+                <option value="" selected disabled>Select Type</option>
+                <option value="Brand">Brand</option>
+                <option value="Category">Category</option>
+                <option value="Product">Product</option>
+              </select>
+              <span id="editOfferForm-offerType-error" class="text-danger"></span>
+            </div>
+            <div class="mb-3" id="editApplicableToContainer" style="display: none;">
+              <label for="editApplicableTo" class="form-label">Applicable To</label>
+              <select class="form-control bg-dark text-white" id="editApplicableTo" name="applicableTo">
+                <option value="" selected disabled>Select Applicable</option>
+              </select>
+              <span id="editOfferForm-applicableTo-error" class="text-danger"></span>
+            </div>
+            <input type="hidden" id="offerId" name="offerId">
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            <button type="submit" class="btn btn-primary">Save Offer</button>
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <div class="container">
+    <div class="header">
+      <h2>Manage Offers</h2>
+      <button class="btn add-btn bg-primary" data-bs-toggle="modal" data-bs-target="#addOfferModal">ADD OFFER +</button>
+    </div>
+
+    <!-- Search Bar -->
+    <div class="search-container">
+      <form action="/admin/offers" method="get" id="searchForm">
+        <div class="input-group">
+          <input type="text" class="search-input bg-dark text-white" name="search" placeholder="Search by offer name"
+                 value="<%= typeof search !== 'undefined' ? search : '' %>">
+          <button type="submit" class="btn btn-outline-primary">Search</button>
+        </div>
+      </form>
+      <% if (typeof search !== 'undefined' && search.trim()) { %>
+        <form action="/admin/offers" method="get" style="display: inline;">
+          <button type="submit" class="clear-btn" id="clearSearch">Clear</button>
+        </form>
+      <% } %>
+    </div>
+
+    <div class="table-responsive">
+      <table class="table table-dark">
+        <thead>
+          <tr>
+            <th>OFFER NAME</th>
+            <th>OFFER TYPE</th>
+            <th>APPLICABLE</th>
+            <th>TYPE</th>
+            <th>OFFER AMOUNT</th>
+            <th>VALID FROM</th>
+            <th>VALID UPTO</th>
+            <th>ACTIONS</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% if (offers && offers.length > 0) { %>
+            <% offers.forEach((offer, index) => { %>
+              <tr>
+                <td><%= offer.offerName %></td>
+                <td><%= offer.offerType %></td>
+                <td>
+                  <% if (offer.offerType === 'Brand') { %>
+                    <%= offer.applicableTo.BrandName %>
+                  <% } else if (offer.offerType === 'Category') { %>
+                    <%= offer.applicableTo.name %>
+                  <% } else if (offer.offerType === 'Product') { %>
+                    <%= offer.applicableTo.productName %>
+                  <% } %>
+                </td>
+                <td><%= offer.discountType %></td>
+                <td><%= offer.discountAmount %>%</td>
+                <td><%= offer.validFrom.toLocaleDateString() %></td>
+                <td><%= offer.validUpto.toLocaleDateString() %></td>
+                <td>
+                  <button class="action-btn edit-btn" onclick='editOffer(<%- JSON.stringify(offer) %>)'>
+                    <i class="fas fa-edit"></i>
+                  </button>
+                  <button class="action-btn delete-btn" onclick="deleteOffer('<%= offer._id %>')">
+                    <i class="fas fa-trash"></i>
+                  </button>
+                </td>
+              </tr>
+            <% }) %>
+          <% } else { %>
+            <tr>
+              <td colspan="8">No offers found</td>
+            </tr>
+          <% } %>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Updated Pagination to match brand.ejs -->
+    <div class="pagination">
+      <span class="page-info">Page <%= currentPage %> of <%= totalPages %></span>
+      <% if (currentPage > 1) { %>
+        <a href="/admin/offers?page=<%= currentPage - 1 %>&search=<%= typeof search !== 'undefined' ? encodeURIComponent(search) : '' %>"
+           style="text-decoration: none;">
+          <button class="nav-btn">Previous</button>
+        </a>
+      <% } %>
+      <% for (let j = 1; j <= totalPages; j++) { %>
+        <a href="/admin/offers?page=<%= j %>&search=<%= typeof search !== 'undefined' ? encodeURIComponent(search) : '' %>"
+           style="text-decoration: none;">
+          <button class="page-btn <%= (j === currentPage) ? 'active' : '' %>">
+            <%= j %>
+          </button>
+        </a>
+      <% } %>
+      <% if (currentPage < totalPages) { %>
+        <a href="/admin/offers?page=<%= currentPage + 1 %>&search=<%= typeof search !== 'undefined' ? encodeURIComponent(search) : '' %>"
+           style="text-decoration: none;">
+          <button class="nav-btn">Next</button>
+        </a>
+      <% } %>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', function () {
+      // Data for dropdowns passed from the controller
+      const brands = <%- JSON.stringify(brands) %>;
+      const categories = <%- JSON.stringify(categories) %>;
+      const products = <%- JSON.stringify(products) %>;
+
+      // Log the data to debug
+      console.log('Brands:', brands);
+      console.log('Categories:', categories);
+      console.log('Products:', products);
+
+      // Utility function to clear all error messages in a form
+      function clearErrors(formId) {
+        const errorElements = document.querySelectorAll(`#${formId} .text-danger`);
+        errorElements.forEach(element => {
+          element.textContent = '';
+        });
+      }
+
+      // Format date to YYYY-MM-DD for input fields
+      function formatDateForInput(dateString) {
+        if (!dateString) return '';
+        const date = new Date(dateString);
+        return date.toISOString().split('T')[0];
+      }
+
+      // Validate form data and display any errors
+      function validateForm(formId) {
+        const form = document.getElementById(formId);
+        if (!form) return false;
+
+        clearErrors(formId);
+        let isValid = true;
+
+        const inputs = {
+          offerName: form.querySelector('[name="offerName"]'),
+          description: form.querySelector('[name="description"]'),
+          discountAmount: form.querySelector('[name="discountAmount"]'),
+          validFrom: form.querySelector('[name="validFrom"]'),
+          validUpto: form.querySelector('[name="validUpto"]'),
+          offerType: form.querySelector('[name="offerType"]'),
+          applicableTo: form.querySelector('[name="applicableTo"]')
+        };
+
+        if (!inputs.offerName || !inputs.offerName.value.trim()) {
+          showError(formId, 'offerName', 'Offer Name is required');
+          isValid = false;
+        }
+
+        if (!inputs.description || !inputs.description.value.trim()) {
+          showError(formId, 'description', 'Description is required');
+          isValid = false;
+        }
+
+        if (inputs.discountAmount) {
+          const discountAmount = inputs.discountAmount.value.trim() === '' ? 0 : parseFloat(inputs.discountAmount.value);
+          if (isNaN(discountAmount) || discountAmount <= 0 || discountAmount > 100) {
+            showError(formId, 'discountAmount', 'Discount Percentage must be between 0 and 100');
+            isValid = false;
+          }
+        }
+
+        if (!inputs.validFrom || !inputs.validFrom.value) {
+          showError(formId, 'validFrom', 'Valid From date is required');
+          isValid = false;
+        }
+
+        if (!inputs.validUpto || !inputs.validUpto.value) {
+          showError(formId, 'validUpto', 'Valid Upto date is required');
+          isValid = false;
+        }
+
+        if (inputs.validFrom && inputs.validUpto && 
+            inputs.validFrom.value && inputs.validUpto.value && 
+            new Date(inputs.validFrom.value) >= new Date(inputs.validUpto.value)) {
+          showError(formId, 'validUpto', 'Valid Upto must be after Valid From');
+          isValid = false;
+        }
+
+        if (!inputs.offerType || !inputs.offerType.value) {
+          showError(formId, 'offerType', 'Offer Applies To is required');
+          isValid = false;
+        }
+
+        if (inputs.offerType.value && (!inputs.applicableTo || !inputs.applicableTo.value)) {
+          showError(formId, 'applicableTo', `Applicable ${inputs.offerType.value} is required`);
+          isValid = false;
+        }
+
+        return isValid;
+      }
+
+      // Show error message for a specific field
+      function showError(formId, fieldName, message) {
+        const errorElement = document.getElementById(`${formId}-${fieldName}-error`);
+        if (errorElement) {
+          errorElement.textContent = message;
+        }
+      }
+
+      // Get form data as an object
+      function getFormData(formId) {
+        const form = document.getElementById(formId);
+        if (!form) return null;
+
+        const formData = {
+          offerName: form.querySelector('[name="offerName"]')?.value.trim() || '',
+          description: form.querySelector('[name="description"]')?.value.trim() || '',
+          discountType: 'percentage', // Hardcode to percentage
+          discountAmount: parseFloat(form.querySelector('[name="discountAmount"]')?.value || 0),
+          validFrom: form.querySelector('[name="validFrom"]')?.value || '',
+          validUpto: form.querySelector('[name="validUpto"]')?.value || '',
+          offerType: form.querySelector('[name="offerType"]')?.value || '',
+          applicableTo: form.querySelector('[name="applicableTo"]')?.value || ''
+        };
+
+        const offerIdField = form.querySelector('[name="offerId"]');
+        if (offerIdField && offerIdField.value) {
+          formData.offerId = offerIdField.value;
+        }
+
+        return formData;
+      }
+
+      // Submit form data to the server
+      function submitFormData(url, formData, modalId, successMessage) {
+        fetch(url, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(formData),
+          redirect: 'manual'
+        })
+        .then(response => {
+          // Check if the response is a redirect (e.g., to login page)
+          if (response.status === 0 || response.type === 'opaqueredirect') {
+            window.location.href = '/admin/login'; // Redirect to login page
+            return;
+          }
+
+          // Check the Content-Type of the response
+          const contentType = response.headers.get('Content-Type');
+          if (!contentType || !contentType.includes('application/json')) {
+            throw new Error('Expected JSON response, but received HTML or other content');
+          }
+
+          if (!response.ok) {
+            return response.json().then(data => {
+              throw new Error(data.message || `Server error: ${response.status}`);
+            });
+          }
+          return response.json();
+        })
+        .then(data => {
+          if (!data) return; // If redirected, data will be undefined
+          if (data.success) {
+            Swal.fire({
+              icon: 'success',
+              title: successMessage || data.message || 'Operation successful',
+              timer: 1500
+            }).then(() => {
+              if (modalId) {
+                const modalElement = document.getElementById(modalId);
+                if (modalElement) {
+                  const modal = bootstrap.Modal.getInstance(modalElement);
+                  if (modal) modal.hide();
+                }
+              }
+              location.reload();
+            });
+          } else {
+            Swal.fire({
+              icon: 'error',
+              title: 'Error',
+              text: data.message || 'Operation failed',
+              timer: 2000
+            });
+          }
+        })
+        .catch(error => {
+          Swal.fire({
+            icon: 'error',
+            title: 'Error',
+            text: error.message || 'Something went wrong',
+            timer: 2000
+          });
+        });
+      }
+
+      // Populate Applicable To dropdown based on Offer Applies To selection
+      function populateApplicableTo(offerTypeId, applicableToId) {
+        const offerType = document.getElementById(offerTypeId);
+        const applicableTo = document.getElementById(applicableToId);
+        const container = document.getElementById(applicableToId + 'Container');
+
+        // Clear existing options
+        applicableTo.innerHTML = '<option value="" selected disabled>Select Applicable</option>';
+
+        if (offerType.value) {
+          container.style.display = 'block';
+          let items = [];
+          if (offerType.value === 'Brand') {
+            items = brands.filter(brand => !brand.isDeleted); // Filter out deleted brands
+            applicableTo.parentElement.querySelector('label').textContent = 'Applicable Brands';
+          } else if (offerType.value === 'Category') {
+            items = categories.filter(category => !category.isDeleted); // Filter out deleted categories
+            applicableTo.parentElement.querySelector('label').textContent = 'Applicable Categories';
+          } else if (offerType.value === 'Product') {
+            items = products.filter(product => !product.isDeleted); // Filter out deleted products
+            applicableTo.parentElement.querySelector('label').textContent = 'Applicable Products';
+          }
+
+          items.forEach(item => {
+            const option = document.createElement('option');
+            option.value = item._id;
+
+            if (offerType.value === 'Brand') {
+              option.textContent = item.BrandName;
+            } else if (offerType.value === 'Product') {
+              option.textContent = item.name || item.productName || 'Unnamed Product';
+            } else {
+              option.textContent = item.name;
+            }
+
+            applicableTo.appendChild(option);
+          });
+        } else {
+          container.style.display = 'none';
+        }
+      }
+
+      // Set up Add Offer form
+      const addOfferForm = document.getElementById('addOfferForm');
+      if (addOfferForm) {
+        addOfferForm.addEventListener('submit', function (e) {
+          e.preventDefault();
+          if (validateForm('addOfferForm')) {
+            const formData = getFormData('addOfferForm');
+            submitFormData('/admin/offers/add', formData, 'addOfferModal', 'Offer added successfully');
+          }
+        });
+
+        const offerTypeSelect = document.getElementById('offerType');
+        offerTypeSelect.addEventListener('change', function () {
+          populateApplicableTo('offerType', 'applicableTo');
+        });
+      }
+
+      // Set up Edit Offer form
+      const editOfferForm = document.getElementById('editOfferForm');
+      if (editOfferForm) {
+        editOfferForm.addEventListener('submit', function (e) {
+          e.preventDefault();
+          if (validateForm('editOfferForm')) {
+            const formData = getFormData('editOfferForm');
+            submitFormData('/admin/offers/edit', formData, 'editOfferModal', 'Offer updated successfully');
+          }
+        });
+
+        const editOfferTypeSelect = document.getElementById('editOfferType');
+        editOfferTypeSelect.addEventListener('change', function () {
+          populateApplicableTo('editOfferType', 'editApplicableTo');
+        });
+      }
+
+      // Edit Offer function
+      window.editOffer = function(offer) {
+        clearErrors('editOfferForm');
+        
+        document.getElementById('editOfferName').value = offer.offerName || '';
+        document.getElementById('editDescription').value = offer.description || '';
+        document.getElementById('editDiscountAmount').value = offer.discountAmount || 0;
+        document.getElementById('editValidFrom').value = formatDateForInput(offer.validFrom);
+        document.getElementById('editValidUpto').value = formatDateForInput(offer.validUpto);
+        document.getElementById('editOfferType').value = offer.offerType || '';
+        document.getElementById('offerId').value = offer._id || '';
+
+        // Populate the Applicable To dropdown based on offerType
+        populateApplicableTo('editOfferType', 'editApplicableTo');
+
+        // Set the previously selected Applicable To value after populating the dropdown
+        const applicableToSelect = document.getElementById('editApplicableTo');
+        if (offer.applicableTo && offer.applicableTo._id) {
+          applicableToSelect.value = offer.applicableTo._id;
+        } else {
+          applicableToSelect.value = ''; // Reset if no applicableTo is set
+        }
+        
+        const modal = new bootstrap.Modal(document.getElementById('editOfferModal'));
+        modal.show();
+      };
+
+      // Delete Offer function
+      window.deleteOffer = function(id) {
+        Swal.fire({
+          title: 'Are you sure?',
+          text: "You are about to delete this offer!",
+          icon: 'warning',
+          showCancelButton: true,
+          confirmButtonColor: '#3085d6',
+          cancelButtonColor: '#d33',
+          confirmButtonText: 'Yes, delete it!'
+        }).then((result) => {
+          if (result.isConfirmed) {
+            fetch(`/admin/offers/delete/${id}`, {
+              method: 'DELETE',
+              headers: {
+                'Content-Type': 'application/json'
+              },
+              redirect: 'manual'
+            })
+            .then(response => {
+              // Check if the response is a redirect (e.g., to login page)
+              if (response.status === 0 || response.type === 'opaqueredirect') {
+                window.location.href = '/admin/login'; // Redirect to login page
+                return;
+              }
+
+              // Check the Content-Type of the response
+              const contentType = response.headers.get('Content-Type');
+              if (!contentType || !contentType.includes('application/json')) {
+                throw new Error('Expected JSON response, but received HTML or other content');
+              }
+
+              if (!response.ok) {
+                return response.json().then(data => {
+                  throw new Error(data.message || `Server error: ${response.status}`);
+                });
+              }
+              return response.json();
+            })
+            .then(data => {
+              if (!data) return; // If redirected, data will be undefined
+              if (data.success) {
+                Swal.fire({
+                  icon: 'success',
+                  title: data.message || 'Offer deleted successfully',
+                  timer: 1500
+                }).then(() => {
+                  location.reload();
+                });
+              } else {
+                Swal.fire({
+                  icon: 'error',
+                  title: 'Error',
+                  text: data.message || 'Error while deleting offer',
+                  timer: 2000
+                });
+              }
+            })
+            .catch(error => {
+              Swal.fire({
+                icon: 'error',
+                title: 'Error',
+                text: error.message || 'Something went wrong',
+                timer: 2000
+              });
+            });
+          }
+        });
+      };
+    });
+  </script>
+</body>
+</html>

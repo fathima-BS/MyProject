@@ -100,19 +100,21 @@
         font-weight: 600;
         color: #212529;
         margin-bottom: 4px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
     }
     
     .original-price {
         font-size: 14px;
         color: #6c757d;
         text-decoration: line-through;
-        margin-left: 8px;
     }
     
-    .save-amount {
+    .discount {
         font-size: 14px;
-        color: #28a745;
-        margin-left: 8px;
+        color: #dc3545;
+        font-weight: 600;
     }
     
     .item-actions {
@@ -241,13 +243,9 @@
 
 <div class="wishlist-container py-5">
 
-    <h1 class="page-title" >My Wishlist</h1>
+    <h1 class="page-title">My Wishlist</h1>
     
-    <% if (message) { %>
-        <div class="message-alert">
-            <%= message %>
-        </div>
-    <% } %>
+ 
     
     <% if (wishlistItems && wishlistItems.length > 0) { %>
         <% wishlistItems.forEach(item => { %>
@@ -255,7 +253,7 @@
                 <div class="wishlist-item">
                     <div class="item-image">
                         <a href="/product/<%= item._id %>">
-                            <img src="<%= item.productImage[0] %>" alt="<%= item.productName || 'Product Image' %>" />
+                            <img src="<%= item.productImage[0] || '/images/placeholder.jpg' %>" alt="<%= item.productName || 'Product Image' %>" />
                         </a>
                     </div>
                     
@@ -269,9 +267,14 @@
                         <p class="item-brand"><%= item.brand ? item.brand.BrandName : 'Unknown Brand' %></p>
                         
                         <div class="item-price">
-                            ₹<%= item.salePrice.toLocaleString("en-IN", { minimumFractionDigits: 2 }) %>
-                            <span class="original-price">₹<%= item.regularPrice.toLocaleString("en-IN", { minimumFractionDigits: 2 }) %></span>
-                            <span class="save-amount">Save ₹<%= (item.regularPrice - item.salePrice).toLocaleString("en-IN", { minimumFractionDigits: 2 }) %></span>
+                            <% if (item.finalOffer) { %>
+                                <span>₹<%= item.discountedPrice.toLocaleString("en-IN", { minimumFractionDigits: 2, maximumFractionDigits: 2 }) %></span>
+                                <span class="original-price">₹<%= item.salePrice.toLocaleString("en-IN", { minimumFractionDigits: 2, maximumFractionDigits: 2 }) %></span>
+                                <span class="discount"><%= item.finalOffer.discountAmount %>% OFF</span>
+                            <% } else { %>
+                                <span>₹<%= item.salePrice.toLocaleString("en-IN", { minimumFractionDigits: 2, maximumFractionDigits: 2 }) %></span>
+                                <span class="original-price">₹<%= item.regularPrice.toLocaleString("en-IN", { minimumFractionDigits: 2, maximumFractionDigits: 2 }) %></span>
+                            <% } %>
                         </div>
                         
                         <div class="item-actions">

@@ -1,29 +1,81 @@
 const Product = require('../../models/productSchema');
 const Wishlist=require('../../models/wishlistSchema')
 const mongoose = require('mongoose');
+const Offer=require('../../models/offerSchema')
 
 const wishlist = async (req, res) => {
-    try {
-        const userId = req.session.user;
-        if (!userId) {
-            return res.status(401).render('login', { message: 'Please log in to view your wishlist' });
+  try {
+    const userId = req.session.user;
+    if (!userId) {
+      return res.status(401).render('login', { message: 'Please log in to view your wishlist' });
+    }
+
+    const wishlist = await Wishlist.findOne({ userId })
+      .populate({
+        path: 'products.productId',
+        populate: [
+          { path: 'brand' },
+          { path: 'category' } // Added for Category offers
+        ]
+      })
+      .lean();
+
+    const currentDate = new Date();
+    let wishlistItems = wishlist ? wishlist.products.map(item => item.productId) : [];
+
+    // Apply offer logic to each wishlist item
+    if (wishlistItems.length > 0) {
+      wishlistItems = await Promise.all(wishlistItems.map(async (item) => {
+        if (!item) return null; // Skip invalid items
+
+        // Fetch offers for the product
+        const productOffer = await Offer.findOne({
+          offerType: 'Product',
+          applicableTo: item._id,
+          isActive: true,
+          validFrom: { $lte: currentDate },
+          validUpto: { $gte: currentDate }
+        }).lean();
+
+        const categoryOffer = item.category ? await Offer.findOne({
+          offerType: 'Category',
+          applicableTo: item.category._id,
+          isActive: true,
+          validFrom: { $lte: currentDate },
+          validUpto: { $gte: currentDate }
+        }).lean() : null;
+
+        let finalOffer = null;
+        if (productOffer && categoryOffer) {
+          finalOffer = productOffer.discountAmount > categoryOffer.discountAmount ? productOffer : categoryOffer;
+        } else if (productOffer) {
+          finalOffer = productOffer;
+        } else if (categoryOffer) {
+          finalOffer = categoryOffer;
         }
 
-        const wishlist = await Wishlist.findOne({ userId })
-            .populate({
-                path: 'products.productId',
-                populate: { path: 'brand' },
-            })
-            .lean();
+        const discountedPrice = finalOffer
+          ? item.salePrice * (1 - finalOffer.discountAmount / 100)
+          : item.salePrice;
 
-        const wishlistItems = wishlist ? wishlist.products.map(item => item.productId) : [];
-        const message = req.query.message || '';
+        return {
+          ...item,
+          finalOffer,
+          discountedPrice
+        };
+      }));
 
-        res.render('wishlist', { wishlistItems, message });
-    } catch (error) {
-        console.error('Error fetching wishlist:', error);
-        res.status(500).render('page404', { message: 'Server error' });
+      // Filter out null items
+      wishlistItems = wishlistItems.filter(item => item !== null);
     }
+
+    const message = req.query.message || '';
+
+    res.render('wishlist', { wishlistItems, message });
+  } catch (error) {
+    console.error('Error fetching wishlist:', error.message, error.stack);
+    res.status(500).render('error', { message: 'Unable to load wishlist page' });
+  }
 };
 const addToWishlist = async (req, res) => {
     try {

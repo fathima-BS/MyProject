@@ -28,10 +28,6 @@ const productSchema = new Schema({
     type: Number,
     required: true,
   },
-  productOffer: {
-    type: Number,
-    default: 0,
-  },
   quantity: {
     type: Number,
     required: true,

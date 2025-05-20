@@ -38,7 +38,7 @@ const loadBrand = async (req, res) => {
 
 const addBrand = async (req, res) => {
     try {
-        const { BrandName, description, brandOffer } = req.body;
+        const { BrandName, description } = req.body;
 
         const existingBrand = await Brand.findOne({ BrandName: { $regex: new RegExp("^" + BrandName + "$", "i") } });
 
@@ -48,8 +48,7 @@ const addBrand = async (req, res) => {
 
         const newBrand = new Brand({
             BrandName,
-            description,
-            brandOffer
+            description
         });
 
         await newBrand.save();
@@ -63,7 +62,7 @@ const addBrand = async (req, res) => {
 
 const editBrand = async (req, res) => {
     try {
-        const { brandId, BrandName, description, brandOffer } = req.body;
+        const { brandId, BrandName, description } = req.body;
 
         const existingBrand = await Brand.findOne({
             _id: { $ne: brandId },
@@ -74,7 +73,7 @@ const editBrand = async (req, res) => {
             return res.json({ success: false, message: 'Brand already exists!' });
         }
 
-        const updatedBrand = await Brand.findByIdAndUpdate(brandId, { $set: { BrandName, description, brandOffer } });
+        const updatedBrand = await Brand.findByIdAndUpdate(brandId, { $set: { BrandName, description } });
 
         if (!updatedBrand) {
             return res.json({ success: false, message: 'Brand not found!' });

@@ -137,14 +137,6 @@
         text-decoration: line-through;
     }
 
-    .offer-badge {
-        background: #ff4444;
-        color: #fff;
-        padding: 5px 10px;
-        border-radius: 15px;
-        font-size: 14px;
-    }
-
     .product-description {
         font-size: 17px;
         color: #555;
@@ -362,9 +354,16 @@
             <p class="brand-name"><%= product.brand.BrandName %></p>
 
             <div class="price-section">
-                <span class="sale-price">₹<%= product.salePrice.toLocaleString("en-IN") %></span>
-                <span class="regular-price">₹<%= product.regularPrice.toLocaleString("en-IN") %></span>
-                <span class="offer-badge">20% OFF</span>
+                <% if (finalOffer) { %>
+                    <span class="sale-price">₹<%= discountedPrice.toLocaleString("en-IN", { minimumFractionDigits: 2 }) %></span>
+                    <span class="regular-price">₹<%= product.salePrice.toLocaleString("en-IN", { minimumFractionDigits: 2 }) %></span>
+                    <span class="offer-info" style="color: #ff4444; font-weight: 600;">
+                        <%= finalOffer.discountAmount %>% OFF  
+                    </span>
+                <% } else { %>
+                    <span class="sale-price">₹<%= product.salePrice.toLocaleString("en-IN", { minimumFractionDigits: 2 }) %></span>
+                    <span class="regular-price">₹<%= product.regularPrice.toLocaleString("en-IN", { minimumFractionDigits: 2 }) %></span>
+                <% } %>
             </div>
 
             <p class="product-description"><%= product.description %></p>
@@ -394,10 +393,20 @@
                                 <h4><%= product.productName %></h4>
                                 <h6><%= product.brand ? product.brand.BrandName : 'Unknown Brand' %></h6>
                                 <p>
-                                    ₹<%= product.salePrice.toLocaleString("en-IN", { minimumFractionDigits: 2 }) %>
-                                    <span class="text-muted">
-                                        <strike>₹<%= product.regularPrice.toLocaleString("en-IN", { minimumFractionDigits: 2 }) %></strike>
-                                    </span>
+                                    <% if (product.finalOffer) { %>
+                                        ₹<%= product.discountedPrice.toLocaleString("en-IN", { minimumFractionDigits: 2 }) %>
+                                        <span class="text-muted">
+                                            <strike>₹<%= product.salePrice.toLocaleString("en-IN", { minimumFractionDigits: 2 }) %></strike>
+                                        </span>
+                                        <span style="color: #ff4444; font-weight: 600;">
+                                            <%= product.finalOffer.discountAmount %>% OFF
+                                        </span>
+                                    <% } else { %>
+                                        ₹<%= product.salePrice.toLocaleString("en-IN", { minimumFractionDigits: 2 }) %>
+                                        <span class="text-muted">
+                                            <strike>₹<%= product.regularPrice.toLocaleString("en-IN", { minimumFractionDigits: 2 }) %></strike>
+                                        </span>
+                                    <% } %>
                                 </p>
                             </a>
                             <button class="add-to-cart-btn" onclick="addToCart('<%= product._id %>')">Add to Cart</button>
@@ -521,7 +530,7 @@
         } catch (error) {
             Swal.fire({
                 title: 'Error!',
-                text: 'Error adding to  in productDetail. Please try again.',
+                text: 'Error adding to wishlist. Please try again.',
                 icon: 'error',
                 confirmButtonText: 'OK',
             });

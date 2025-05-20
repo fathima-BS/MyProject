@@ -221,7 +221,7 @@
 /* Product Grid Styling */
 .product-grid {
   display: grid;
-  grid-template-columns: repeat(3, 1fr); /* 3-column grid */
+  grid-template-columns: repeat(3, 1fr);
   gap: 20px;
   width: calc(100% - 270px);
   justify-content: flex-start;
@@ -234,20 +234,20 @@
   padding: 12px;
   text-align: center;
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
-  height: 350px; /* Adjusted height to accommodate content */
+  height: 350px;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  width: 100%; /* Allow full width within grid */
+  width: 100%;
 }
 
 .product-card a {
-  text-decoration: none; /* Remove underline from links */
+  text-decoration: none;
 }
 
 .product-card img {
   max-width: 100%;
-  height: 150px; /* Reduced height to fit content */
+  height: 150px;
   object-fit: contain;
   border-radius: 6px;
   margin-bottom: 8px;
@@ -261,7 +261,7 @@
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  line-height: 1.2; /* Improve readability */
+  line-height: 1.2;
 }
 
 .product-card h6 {
@@ -393,7 +393,7 @@
   }
 
   .product-grid {
-    grid-template-columns: repeat(2, 1fr); /* 2 columns on medium screens */
+    grid-template-columns: repeat(2, 1fr);
     width: 100%;
   }
 }
@@ -409,7 +409,7 @@
   }
 
   .product-grid {
-    grid-template-columns: 1fr; /* 1 column on small screens */
+    grid-template-columns: 1fr;
   }
 
   .product-card {
@@ -430,7 +430,6 @@
 
 <div class="main-container">
   <section class="shop-page container">
-
     <!-- Breadcrumb -->
     <nav class="breadcrumb py-2" aria-label="Breadcrumb">
       <a href="/">Home</a>
@@ -571,10 +570,20 @@
                 <h4><%= product.productName %></h4>
                 <h6><%= product.brand ? product.brand.BrandName : 'Unknown Brand' %></h6>
                 <p>
-                  ₹ <%= product.salePrice.toLocaleString("en-IN", { minimumFractionDigits: 2, maximumFractionDigits: 2 }) %>
-                  <span class="text-muted">
-                    <strike>₹ <%= product.regularPrice.toLocaleString("en-IN", { minimumFractionDigits: 2, maximumFractionDigits: 2 }) %></strike>
-                  </span>
+                  <% if (product.finalOffer) { %>
+                    ₹<%= product.discountedPrice.toLocaleString("en-IN", { minimumFractionDigits: 2, maximumFractionDigits: 2 }) %>
+                    <span class="text-muted">
+                      <strike>₹<%= product.salePrice.toLocaleString("en-IN", { minimumFractionDigits: 2, maximumFractionDigits: 2 }) %></strike>
+                    </span>
+                    <span style="color: #ff4444; font-weight: 600;">
+                      <%= product.finalOffer.discountAmount %>% OFF
+                    </span>
+                  <% } else { %>
+                    ₹<%= product.salePrice.toLocaleString("en-IN", { minimumFractionDigits: 2, maximumFractionDigits: 2 }) %>
+                    <span class="text-muted">
+                      <strike>₹<%= product.regularPrice.toLocaleString("en-IN", { minimumFractionDigits: 2, maximumFractionDigits: 2 }) %></strike>
+                    </span>
+                  <% } %>
                 </p>
               </a>
               <button class="add-to-cart-btn" onclick="addToCart('<%= product._id %>')">Add to Cart</button>
@@ -590,11 +599,9 @@
       <% if (currentPage > 1) { %>
         <a href="/shop?page=<%= currentPage - 1 %>&search=<%= search || '' %>&sort=<%= sort || '' %>&categoryf=<%= categoryf || '' %>&brandf=<%= brandf || '' %>&priceRange=<%= priceRange || '' %>">Previous</a>
       <% } %>
-
       <% for (let i = 1; i <= totalPages; i++) { %>
         <a class="<%= currentPage === i ? 'active' : '' %>" href="/shop?page=<%= i %>&search=<%= search || '' %>&sort=<%= sort || '' %>&categoryf=<%= categoryf || '' %>&brandf=<%= brandf || '' %>&priceRange=<%= priceRange || '' %>"><%= i %></a>
       <% } %>
-
       <% if (currentPage < totalPages) { %>
         <a href="/shop?page=<%= currentPage + 1 %>&search=<%= search || '' %>&sort=<%= sort || '' %>&categoryf=<%= categoryf || '' %>&brandf=<%= brandf || '' %>&priceRange=<%= priceRange || '' %>">Next</a>
       <% } %>
@@ -612,79 +619,77 @@ function toggleSidebar() {
   document.getElementById('sidebar').classList.toggle('active');
 }
 
- // Add to Cart functionality
- async function addToCart(productId) {
-        try {
-            const response = await fetch('/add', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ productId }),
-            });
-            const data = await response.json();
-            if (response.ok) {
-                Swal.fire({
-                    title: 'Success!',
-                    text: data.message,
-                    icon: 'success',
-                    confirmButtonText: 'Go to Cart',
-                    showCancelButton: true,
-                    cancelButtonText: 'Continue Shopping',
-                }).then((result) => {
-                    if (result.isConfirmed) {
-                        window.location.href = '/cart';
-                    }
-                });
-            } else {
-                Swal.fire({
-                    title: 'Error!',
-                    text: data.message,
-                    icon: 'error',
-                    confirmButtonText: 'OK',
-                });
-            }
-        } catch (error) {
-            Swal.fire({
-                title: 'Error!',
-                text: 'Error adding to cart. Please try again.',
-                icon: 'error',
-                confirmButtonText: 'OK',
-            });
+async function addToCart(productId) {
+  try {
+    const response = await fetch('/add', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ productId }),
+    });
+    const data = await response.json();
+    if (response.ok) {
+      Swal.fire({
+        title: 'Success!',
+        text: data.message,
+        icon: 'success',
+        confirmButtonText: 'Go to Cart',
+        showCancelButton: true,
+        cancelButtonText: 'Continue Shopping',
+      }).then((result) => {
+        if (result.isConfirmed) {
+          window.location.href = '/cart';
         }
+      });
+    } else {
+      Swal.fire({
+        title: 'Error!',
+        text: data.message,
+        icon: 'error',
+        confirmButtonText: 'OK',
+      });
     }
+  } catch (error) {
+    Swal.fire({
+      title: 'Error!',
+      text: 'Error adding to cart. Please try again.',
+      icon: 'error',
+      confirmButtonText: 'OK',
+    });
+  }
+}
 
-    // Add to Wishlist functionality
-    async function addToWishlist(productId) {
-        try {
-            const response = await fetch('/wishlist/add', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ productId }),
-            });
-            const data = await response.json();
-            if (response.ok) {
-                Swal.fire({
-                    title: 'Success!',
-                    text: 'Product added to wishlist',
-                    icon: 'success',
-                    confirmButtonText: 'OK',
-                });
-            } else {
-                Swal.fire({
-                    title: 'Error!',
-                    text: data.message,
-                    icon: 'error',
-                    confirmButtonText: 'OK',
-                });
-            }
-        } catch (error) {
-            Swal.fire({
-                title: 'Error!',
-                text: 'Error adding to wishlist in shop. Please try again.',
-                icon: 'error',
-                confirmButtonText: 'OK',
-            });
-        }
+async function addToWishlist(productId) {
+  try {
+    const response = await fetch('/wishlist/add', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ productId }),
+    });
+    const data = await response.json();
+    if (response.ok) {
+      Swal.fire({
+        title: 'Success!',
+        text: 'Product added to wishlist',
+        icon: 'success',
+        confirmButtonText: 'OK',
+      });
+    } else {
+      Swal.fire({
+        title: 'Error!',
+        text: data.message,
+        icon: 'error',
+        confirmButtonText: 'OK',
+      });
     }
+  } catch (error) {
+    Swal.fire({
+      title: 'Error!',
+      text: 'Error adding to wishlist in shop. Please try again.',
+      icon: 'error',
+      confirmButtonText: 'OK',
+    });
+  }
+}
 </script>
 
 <%- include("../partials/user/footer") %>

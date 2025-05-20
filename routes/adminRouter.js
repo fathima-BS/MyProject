@@ -6,6 +6,8 @@ const brandController=require('../controllers/admin/brandController')
 const userController=require('../controllers/admin/userController')
 const productController=require('../controllers/admin/productController');
 const adminOrderController = require('../controllers/admin/adminOrderController')
+const couponController=require('../controllers/admin/couponController')
+const offerController = require('../controllers/admin/offerController')
 const {adminAuth}=require('../middlewares/auth')
 
 
@@ -33,7 +35,7 @@ router.patch('/list-brand/:id',adminAuth,brandController.listBrand)
 
 // user management
 router.get('/user',adminAuth,userController.loadUser)
-router.patch('/unblock-user/:id',adminAuth,userController.unblockUser)
+router.patch('/unblock-user/:id',adminAuth,userController.unblockUser) 
 router.patch('/block-user/:id',adminAuth,userController.blockUser)
 
 // Product management
@@ -52,5 +54,16 @@ router.get('/orders/:id', adminAuth, adminOrderController.getOrderDetails);
 router.post('/orders/:orderId/status', adminAuth, adminOrderController.updateOrderStatus);
 router.get('/returnOrder', adminAuth, adminOrderController.handleReturnRequest);
 
+//coupon management
+router.get('/coupons', adminAuth, couponController.loadCoupon);
+router.post('/coupons/add', adminAuth, couponController.addCoupon);
+router.post('/coupons/edit', adminAuth, couponController.editCoupon);
+router.delete('/coupons/delete/:id', adminAuth, couponController.deleteCoupon);
+
+// Offer management
+router.get('/offers', adminAuth, offerController.loadOffers);
+router.post('/offers/add', adminAuth, offerController.addOffer);
+router.post('/offers/edit', adminAuth, offerController.editOffer);
+router.delete('/offers/delete/:id', adminAuth, offerController.deleteOffer);
 
 module.exports=router

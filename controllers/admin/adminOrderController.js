@@ -166,6 +166,6 @@ const handleReturnRequest = async (req, res) => {
 module.exports = {
   listOrders,
   getOrderDetails,
-    updateOrderStatus,
-    handleReturnRequest,
+  updateOrderStatus,
+  handleReturnRequest,
 };
