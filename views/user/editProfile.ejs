@@ -3,17 +3,17 @@
 <div class="profile-container">
     <!-- Include the sidebar partial with active state -->
     <div class="sidebar-container">
-        <%- include('../../views/partials/user/sidebar', {active: 'personal-info'}) %>
+        <%- include('../../views/partials/user/sidebar', {active: 'personal-info' }) %>
     </div>
-    
+
     <div class="profile-content">
         <div class="page-header">
             <a href="/userProfile" class="back-button">
-                <i class="fa fa-arrow-left"></i> Back to Profile 
+                <i class="fa fa-arrow-left"></i> Back to Profile
             </a>
             <h1>Edit Profile</h1>
         </div>
-        
+
         <form class="edit-profile-form" id="editProfileForm" enctype="multipart/form-data">
             <div class="form-section">
                 <h2>Profile Image</h2>
@@ -24,19 +24,22 @@
                                 <img src="<%= user.profileImage %>" alt="Profile Image" class="profile-img">
                             <% } else { %>
                                 <div class="profile-placeholder">
-                                    <span><%= user.username.charAt(0) %></span>
+                                    <span>
+                                        <%= user.username.charAt(0) %>
+                                    </span>
                                 </div>
                             <% } %>
                         </div>
                     </div>
-                    
+
                     <div class="upload-controls">
                         <label for="profile-image" class="upload-btn">
                             <i class="fa fa-upload"></i> Choose Image
                         </label>
-                        <input type="file" id="profile-image" name="profileImage" accept="image/*" class="hidden-input">
+                        <input type="file" id="profile-image" name="profileImage" accept="image/*"
+                            class="hidden-input">
                         <p class="upload-info">Maximum file size: 5MB. Formats: JPG, PNG</p>
-                        
+
                         <!-- Image preview with crop functionality -->
                         <div class="image-preview-wrapper" id="image-preview-wrapper" style="display: none;">
                             <div class="crop-container" id="crop-container">
@@ -51,68 +54,49 @@
                                 </button>
                             </div>
                         </div>
-                        
+
                         <!-- Hidden input to store cropped image data -->
                         <input type="hidden" id="cropped-image-data" name="croppedImageData">
                     </div>
                 </div>
             </div>
-            
+
             <div class="form-section">
                 <h2>Personal Information</h2>
                 <div class="form-group">
                     <label for="fullName">Full Name</label>
-                    <input type="text" id="fullName" name="fullName" value="<%= user.username %>" class="form-control" required>
+                    <input type="text" id="fullName" name="fullName" value="<%= user.username %>"
+                        class="form-control" required>
                 </div>
-                
+
                 <div class="form-group">
                     <label for="birthdate">Date of Birth</label>
-                    <% 
-                        let formattedDateOfBirth = '';
-                        if (user.dateOfBirth) {
-                            const date = new Date(user.dateOfBirth);
-                            formattedDateOfBirth = date.toISOString().split('T')[0];
-                        }
-                    %>
-                    <input type="date" id="birthdate" name="birthdate" value="<%= formattedDateOfBirth %>" class="form-control">
+                    <% let formattedDateOfBirth='' ; if (user.dateOfBirth) { const date=new Date(user.dateOfBirth);
+                        formattedDateOfBirth=date.toISOString().split('T')[0]; } %>
+                        <input type="date" id="birthdate" name="birthdate" value="<%= formattedDateOfBirth %>"
+                            class="form-control">
                 </div>
-                
+
                 <div class="form-group">
                     <label for="phone">Phone Number</label>
-                    <input type="tel" id="phone" name="phone" value="<%= user.phone || '' %>" class="form-control" placeholder="Enter phone number">
+                    <input type="tel" id="phone" name="phone" value="<%= user.phone || '' %>" class="form-control"
+                        placeholder="Enter phone number">
                 </div>
             </div>
-            
-            <div class="form-section">
-                <h2>Email Address</h2>
-                <% if (user.googleId) { %>
-                    <div class="google-login-notice">
-                        <i class="fa fa-info-circle"></i>
-                        <p>Your account is linked to Google. Email changes must be made through your Google account.</p>
-                    </div>
-                    <div class="form-group">
-                        <label for="email">Email Address</label>
-                        <input type="email" id="email" name="email" value="<%= user.email %>" class="form-control" disabled>
-                        <input type="hidden" name="email" value="<%= user.email %>">
-                    </div>
-                <% } else { %>
-                    <div class="form-group">
-                        <label for="email">Email Address</label>
-                        <input type="email" id="email" name="email" value="<%= user.email %>" class="form-control" required>
-                        <p class="form-note">
-                            <i class="fa fa-exclamation-triangle"></i>
-                            Note: Changing your email will require verification via OTP sent to your new email address.
-                        </p>
-                    </div>
-                    <button type="button" id="verify-email-btn" class="verify-email-btn" style="display: none;">
-                        Verify Email
-                    </button>
-                <% } %>
-                <p class="email-message" id="email-message"></p>
-            </div>
-            
+
+            <!-- <div class="form-section">
+                <h2>Change Email</h2>
+                <p style="color: #666; font-size: 0.9rem; margin-bottom: 1rem;">
+                    Update your email for better security
+                </p>
+                <button type="button" class="change-email-btn" onclick="window.location.href='/change-email'">
+                    Change Email
+                </button>
+            </div> -->
+
             <div class="form-actions">
-                <button type="button" class="cancel-btn" onclick="window.location.href='/edit-profile'">Cancel</button>
+                <button type="button" class="cancel-btn"
+                    onclick="window.location.href='/userProfile'">Cancel</button>
                 <button type="submit" class="save-btn" id="save-btn">Save Changes</button>
             </div>
         </form>
@@ -148,13 +132,13 @@
         flex: 1;
         padding: 2rem;
     }
-    
+
     .page-header {
         display: flex;
         flex-direction: column;
         margin-bottom: 2rem;
     }
-    
+
     .back-button {
         display: inline-flex;
         align-items: center;
@@ -164,15 +148,15 @@
         margin-bottom: 1rem;
         width: fit-content;
     }
-    
+
     .back-button i {
         margin-right: 0.5rem;
     }
-    
+
     .back-button:hover {
         color: #1e88e5;
     }
-    
+
     .page-header h1 {
         font-size: 1.8rem;
         margin: 0;
@@ -182,34 +166,34 @@
     .edit-profile-form {
         max-width: 800px;
     }
-    
+
     .form-section {
         margin-bottom: 2.5rem;
         border-bottom: 1px solid #f0f0f0;
         padding-bottom: 1.5rem;
     }
-    
+
     .form-section:last-child {
         border-bottom: none;
     }
-    
+
     .form-section h2 {
         font-size: 1.2rem;
         margin: 0 0 1.5rem 0;
         font-weight: 500;
     }
-    
+
     .profile-image-upload {
         display: flex;
         align-items: flex-start;
         gap: 2rem;
         margin-bottom: 1rem;
     }
-    
+
     .current-image-container {
         flex: 0 0 100px;
     }
-    
+
     .current-image {
         width: 100px;
         height: 100px;
@@ -218,14 +202,14 @@
         background-color: #f0f0f0;
         position: relative;
     }
-    
+
     .profile-img {
         width: 100%;
         height: 100%;
         object-fit: cover;
         display: block;
     }
-    
+
     .profile-placeholder {
         width: 100%;
         height: 100%;
@@ -240,15 +224,15 @@
         top: 0;
         left: 0;
     }
-    
+
     .upload-controls {
         flex: 1;
     }
-    
+
     .hidden-input {
         display: none;
     }
-    
+
     .upload-btn {
         display: inline-flex;
         align-items: center;
@@ -262,17 +246,17 @@
         cursor: pointer;
         transition: all 0.2s ease;
     }
-    
+
     .upload-btn:hover {
         background-color: #e0e0e0;
     }
-    
+
     .upload-info {
         font-size: 0.8rem;
         color: #666;
         margin: 0.5rem 0 0;
     }
-    
+
     .image-preview-wrapper {
         margin-top: 1.5rem;
         border: 1px solid #ddd;
@@ -281,7 +265,7 @@
         background-color: #f9f9f9;
         max-width: 450px;
     }
-    
+
     .crop-container {
         width: 100%;
         height: 300px;
@@ -290,18 +274,19 @@
         margin-bottom: 1rem;
         background-color: #000;
     }
-    
+
     #image-to-crop {
         max-width: 100%;
         display: block;
     }
-    
+
     .crop-controls {
         display: flex;
         gap: 1rem;
     }
-    
-    .crop-btn, .cancel-crop-btn {
+
+    .crop-btn,
+    .cancel-crop-btn {
         padding: 0.6rem 1rem;
         border-radius: 4px;
         font-size: 0.9rem;
@@ -310,38 +295,38 @@
         align-items: center;
         gap: 0.5rem;
     }
-    
+
     .crop-btn {
         background-color: #1e88e5;
         color: white;
         border: none;
     }
-    
+
     .crop-btn:hover {
         background-color: #1976d2;
     }
-    
+
     .cancel-crop-btn {
         background-color: #f5f5f5;
         color: #333;
         border: 1px solid #ddd;
     }
-    
+
     .cancel-crop-btn:hover {
         background-color: #e9e9e9;
     }
-    
+
     .form-group {
         margin-bottom: 1.5rem;
     }
-    
+
     .form-group label {
         display: block;
         margin-bottom: 0.5rem;
         font-size: 0.9rem;
         color: #555;
     }
-    
+
     .form-control {
         width: 100%;
         max-width: 400px;
@@ -350,12 +335,12 @@
         border-radius: 4px;
         font-size: 1rem;
     }
-    
+
     .form-control:disabled {
         background-color: #f5f5f5;
         cursor: not-allowed;
     }
-    
+
     .form-note {
         font-size: 0.85rem;
         color: #e67e22;
@@ -364,7 +349,7 @@
         align-items: center;
         gap: 0.5rem;
     }
-    
+
     .google-login-notice {
         background-color: #f8f9fa;
         border-left: 3px solid #4285F4;
@@ -374,53 +359,40 @@
         align-items: flex-start;
         gap: 0.75rem;
     }
-    
+
     .google-login-notice i {
         color: #4285F4;
         font-size: 1.1rem;
         margin-top: 0.1rem;
     }
-    
+
     .google-login-notice p {
         margin: 0;
         font-size: 0.9rem;
         color: #555;
     }
-    
-    .verify-email-btn {
-        background-color: #1e88e5;
-        color: white;
-        border: none;
+
+    .change-email-btn {
+        background-color: transparent;
+        color: #1e88e5;
+        border: 1px solid #1e88e5;
         border-radius: 4px;
         padding: 0.6rem 1.2rem;
         font-size: 0.9rem;
         cursor: pointer;
-        margin-top: 1rem;
+        transition: all 0.2s ease;
     }
-    
-    .verify-email-btn:hover {
-        background-color: #1976d2;
+
+    .change-email-btn:hover {
+        background-color: #e3f2fd;
     }
-    
-    .email-message {
-        margin: 0.5rem 0 0;
-        font-size: 0.9rem;
-    }
-    
-    .email-message.success {
-        color: #28a745;
-    }
-    
-    .email-message.error {
-        color: #dc3545;
-    }
-    
+
     .form-actions {
         display: flex;
         gap: 1rem;
         margin-top: 2rem;
     }
-    
+
     .cancel-btn {
         background-color: #f5f5f5;
         color: #333;
@@ -430,11 +402,11 @@
         font-size: 0.9rem;
         cursor: pointer;
     }
-    
+
     .cancel-btn:hover {
         background-color: #e9e9e9;
     }
-    
+
     .save-btn {
         background-color: #1e88e5;
         color: white;
@@ -444,12 +416,12 @@
         font-size: 0.9rem;
         cursor: pointer;
     }
-    
+
     .save-btn:disabled {
         background-color: #a0c4ff;
         cursor: not-allowed;
     }
-    
+
     .save-btn:hover:not(:disabled) {
         background-color: #1976d2;
     }
@@ -463,32 +435,32 @@
             flex: auto;
             width: 100%;
         }
-        
+
         .profile-image-upload {
             flex-direction: column;
             align-items: center;
             text-align: center;
             gap: 1rem;
         }
-        
+
         .upload-controls {
             display: flex;
             flex-direction: column;
             align-items: center;
         }
-        
+
         .form-control {
             max-width: 100%;
         }
-        
+
         .form-actions {
             flex-direction: column-reverse;
         }
-        
+
         .form-actions button {
             width: 100%;
         }
-        
+
         .crop-container {
             height: 250px;
         }
@@ -523,7 +495,7 @@
 </style>
 
 <script>
-    document.addEventListener('DOMContentLoaded', function() {
+    document.addEventListener('DOMContentLoaded', function () {
         let cropper;
         const imageInput = document.getElementById('profile-image');
         const imageToCrop = document.getElementById('image-to-crop');
@@ -531,59 +503,62 @@
         const applyCropBtn = document.getElementById('apply-crop-btn');
         const cancelCropBtn = document.getElementById('cancel-crop-btn');
         const editProfileForm = document.getElementById('editProfileForm');
-        const emailInput = document.getElementById('email');
-        const verifyEmailBtn = document.getElementById('verify-email-btn');
-        const emailMessage = document.getElementById('email-message');
-        const originalEmail = emailInput.value;
         let croppedBlob = null; // Store the cropped image Blob
 
         // Image upload and crop functionality
-       imageInput.addEventListener('change', function(event) {
-    const file = event.target.files[0];
-    const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png'];
+        imageInput.addEventListener('change', function (event) {
+            const file = event.target.files[0];
+            const allowedTypes = [
+                'image/jpeg',
+                'image/jpg',
+                'image/png',
+                'image/gif',
+                'image/webp',
+                'image/bmp',
+                'image/svg+xml',
+                'image/tiff',
+                'image/x-icon'
+            ];
 
-    if (file) {
-        // 🔴 File type check
-        if (!allowedTypes.includes(file.type)) {
-            Swal.fire({
-                icon: 'error',
-                title: 'Invalid Image Type',
-                text: 'Only JPG, JPEG, and PNG images are allowed.'
-            });
-            // Reset input so user can pick again
-            imageInput.value = '';
-            return;
-        }
+            if (file) {
+                // 🔴 File type check
+                if (!allowedTypes.includes(file.type)) {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Invalid Image Type',
+                        text: 'Only image files are allowed.'
+                    });
+                    imageInput.value = '';
+                    return;
+                }
+                const reader = new FileReader();
+                reader.onload = function (e) {
+                    imageToCrop.src = e.target.result;
+                    imagePreviewWrapper.style.display = 'block';
 
-        const reader = new FileReader();
-        reader.onload = function(e) {
-            imageToCrop.src = e.target.result;
-            imagePreviewWrapper.style.display = 'block';
+                    if (cropper) {
+                        cropper.destroy();
+                    }
 
-            if (cropper) {
-                cropper.destroy();
+                    cropper = new Cropper(imageToCrop, {
+                        aspectRatio: 1,
+                        viewMode: 1,
+                        autoCropArea: 0.8,
+                        responsive: true
+                    });
+                };
+
+                reader.readAsDataURL(file);
             }
+        });
 
-            cropper = new Cropper(imageToCrop, {
-                aspectRatio: 1,
-                viewMode: 1,
-                autoCropArea: 0.8,
-                responsive: true
-            });
-        };
-
-        reader.readAsDataURL(file);
-    }
-});
-
-
-        applyCropBtn.addEventListener('click', function() {
+        applyCropBtn.addEventListener('click', function () {
             if (cropper) {
                 const canvas = cropper.getCroppedCanvas({
                     width: 200,
                     height: 200
                 });
-                canvas.toBlob(function(blob) {
+                canvas.toBlob(function (blob) {
                     croppedBlob = blob; // Store the Blob
                     const url = URL.createObjectURL(blob);
                     imagePreviewWrapper.style.display = 'none';
@@ -600,7 +575,7 @@
             }
         });
 
-        cancelCropBtn.addEventListener('click', function() {
+        cancelCropBtn.addEventListener('click', function () {
             imagePreviewWrapper.style.display = 'none';
             if (cropper) {
                 cropper.destroy();
@@ -610,55 +585,8 @@
             croppedBlob = null;
         });
 
-        // Email verification (unchanged)
-        if (!emailInput.disabled) {
-            emailInput.addEventListener('input', function() {
-                if (emailInput.value !== originalEmail) {
-                    verifyEmailBtn.style.display = 'block';
-                    emailMessage.textContent = 'Please verify your new email address.';
-                    emailMessage.className = 'email-message';
-                } else {
-                    verifyEmailBtn.style.display = 'none';
-                    emailMessage.textContent = '';
-                }
-            });
-
-            verifyEmailBtn.addEventListener('click', async function() {
-                const email = emailInput.value;
-                if (!email) {
-                    emailMessage.textContent = 'Please enter a valid email address.';
-                    emailMessage.className = 'email-message error';
-                    return;
-                }
-
-                try {
-                    const response = await fetch('/send-otp', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json'
-                        },
-                        body: JSON.stringify({ email })
-                    });
-
-                    const result = await response.json();
-                    if (result.success) {
-                        emailMessage.textContent = 'OTP sent to your email. Please verify.';
-                        emailMessage.className = 'email-message success';
-                        window.location.href = `/verify-otp?email=${encodeURIComponent(email)}`;
-                    } else {
-                        emailMessage.textContent = result.message || 'Failed to send OTP.';
-                        emailMessage.className = 'email-message error';
-                    }
-                } catch (error) {
-                    console.error('Error sending OTP:', error);
-                    emailMessage.textContent = 'An error occurred while sending OTP.';
-                    emailMessage.className = 'email-message error';
-                }
-            });
-        }
-
         // Form submission
-        editProfileForm.addEventListener('submit', async function(event) {
+        editProfileForm.addEventListener('submit', async function (event) {
             event.preventDefault();
 
             const formData = new FormData();
@@ -666,8 +594,7 @@
             formData.append('fullName', document.getElementById('fullName').value);
             formData.append('birthdate', document.getElementById('birthdate').value);
             formData.append('phone', document.getElementById('phone').value);
-            formData.append('email', document.getElementById('email').value);
-            
+
             // Append the cropped image or original image
             if (croppedBlob) {
                 formData.append('profileImage', croppedBlob, 'cropped-image.jpg');

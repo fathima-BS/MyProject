@@ -49,12 +49,29 @@
     .footer a:hover {
         color: #ffffff;
     }
+    .price-offer {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+    .discounted-price {
+        font-size: 1.125rem;
+        font-weight: 600;
+        color: #1f2937;
+    }
+    .original-price {
+        font-size: 0.875rem;
+        color: #6b7280;
+        text-decoration: line-through;
+    }
+    .discount {
+        font-size: 0.875rem;
+        color: #ef4444;
+        font-weight: 600;
+    }
 </style>
 
-<!-- Header Promo Banner -->
-<div class="header-promo text-center py-3 text-sm font-medium">
-    Early Friday Deal! Spend ₹2,000 or more & get ₹400 OFF instantly! Use code: <span class="font-bold">EARLYFRIDAY</span> at checkout. Hurry, limited time offer!
-</div>
+
 
 <!-- Main Content -->
 <div class="container mx-auto p-6 max-w-6xl">
@@ -66,7 +83,7 @@
                 <% cart.items.forEach(item => { %>
                     <% if (item.productId) { %>
                         <div class="bg-white p-6 rounded-lg shadow-sm mb-6 flex items-center cart-item">
-                            <img src="<%= item.productId.productImage[0] %>" alt="<%= item.productId.productName %>" class="w-24 h-24 object-cover mr-6 rounded">
+                            <img src="<%= item.productId.productImage[0] || '/images/placeholder.jpg' %>" alt="<%= item.productId.productName || 'Product Image' %>" class="w-24 h-24 object-cover mr-6 rounded">
                             <div class="flex-1">
                                 <div class="flex justify-between items-center">
                                     <h3 class="text-lg font-semibold text-gray-800"><%= item.productId.productName %></h3>
@@ -84,9 +101,15 @@
                                     <button class="increment-quantity quantity-btn bg-gray-200 text-gray-600 rounded-r <%= item.quantity >= item.productId.quantity || item.quantity >= 5 || item.productId.quantity <= 0 ? 'opacity-50 cursor-not-allowed' : '' %>" 
                                             data-product-id="<%= item.productId._id %>" <%= item.quantity >= item.productId.quantity || item.quantity >= 5 || item.productId.quantity <= 0 ? 'disabled' : '' %>>+</button>
                                 </div>
-                                <div class="flex items-center mt-3 space-x-3">
-                                    <span class="text-gray-500 line-through text-sm">₹<%= item.productId.regularPrice ? item.productId.regularPrice.toLocaleString("en-IN") : item.productId.salePrice.toLocaleString("en-IN") %></span>
-                                    <span class="text-lg font-semibold text-gray-800">₹<%= (item.productId.salePrice * item.quantity).toLocaleString("en-IN") %></span>
+                                <div class="price-offer mt-3">
+                                    <% if (item.finalOffer) { %>
+                                        <span class="discounted-price">₹<%= (item.discountedPrice * item.quantity).toLocaleString("en-IN", { minimumFractionDigits: 2, maximumFractionDigits: 2 }) %></span>
+                                        <span class="original-price">₹<%= (item.productId.salePrice * item.quantity).toLocaleString("en-IN", { minimumFractionDigits: 2, maximumFractionDigits: 2 }) %></span>
+                                        <span class="discount"><%= item.finalOffer.discountAmount %>% OFF</span>
+                                    <% } else { %>
+                                        <span class="discounted-price">₹<%= (item.productId.salePrice * item.quantity).toLocaleString("en-IN", { minimumFractionDigits: 2, maximumFractionDigits: 2 }) %></span>
+                                        <span class="original-price">₹<%= (item.productId.regularPrice * item.quantity).toLocaleString("en-IN", { minimumFractionDigits: 2, maximumFractionDigits: 2 }) %></span>
+                                    <% } %>
                                 </div>
                                 <% if (item.productId.quantity <= 0) { %>
                                     <p class="text-red-500 mt-2 text-sm font-medium">Out of stock</p>
@@ -107,26 +130,20 @@
         <div class="w-full lg:w-1/3 bg-white p-6 rounded-lg shadow-sm">
             <h3 class="text-lg font-semibold text-gray-800 mb-4">Cart Summary</h3>
             <% if (cart && cart.items && cart.items.length > 0) { %>
-                <% 
-                    let subtotal = 0;
-                    let totalItems = 0;
-                    cart.items.forEach(item => {
-                        if (item.productId) {
-                            subtotal += item.productId.salePrice * item.quantity;
-                            totalItems += item.quantity;
-                        }
-                    });
-                %>
                 <div class="flex justify-between mb-2 text-gray-600">
                     <span>Subtotal (<%= totalItems %> Items)</span>
-                    <span>₹<%= subtotal.toLocaleString("en-IN") %></span>
+                    <span>₹<%= subtotal.toLocaleString("en-IN", { minimumFractionDigits: 2, maximumFractionDigits: 2 }) %></span>
+                </div>
+                <div class="flex justify-between mb-2 text-gray-600">
+                    <span>Shipping Cost <%= subtotal >= 2000 ? '(Free)' : '' %></span>
+                    <span>₹<%= shippingCost.toLocaleString("en-IN", { minimumFractionDigits: 2, maximumFractionDigits: 2 }) %></span>
                 </div>
                 <div class="flex justify-between font-semibold text-lg text-gray-800 border-t pt-2">
                     <span>Total</span>
-                    <span>₹<%= subtotal.toLocaleString("en-IN") %></span>
+                    <span>₹<%= total.toLocaleString("en-IN", { minimumFractionDigits: 2, maximumFractionDigits: 2 }) %></span>
                 </div>
                 <a href="/checkout" class="block w-full bg-blue-900 text-white py-2 rounded-lg mt-4 checkout-btn font-medium text-center <%= cart.items.some(item => item.productId.quantity <= 0) ? 'opacity-50 cursor-not-allowed' : '' %>"
-                 style="text-decoration: none; color: white;"  <%= cart.items.some(item => item.productId.quantity <= 0) ? 'onclick="return false;"' : '' %>>Proceed to Checkout</a>
+                   style="text-decoration: none; color: white;" <%= cart.items.some(item => item.productId.quantity <= 0) ? 'onclick="return false;"' : '' %>>Proceed to Checkout</a>
             <% } else { %>
                 <p class="text-gray-600">Your cart is empty.</p>
             <% } %>

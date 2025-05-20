@@ -38,7 +38,7 @@ const loadCategory = async (req, res) => {
 
 const addCategory = async (req, res) => {
     try {
-        const { categoryName, description, categoryOffer } = req.body;
+        const { categoryName, description } = req.body;
 
         const existingCategory = await Category.findOne({ name: { $regex: new RegExp("^" + categoryName + "$", "i") } });
 
@@ -49,7 +49,6 @@ const addCategory = async (req, res) => {
         const newCategory = new Category({
             name: categoryName,
             description,
-            categoryOffer
         });
 
         await newCategory.save();
@@ -63,7 +62,7 @@ const addCategory = async (req, res) => {
 
 const editCategory = async (req, res) => {
     try {
-        const { categoryId, categoryName, description, categoryOffer } = req.body;
+        const { categoryId, categoryName, description } = req.body;
 
         const existingCategory = await Category.findOne({
             _id: { $ne: categoryId },
@@ -74,7 +73,7 @@ const editCategory = async (req, res) => {
             return res.json({ success: false, message: 'Category already exists!' });
         }
 
-        const updatedCategory = await Category.findByIdAndUpdate(categoryId, { $set: { name: categoryName, description, categoryOffer } });
+        const updatedCategory = await Category.findByIdAndUpdate(categoryId, { $set: { name: categoryName, description} });
 
         if (!updatedCategory) {
             return res.json({ success: false, message: 'Category not found!' });

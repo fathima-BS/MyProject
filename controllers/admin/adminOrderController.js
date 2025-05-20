@@ -11,7 +11,6 @@ const listOrders = async (req, res) => {
     const { page = 1, search = '', status = 'all', months = 'all', sortBy = 'createdOn' } = req.query;
     let query = {};
 
-    // Search by orderId or customer name
     if (search) {
       const users = await User.find({
         $or: [
@@ -26,19 +25,16 @@ const listOrders = async (req, res) => {
       ];
     }
 
-    // Filter by status
     if (status !== 'all') {
       query.status = status;
     }
 
-    // Filter by date range
     if (months !== 'all') {
       const dateThreshold = new Date();
       dateThreshold.setMonth(dateThreshold.getMonth() - parseInt(months));
       query.createdOn = { $gte: dateThreshold };
     }
 
-    // Sorting
     const sortOptions = {};
     if (sortBy === 'orderId') {
       sortOptions.orderId = 1; // Ascending
@@ -48,12 +44,10 @@ const listOrders = async (req, res) => {
       sortOptions.createdOn = -1; // Default: sort by date descending
     }
 
-    // Pagination
     const totalOrders = await Order.countDocuments(query);
     const totalPages = Math.ceil(totalOrders / ITEMS_PER_PAGE);
     const currentPage = parseInt(page) || 1;
 
-    // Fetch orders
     const orders = await Order.find(query)
       .populate('userId')
       .populate('orderedItems.product')
@@ -76,119 +70,102 @@ const listOrders = async (req, res) => {
   }
 };
 
-// View Order Details
-const viewOrderDetails = async (req, res) => {
-  try {
-    const { orderId } = req.params;
-    const order = await Order.findOne({ orderId })
-      .populate('userId')
-      .populate('orderedItems.product');
+// Get Order Details for Admin
+const getOrderDetails = async (req, res) => {
+    try {
+        const orderId = req.params.id;
+        const order = await Order.findOne({ orderId })
+            .populate('orderedItems.product');
 
-    if (!order) {
-      return res.status(404).send('Order not found');
+        if (!order) {
+            return res.status(404).render('/page404', { message: 'Order not found.' });
+        }
+
+        res.render('orderDetailsAdmin', { order });
+    } catch (error) {
+        console.error('Error fetching order details:', error.message, error.stack);
+        res.status(500).render('page404', { message: 'Something went wrong while fetching order details.' });
     }
-
-    res.render('orderDetailsAdmin', { order });
-  } catch (error) {
-    console.error('Error viewing order details:', error);
-    res.status(500).send('Server Error');
-  }
 };
 
 // Update Order Status
 const updateOrderStatus = async (req, res) => {
-  try {
-    const { orderId } = req.params;
-    const { status } = req.body;
+    try {
+        const { orderId } = req.params;
+        const { status } = req.body;
 
-    const order = await Order.findOne({ orderId });
-    if (!order) {
-      return res.status(404).json({ success: false, message: 'Order not found' });
+        const order = await Order.findOne({ orderId });
+        if (!order) {
+            return res.status(404).json({ success: false, message: 'Order not found.' });
+        }
+
+        order.status = status;
+        order.orderedItems.forEach(item => {
+            if (item.status !== 'Cancelled' && item.status !== 'Returned' && item.status !== 'Return Rejected') {
+                item.status = status;
+            }
+        });
+
+        await order.save();
+        res.status(200).json({ success: true, message: 'Order status updated successfully.' });
+    } catch (error) {
+        console.error('Error updating order status:', error.message, error.stack);
+        res.status(500).json({ success: false, message: 'Something went wrong while updating the order status.' });
     }
-
-    // Update the overall order status
-    order.status = status;
-    order.orderedItems = order.orderedItems.map(item => ({
-      ...item.toObject(),
-      status: status,
-    }));
-
-    await order.save();
-
-    res.json({ success: true, message: 'Order status updated successfully' });
-  } catch (error) {
-    console.error('Error updating order status:', error);
-    res.status(500).json({ success: false, message: 'Error updating status' });
-  }
 };
 
-// Handle Return Request
+// Handle Return Request (Accept/Reject)
 const handleReturnRequest = async (req, res) => {
-  try {
-    const { orderId, productId, action } = req.query;
+    try {
+        const { orderId, productId, action, rejectReason } = req.query;
 
-    const order = await Order.findOne({ orderId })
-      .populate('userId')
-      .populate('orderedItems.product');
-    if (!order) {
-      return res.status(404).json({ success: false, message: 'Order not found' });
+        const order = await Order.findOne({ orderId });
+        if (!order) {
+            return res.status(404).json({ success: false, message: 'Order not found.' });
+        }
+
+        const item = order.orderedItems.find(item => item.product.toString() === productId);
+        if (!item) {
+            return res.status(404).json({ success: false, message: 'Item not found in order.' });
+        }
+
+        if (item.status !== 'Return Request') {
+            return res.status(400).json({ success: false, message: 'No return request found for this item.' });
+        }
+
+        if (action === 'accept') {
+            item.status = 'Returned';
+        } else if (action === 'reject') {
+            item.status = 'Return Rejected';
+            item.returnRejectReason = rejectReason || 'Not specified';
+        } else {
+            return res.status(400).json({ success: false, message: 'Invalid action.' });
+        }
+
+        const allItemsProcessed = order.orderedItems.every(item =>
+            ['Delivered', 'Cancelled', 'Returned', 'Return Rejected'].includes(item.status)
+        );
+        if (allItemsProcessed) {
+            if (order.orderedItems.some(item => item.status === 'Return Rejected')) {
+                order.status = 'Return Rejected';
+                order.returnRejectReason = rejectReason || 'Not specified';
+            } else if (order.orderedItems.every(item => item.status === 'Returned' || item.status === 'Cancelled')) {
+                order.status = 'Returned';
+            } else {
+                order.status = 'Delivered';
+            }
+        }
+
+        await order.save();
+        res.status(200).json({ success: true, message: `Return request ${action}ed successfully.` });
+    } catch (error) {
+        console.error('Error handling return request:', error.message, error.stack);
+        res.status(500).json({ success: false, message: 'Something went wrong while processing the return request.' });
     }
-
-    const item = order.orderedItems.find(i => i.product._id.toString() === productId);
-    if (!item) {
-      return res.status(404).json({ success: false, message: 'Item not found in order' });
-    }
-
-    if (item.status !== 'Return Request') {
-      return res.status(400).json({ success: false, message: 'No return request to process for this item' });
-    }
-
-    if (action === 'accept') {
-      item.status = 'Returned';
-
-      // Refund the item amount to the user's wallet
-      let wallet = await Wallet.findOne({ userId: order.userId });
-      if (!wallet) {
-        wallet = new Wallet({ userId: order.userId, balance: 0, transactions: [] });
-      }
-
-      const refundAmount = item.price * item.quantity;
-      wallet.balance += refundAmount;
-      wallet.transactions.push({
-        amount: refundAmount,
-        type: 'credit',
-        description: `Refund for item in order #${order.orderId}`,
-        date: new Date(),
-      });
-      await wallet.save();
-
-      // Restore product quantity
-      await Product.findByIdAndUpdate(item.product._id, {
-        $inc: { quantity: item.quantity },
-      });
-
-      // Update order status if all items are returned
-      const allReturned = order.orderedItems.every(i => i.status === 'Returned');
-      if (allReturned) order.status = 'Returned';
-
-      await order.save();
-      res.json({ success: true, message: 'Return approved and amount refunded to wallet' });
-    } else if (action === 'reject') {
-      item.status = 'Delivered';
-      await order.save();
-      res.json({ success: true, message: 'Return request rejected' });
-    } else {
-      res.status(400).json({ success: false, message: 'Invalid action' });
-    }
-  } catch (error) {
-    console.error('Error handling return request:', error);
-    res.status(500).json({ success: false, message: 'Error processing return request' });
-  }
 };
-
 module.exports = {
   listOrders,
-  viewOrderDetails,
+  getOrderDetails,
   updateOrderStatus,
   handleReturnRequest,
 };

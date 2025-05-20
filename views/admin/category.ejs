@@ -35,11 +35,7 @@
                                 <textarea class="form-control bg-dark text-white" id="description" name="description"
                                     rows="3"></textarea>
                             </div>
-                            <div class="mb-3">
-                                <label for="categoryOffer" class="form-label">Offer %</label>
-                                <input type="number" class="form-control bg-dark text-white" id="categoryOffer"
-                                    name="categoryOffer">
-                            </div>
+                           
                         </div>
                         <div class="modal-footer bg-dark">
                             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
@@ -72,11 +68,7 @@
                                     rows="3"></textarea>
                             </div>
                             <input type="hidden" id="categoryId" name="categoryId">
-                            <div class="mb-3">
-                                <label for="categoryOffer" class="form-label">Offer %</label>
-                                <input type="number" class="form-control bg-dark text-white" id="categoryOffer"
-                                    name="categoryOffer">
-                            </div>
+                           
                         </div>
                         <div class="modal-footer bg-dark">
                             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
@@ -199,7 +191,6 @@
                 const form = document.getElementById('editcategoryForm');
                 form.elements['categoryName'].value = category.name || '';
                 form.elements['description'].value = category.description || '';
-                form.elements['categoryOffer'].value = category.categoryOffer || '';
                 form.elements['categoryId'].value = category._id || '';
                 const modal = new bootstrap.Modal(document.getElementById('editcategoryModal'));
                 modal.show();
@@ -210,7 +201,7 @@
                 const formData = new FormData(form);
                 const categoryName = formData.get('categoryName').trim();
                 const description = formData.get('description').trim();
-                let categoryOffer = formData.get('categoryOffer').trim();
+               
                 const categoryId = formData.get('categoryId').trim();
 
                 const nameRegex = /^[A-Za-z\s]{6,}$/;
@@ -237,25 +228,13 @@
                     });
                 }
 
-                // If categoryOffer is empty, set it to 0
-                if (!categoryOffer) {
-                    categoryOffer = 0; // Or set to null if your schema expects null
-                } else {
-                    const offerValue = Number(categoryOffer);
-                    if (isNaN(offerValue) || offerValue < 0 || offerValue > 100) {
-                        return Swal.fire({
-                            icon: 'warning',
-                            title: 'Invalid Offer Value!',
-                            text: 'Offer must be a percentage between 0 and 100.',
-                        });
-                    }
-                }
+           
 
                 // Prepare form data for submission
                 const updatedFormData = new FormData();
                 updatedFormData.append('categoryName', categoryName);
                 updatedFormData.append('description', description);
-                updatedFormData.append('categoryOffer', categoryOffer);
+             
                 updatedFormData.append('categoryId', categoryId);
 
                 fetch('/admin/edit-category', {
@@ -419,7 +398,7 @@
                 e.preventDefault();
                 const categoryName = document.getElementById('categoryName').value.trim();
                 const description = document.getElementById('description').value.trim();
-                let categoryOffer = document.getElementById('categoryOffer').value.trim();
+              
 
                 const nameRegex = /^[A-Za-z\s]{6,}$/;
 
@@ -445,26 +424,13 @@
                     });
                 }
 
-                // If categoryOffer is empty, set it to 0
-                if (!categoryOffer) {
-                    categoryOffer = 0; // Or set to null if your schema expects null
-                } else {
-                    const offerValue = Number(categoryOffer);
-                    if (isNaN(offerValue) || offerValue < 0 || offerValue > 100) {
-                        return Swal.fire({
-                            icon: 'warning',
-                            title: 'Invalid Offer Value!',
-                            text: 'Offer must be a percentage between 0 and 100.',
-                        });
-                    }
-                }
 
                 fetch('/admin/add-category', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
                     },
-                    body: JSON.stringify({ categoryName, description, categoryOffer })
+                    body: JSON.stringify({ categoryName, description })
                 })
                     .then(response => response.json())
                     .then(data => {

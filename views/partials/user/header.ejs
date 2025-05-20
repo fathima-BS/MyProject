@@ -161,7 +161,7 @@
 
       .header__nav__option .icon-link img {
          display: block;
-         width: 20px;
+         width: 30px;
          height: 20px;
       }
 
@@ -206,6 +206,25 @@
       .canvas__open {
          display: none;
       }
+
+      .cart-img {
+         width: 24px;
+         height: 24px;
+      }
+
+      .cart-icon {
+         position: relative;
+         color: #000;
+      }
+
+      .cart-count {
+         font-size: 0.7rem;
+         padding: 3px 6px;
+         color: #fff;
+         background-color: #dc3545;
+         /* Bootstrap danger color */
+      }
+
 
       @media (max-width: 991px) {
          .header__menu {
@@ -259,8 +278,14 @@
                         <a href="/login" class="sign-in-link">Log in</a>
                         <%}%>
                            <a href="/wishlist" class="icon-link"><img src="/img/icon/heart.png" alt="Wishlist"></a>
-                           <a href="/cart" class="icon-link"><img src="/img/icon/cart.png" alt="Cart">
-                              <span>0</span></a>
+                           <a href="/cart"
+                              class="cart-icon position-relative d-flex align-items-center ms-3 text-decoration-none">
+                              <img src="/img/icon/cart.png" alt="Cart" class="cart-img me-1" />
+                              <span
+                                 class="cart-count badge rounded-pill bg-danger position-absolute top-0 start-100 translate-middle">
+                                 <%= typeof cartCount !=='undefined' ? cartCount : 0 %>
+                              </span>
+                           </a>
                </div>
             </div>
          </div>

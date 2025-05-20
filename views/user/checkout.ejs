@@ -1,45 +1,11 @@
 <%- include("../partials/user/header") %>
 <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+<!-- SweetAlert2 CDN -->
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <style>
     body {
         font-family: 'Roboto', sans-serif;
         background-color: #f5f5f5;
-    }
-    .checkout-progress {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        margin-bottom: 2rem;
-    }
-    .progress-step {
-        display: flex;
-        align-items: center;
-        font-size: 0.9rem;
-        color: #6b7280;
-    }
-    .progress-step.active {
-        color: #1f2937;
-        font-weight: 600;
-    }
-    .progress-step.completed .step-icon {
-        background-color: #10b981;
-        color: white;
-    }
-    .step-icon {
-        width: 1.5rem;
-        height: 1.5rem;
-        border-radius: 50%;
-        background-color: #d1d5db;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        margin-right: 0.5rem;
-    }
-    .progress-line {
-        width: 2rem;
-        height: 2px;
-        background-color: #d1d5db;
-        margin: 0 0.5rem;
     }
     .address-card {
         background-color: white;
@@ -48,9 +14,6 @@
         box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
         margin-bottom: 1rem;
         position: relative;
-    }
-    .address-card.selected {
-        border: 2px solid #3b82f6;
     }
     .action-btn {
         transition: background-color 0.2s ease;
@@ -62,7 +25,7 @@
         transition: background-color 0.3s ease;
     }
     .proceed-btn:hover:not(:disabled) {
-        background-color: #1e3a8a;
+        background-color: #96aff3;
     }
     .cart-item-img {
         width: 60px;
@@ -83,26 +46,141 @@
         border-color: #3b82f6;
         background-color: #f0f7ff;
     }
+    /* Modal Styles */
+    .modal {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0,0,0,0.5);
+        z-index: 1000;
+        overflow-y: auto;
+    }
+    .modal.show {
+        display: block;
+    }
+    .modal-dialog {
+        position: relative;
+        width: 95%;
+        max-width: 500px;
+        margin: 30px auto;
+        background-color: white;
+        border-radius: 8px;
+        overflow: hidden;
+    }
+    .modal-content {
+        padding: 20px;
+    }
+    .modal-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding-bottom: 15px;
+        margin-bottom: 20px;
+        border-bottom: 1px solid #eee;
+    }
+    .modal-title {
+        font-size: 18px;
+        font-weight: 600;
+        color: #333;
+    }
+    .close-btn {
+        background-color: #333;
+        color: white;
+        width: 24px;
+        height: 24px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        font-size: 14px;
+        border: none;
+    }
+    .form-group {
+        margin-bottom: 15px;
+    }
+    .form-group label {
+        display: block;
+        margin-bottom: 5px;
+        font-size: 14px;
+        color: #333;
+    }
+    .form-group label .required {
+        color: red;
+    }
+    .form-control {
+        width: 100%;
+        padding: 10px 15px;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        font-size: 14px;
+        background-color: #f9f9f9;
+    }
+    .form-row {
+        display: flex;
+        gap: 15px;
+        margin-bottom: 15px;
+    }
+    .form-row .form-group {
+        flex: 1;
+        margin-bottom: 0;
+    }
+    .save-btn {
+        display: block;
+        width: 100%;
+        padding: 12px;
+        background-color: #1e88e5;
+        color: white;
+        border: none;
+        border-radius: 4px;
+        font-size: 16px;
+        cursor: pointer;
+        text-align: center;
+        margin-top: 20px;
+    }
+    .save-btn:hover {
+        background-color: #1976d2;
+    }
+    .error-message {
+        color: red;
+        font-size: 14px;
+        margin-top: 4px;
+        display: block;
+    }
+    .price-offer {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+    .sale-price {
+        font-size: 0.875rem;
+        font-weight: 600;
+        color: #1f2937;
+    }
+    .original-price {
+        font-size: 0.75rem;
+        color: #6b7280;
+        text-decoration: line-through;
+    }
+    .discount {
+        font-size: 0.75rem;
+        color: #dc3545;
+        font-weight: 600;
+    }
 </style>
 
 <!-- Main Content -->
 <div class="container mx-auto p-6 max-w-6xl">
-    <!-- Checkout Progress -->
-    <div class="checkout-progress">
-        <div class="progress-step completed">
-            <span class="step-icon">✔</span>
-            Cart
-        </div>
-        <div class="progress-line"></div>
-        <div class="progress-step active">
-            <span class="step-icon">2</span>
-            Address
-        </div>
-        <div class="progress-line"></div>
-        <div class="progress-step">
-            <span class="step-icon">3</span>
-            Payment
-        </div>
+    <!-- breadcrumbs -->
+    <div class="flex items-center text-sm mb-6">
+        <a href="/" style="text-decoration: none;" class="text-gray-700 hover:text-gray-900">Home</a>
+        <span class="mx-2">></span>
+        <a href="/cart" style="text-decoration: none;" class="text-gray-700 hover:text-gray-900">Cart</a>
+        <span class="mx-2">></span>
+        <span class="text-gray-500">Checkout</span>
     </div>
 
     <!-- Checkout Content -->
@@ -124,7 +202,11 @@
                         <div class="flex-1">
                             <p class="text-sm font-medium text-gray-800"><%= item.productId.productName %></p>
                             <p class="text-xs text-gray-600">Qty: <%= item.quantity %></p>
-                            <p class="text-sm font-semibold text-gray-800">₹<%= (item.productId.salePrice * item.quantity).toLocaleString("en-IN") %></p>
+                            <div class="price-offer">
+                                <span class="sale-price">₹<%= (item.salePrice * item.quantity).toLocaleString("en-IN", { minimumFractionDigits: 2, maximumFractionDigits: 2 }) %></span>
+                                <span class="original-price">₹<%= (item.regularPrice * item.quantity).toLocaleString("en-IN", { minimumFractionDigits: 2, maximumFractionDigits: 2 }) %></span>
+                               
+                            </div>
                         </div>
                     </div>
                 <% }) %>
@@ -132,31 +214,23 @@
             <div class="border-t pt-2 mt-4">
                 <div class="flex justify-between mb-2 text-gray-600">
                     <span>Price</span>
-                    <span>₹<%= subtotal.toLocaleString("en-IN") %></span>
+                    <span>₹<%= subtotal.toLocaleString("en-IN", { minimumFractionDigits: 2, maximumFractionDigits: 2 }) %></span>
                 </div>
-                <!-- <div class="flex justify-between mb-2 text-gray-600">
-                    <span>Discount</span>
-                    <span>-₹<%= offerDiscount.toLocaleString("en-IN") %></span>
-                </div>
-                <% if (coupon > 0) { %>
-                    <div class="flex justify-between mb-2 text-gray-600">
-                        <span>Coupon Discount</span>
-                        <span>-₹<%= coupon.toLocaleString("en-IN") %></span>
-                    </div>
-                <% } %>
                 <div class="flex justify-between mb-2 text-gray-600">
-                    <span>Taxes (GST 5%)</span>
-                    <% let taxes = total * 0.05; %>
-                    <span>₹<%= taxes.toLocaleString("en-IN") %></span>
-                </div> -->
+                    <span>Offer Discount</span>
+                    <span>-₹<%= offerDiscount.toLocaleString("en-IN", { minimumFractionDigits: 2, maximumFractionDigits: 2 }) %></span>
+                </div>
+                <div class="flex justify-between mb-2 text-gray-600">
+                    <span>Coupon Discount</span>
+                    <span>-₹<%= coupon.toLocaleString("en-IN", { minimumFractionDigits: 2, maximumFractionDigits: 2 }) %></span>
+                </div>
                 <div class="flex justify-between mb-2 text-gray-600">
                     <span>Shipping</span>
                     <span>Free</span>
                 </div>
                 <div class="flex justify-between font-semibold text-lg text-gray-800 border-t pt-2">
                     <span>TOTAL</span>
-                    <% let finalTotal = total + taxes; %>
-                    <span>₹<%= finalTotal.toLocaleString("en-IN") %></span>
+                    <span>₹<%= total.toLocaleString("en-IN", { minimumFractionDigits: 2, maximumFractionDigits: 2 }) %></span>
                 </div>
             </div>
         </div>
@@ -164,12 +238,12 @@
         <!-- Address Selection and Payment -->
         <div class="w-full lg:w-2/3">
             <!-- Address Selection -->
-            <% if (addresses && addresses.address && addresses.address.length > 0) { %>
+            <% if (Array.isArray(addresses?.address) && addresses.address.length > 0) { %>
                 <% addresses.address.forEach((address, index) => { %>
                     <div class="address-card <%= index === 0 ? 'selected' : '' %>">
                         <div class="flex justify-between items-start">
                             <div class="flex items-start">
-                                <input type="radio" name="selectedAddress" value="<%= index %>" class="mt-1 mr-3" <%= index === 0 ? 'checked' : '' %>>
+                                <input type="radio" name="selectedAddress" value="<%= address._id %>" class="mt-1 mr-3" <%= index === 0 ? 'checked' : '' %>>
                                 <div>
                                     <p class="font-semibold text-gray-800"><%= address.addressType %></p>
                                     <p class="text-gray-600 text-sm mt-1">
@@ -183,23 +257,20 @@
                                     <% if (index === 0) { %>
                                         <p class="text-blue-600 text-sm mt-1 font-medium">Default Address</p>
                                     <% } %>
-                                    <!-- <button class="text-blue-600 text-sm mt-2 font-medium deliver-btn" data-address-index="<%= index %>">
-                                        Deliver Here
-                                    </button> -->
                                 </div>
                             </div>
-                            <!-- <div class="flex space-x-2">
-                                <button class="action-btn text-gray-500 p-2 rounded edit-btn" data-address-index="<%= index %>">
+                            <div class="flex space-x-2">
+                                <button class="action-btn text-gray-500 p-2 rounded edit-btn" data-id="<%= address._id %>" data-address='<%= JSON.stringify(address) %>'>
                                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.536L16.732 3.732z"></path>
                                     </svg>
                                 </button>
-                                <button class="action-btn text-gray-500 p-2 rounded remove-btn" data-address-index="<%= index %>">
+                                <button class="action-btn text-gray-500 p-2 rounded remove-btn" data-id="<%= address._id %>">
                                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
                                     </svg>
                                 </button>
-                            </div> -->
+                            </div>
                         </div>
                     </div>
                 <% }) %>
@@ -210,14 +281,8 @@
             <% } %>
 
             <!-- Add New Address -->
-            <!-- <div class="mt-6">
-                <a href="/addresses" class="border border-dashed border-gray-400 w-full py-3 text-gray-600 rounded-lg font-medium hover:bg-gray-100 transition text-center">
-                    + Add New Address
-                </a>
-            </div> -->
-
-             <div class="mt-6">
-                <a href="/addresses" style="text-decoration: none;" class="w-full bg-blue-900 text-white py-3 rounded-lg font-medium proceed-btn ">+ Add New Address</a>
+            <div class="mt-6">
+                <button class="w-full bg-blue-900 text-white py-3 rounded-lg font-medium proceed-btn" id="openAddressModal">+ Add New Address</button>
             </div>
 
             <!-- Payment Method -->
@@ -238,118 +303,762 @@
     </div>
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<!-- Add Address Modal -->
+<div class="modal" id="addressModal">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Add New Address</h5>
+                <button type="button" class="close-btn" id="closeAddressModal">✕</button>
+            </div>
+            <form id="addAddressForm">
+                <div class="form-group">
+                    <label for="addAddressType">Address Type <span class="required">*</span></label>
+                    <select class="form-control" id="addAddressType" name="addressType">
+                        <option value="Home">Home</option>
+                        <option value="Work">Work</option>
+                        <option value="Other">Other</option>
+                    </select>
+                    <span id="addAddressTypeError" class="error-message"></span>
+                </div>
+                <div class="form-group">
+                    <label for="addFullName">Full Name <span class="required">*</span></label>
+                    <input type="text" class="form-control" id="addFullName" name="name" placeholder="Enter full name">
+                    <span id="addFullNameError" class="error-message"></span>
+                </div>
+                <div class="form-group">
+                    <label for="addMobileNo">Mobile No. <span class="required">*</span></label>
+                    <input type="tel" class="form-control" id="addMobileNo" name="phone" placeholder="Enter mobile number">
+                    <span id="addMobileNoError" class="error-message"></span>
+                </div>
+                <div class="form-group">
+                    <label for="addAltPhone">Alternate Phone</label>
+                    <input type="tel" class="form-control" id="addAltPhone" name="altPhone" placeholder="Enter alternate phone (optional)">
+                    <span id="addAltPhoneError" class="error-message"></span>
+                </div>
+                <div class="form-group">
+                    <label for="addLandMark">Landmark <span class="required">*</span></label>
+                    <input type="text" class="form-control" id="addLandMark" name="landMark" placeholder="Enter landmark">
+                    <span id="addLandMarkError" class="error-message"></span>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="addCity">City <span class="required">*</span></label>
+                        <input type="text" class="form-control" id="addCity" name="city" placeholder="Enter city">
+                        <span id="addCityError" class="error-message"></span>
+                    </div>
+                    <div class="form-group">
+                        <label for="addPincode">Pincode <span class="required">*</span></label>
+                        <input type="text" class="form-control" id="addPincode" name="pincode" placeholder="Enter pincode">
+                        <span id="addPincodeError" class="error-message"></span>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="addState">State <span class="required">*</span></label>
+                    <input type="text" class="form-control" id="addState" name="State" placeholder="Enter state">
+                    <span id="addStateError" class="error-message"></span>
+                </div>
+                <button type="submit" class="save-btn">Save</button>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Edit Address Modal -->
+<div class="modal" id="editAddressModal">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Edit Address</h5>
+                <button type="button" class="close-btn" id="closeEditAddressModal">✕</button>
+            </div>
+            <form id="editAddressForm">
+                <input type="hidden" id="editAddressId" name="addressId">
+                <div class="form-group">
+                    <label for="editAddressType">Address Type <span class="required">*</span></label>
+                    <select class="form-control" id="editAddressType" name="addressType">
+                        <option value="Home">Home</option>
+                        <option value="Work">Work</option>
+                        <option value="Other">Other</option>
+                    </select>
+                    <span id="editAddressTypeError" class="error-message"></span>
+                </div>
+                <div class="form-group">
+                    <label for="editFullName">Full Name <span class="required">*</span></label>
+                    <input type="text" class="form-control" id="editFullName" name="name" placeholder="Enter full name">
+                    <span id="editFullNameError" class="error-message"></span>
+                </div>
+                <div class="form-group">
+                    <label for="editMobileNo">Mobile No. <span class="required">*</span></label>
+                    <input type="tel" class="form-control" id="editMobileNo" name="phone" placeholder="Enter mobile number">
+                    <span id="editMobileNoError" class="error-message"></span>
+                </div>
+                <div class="form-group">
+                    <label for="editAltPhone">Alternate Phone</label>
+                    <input type="tel" class="form-control" id="editAltPhone" name="altPhone" placeholder="Enter alternate phone (optional)">
+                    <span id="editAltPhoneError" class="error-message"></span>
+                </div>
+                <div class="form-group">
+                    <label for="editLandMark">Landmark <span class="required">*</span></label>
+                    <input type="text" class="form-control" id="editLandMark" name="landMark" placeholder="Enter landmark">
+                    <span id="editLandMarkError" class="error-message"></span>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="editCity">City <span class="required">*</span></label>
+                        <input type="text" class="form-control" id="editCity" name="city" placeholder="Enter city">
+                        <span id="editCityError" class="error-message"></span>
+                    </div>
+                    <div class="form-group">
+                        <label for="editPincode">Pincode <span class="required">*</span></label>
+                        <input type="text" class="form-control" id="editPincode" name="pincode" placeholder="Enter pincode">
+                        <span id="editPincodeError" class="error-message"></span>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="editState">State <span class="required">*</span></label>
+                    <input type="text" class="form-control" id="editState" name="State" placeholder="Enter state">
+                    <span id="editStateError" class="error-message"></span>
+                </div>
+                <button type="submit" class="save-btn">Save</button>
+            </form>
+        </div>
+    </div>
+</div>
+
 <script>
-// Deliver Here Button
-document.querySelectorAll('.deliver-btn').forEach(button => {
-    button.addEventListener('click', async () => {
-        const addressIndex = button.dataset.addressIndex;
+document.addEventListener('DOMContentLoaded', function() {
+    // Modal functionality for Add Address
+    const addModal = document.getElementById('addressModal');
+    const openAddModalBtn = document.getElementById('openAddressModal');
+    const closeAddModalBtn = document.getElementById('closeAddressModal');
+    const addAddressForm = document.getElementById('addAddressForm');
+    const editAddressForm = document.getElementById('editAddressForm');
+
+    if (openAddModalBtn && addModal && closeAddModalBtn) {
+        openAddModalBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+            addModal.classList.add('show');
+            document.body.style.overflow = 'hidden';
+        });
+
+        closeAddModalBtn.addEventListener('click', function() {
+            addModal.classList.remove('show');
+            document.body.style.overflow = '';
+            document.querySelectorAll('#addAddressForm .error-message').forEach(function(error) {
+                if (error) error.textContent = '';
+            });
+            document.getElementById('addAddressForm').reset();
+        });
+    }
+
+    // Modal functionality for Edit Address
+    const editModal = document.getElementById('editAddressModal');
+    const closeEditModalBtn = document.getElementById('closeEditAddressModal');
+
+    if (editModal && closeEditModalBtn) {
+        closeEditModalBtn.addEventListener('click', function() {
+            editModal.classList.remove('show');
+            document.body.style.overflow = '';
+            document.querySelectorAll('#editAddressForm .error-message').forEach(function(error) {
+                if (error) error.textContent = '';
+            });
+        });
+    }
+
+    // Close modals on outside click
+    window.addEventListener('click', function(e) {
+        if (e.target === addModal || e.target === editModal) {
+            addModal.classList.remove('show');
+            editModal.classList.remove('show');
+            document.body.style.overflow = '';
+            document.querySelectorAll('.error-message').forEach(function(error) {
+                if (error) error.textContent = '';
+            });
+            document.getElementById('addAddressForm').reset();
+        }
+    });
+
+    // Regex patterns
+    const nameRegex = /^[a-zA-Z\s]{2,50}$/;
+    const phoneRegex = /^\d{10}$/;
+    const pincodeRegex = /^\d{6}$/;
+    const textRegex = /^[a-zA-Z\s]{2,100}$/;
+
+    // Real-time validation for Add Address Form
+    function validateAddField(fieldId, value) {
+        const errorElement = document.getElementById(fieldId + 'Error');
+        if (!errorElement) return false;
+
+        let errorMessage = '';
+
+        switch (fieldId) {
+            case 'addAddressType':
+                if (!['Home', 'Work', 'Other'].includes(value)) {
+                    errorMessage = 'Please select a valid address type';
+                }
+                break;
+            case 'addFullName':
+                if (!value) {
+                    errorMessage = 'Please enter full name';
+                } else if (!nameRegex.test(value)) {
+                    errorMessage = 'Name must be 2-50 letters or spaces';
+                }
+                break;
+            case 'addMobileNo':
+                if (!value) {
+                    errorMessage = 'Please enter mobile number';
+                } else if (!phoneRegex.test(value)) {
+                    errorMessage = 'Mobile number must be 10 digits';
+                }
+                break;
+            case 'addAltPhone':
+                if (value && !phoneRegex.test(value)) {
+                    errorMessage = 'Alternate phone must be 10 digits or empty';
+                }
+                break;
+            case 'addLandMark':
+                if (!value) {
+                    errorMessage = 'Please enter landmark';
+                } else if (!textRegex.test(value)) {
+                    errorMessage = 'Landmark must be 2-100 letters or spaces';
+                }
+                break;
+            case 'addCity':
+                if (!value) {
+                    errorMessage = 'Please enter city';
+                } else if (!textRegex.test(value)) {
+                    errorMessage = 'City must be 2-100 letters or spaces';
+                }
+                break;
+            case 'addPincode':
+                if (!value) {
+                    errorMessage = 'Please enter pincode';
+                } else if (!pincodeRegex.test(value)) {
+                    errorMessage = 'Pincode must be 6 digits';
+                }
+                break;
+            case 'addState':
+                if (!value) {
+                    errorMessage = 'Please enter state';
+                } else if (!textRegex.test(value)) {
+                    errorMessage = 'State must be 2-100 letters or spaces';
+                }
+                break;
+        }
+
+        errorElement.textContent = errorMessage;
+        return !errorMessage;
+    }
+
+    // Real-time validation for Edit Address Form
+    function validateEditField(fieldId, value) {
+        const errorElement = document.getElementById(fieldId + 'Error');
+        if (!errorElement) return false;
+
+        let errorMessage = '';
+
+        switch (fieldId) {
+            case 'editAddressType':
+                if (!['Home', 'Work', 'Other'].includes(value)) {
+                    errorMessage = 'Please select a valid address type';
+                }
+                break;
+            case 'editFullName':
+                if (!value) {
+                    errorMessage = 'Please enter full name';
+                } else if (!nameRegex.test(value)) {
+                    errorMessage = 'Name must be 2-50 letters or spaces';
+                }
+                break;
+            case 'editMobileNo':
+                if (!value) {
+                    errorMessage = 'Please enter mobile number';
+                } else if (!phoneRegex.test(value)) {
+                    errorMessage = 'Mobile number must be 10 digits';
+                }
+                break;
+            case 'editAltPhone':
+                if (value && !phoneRegex.test(value)) {
+                    errorMessage = 'Alternate phone must be 10 digits or empty';
+                }
+                break;
+            case 'editLandMark':
+                if (!value) {
+                    errorMessage = 'Please enter landmark';
+                } else if (!textRegex.test(value)) {
+                    errorMessage = 'Landmark must be 2-100 letters or spaces';
+                }
+                break;
+            case 'editCity':
+                if (!value) {
+                    errorMessage = 'Please enter city';
+                } else if (!textRegex.test(value)) {
+                    errorMessage = 'City must be 2-100 letters or spaces';
+                }
+                break;
+            case 'editPincode':
+                if (!value) {
+                    errorMessage = 'Please enter pincode';
+                } else if (!pincodeRegex.test(value)) {
+                    errorMessage = 'Pincode must be 6 digits';
+                }
+                break;
+            case 'editState':
+                if (!value) {
+                    errorMessage = 'Please enter state';
+                } else if (!textRegex.test(value)) {
+                    errorMessage = 'State must be 2-100 letters or spaces';
+                }
+                break;
+        }
+
+        errorElement.textContent = errorMessage;
+        return !errorMessage;
+    }
+
+    // Attach real-time validation to Add Address Form
+    const addAddressType = document.getElementById('addAddressType');
+    const addFullName = document.getElementById('addFullName');
+    const addMobileNo = document.getElementById('addMobileNo');
+    const addAltPhone = document.getElementById('addAltPhone');
+    const addLandMark = document.getElementById('addLandMark');
+    const addCity = document.getElementById('addCity');
+    const addPincode = document.getElementById('addPincode');
+    const addState = document.getElementById('addState');
+
+    if (addAddressType) addAddressType.addEventListener('input', function() {
+        validateAddField('addAddressType', addAddressType.value ? addAddressType.value.trim() : '');
+    });
+    if (addFullName) addFullName.addEventListener('input', function() {
+        validateAddField('addFullName', addFullName.value ? addFullName.value.trim() : '');
+    });
+    if (addMobileNo) addMobileNo.addEventListener('input', function() {
+        validateAddField('addMobileNo', addMobileNo.value ? addMobileNo.value.trim() : '');
+    });
+    if (addAltPhone) addAltPhone.addEventListener('input', function() {
+        validateAddField('addAltPhone', addAltPhone.value ? addAltPhone.value.trim() : '');
+    });
+    if (addLandMark) addLandMark.addEventListener('input', function() {
+        validateAddField('addLandMark', addLandMark.value ? addLandMark.value.trim() : '');
+    });
+    if (addCity) addCity.addEventListener('input', function() {
+        validateAddField('addCity', addCity.value ? addCity.value.trim() : '');
+    });
+    if (addPincode) addPincode.addEventListener('input', function() {
+        validateAddField('addPincode', addPincode.value ? addPincode.value.trim() : '');
+    });
+    if (addState) addState.addEventListener('input', function() {
+        validateAddField('addState', addState.value ? addState.value.trim() : '');
+    });
+
+    // Attach real-time validation to Edit Address Form
+    const editAddressType = document.getElementById('editAddressType');
+    const editFullName = document.getElementById('editFullName');
+    const editMobileNo = document.getElementById('editMobileNo');
+    const editAltPhone = document.getElementById('editAltPhone');
+    const editLandMark = document.getElementById('editLandMark');
+    const editCity = document.getElementById('editCity');
+    const editPincode = document.getElementById('editPincode');
+    const editState = document.getElementById('editState');
+
+    if (editAddressType) editAddressType.addEventListener('input', function() {
+        validateEditField('editAddressType', editAddressType.value ? editAddressType.value.trim() : '');
+    });
+    if (editFullName) editFullName.addEventListener('input', function() {
+        validateEditField('editFullName', editFullName.value ? editFullName.value.trim() : '');
+    });
+    if (editMobileNo) editMobileNo.addEventListener('input', function() {
+        validateEditField('editMobileNo', editMobileNo.value ? editMobileNo.value.trim() : '');
+    });
+    if (editAltPhone) editAltPhone.addEventListener('input', function() {
+        validateEditField('editAltPhone', editAltPhone.value ? editAltPhone.value.trim() : '');
+    });
+    if (editLandMark) editLandMark.addEventListener('input', function() {
+        validateEditField('editLandMark', editLandMark.value ? editLandMark.value.trim() : '');
+    });
+    if (editCity) editCity.addEventListener('input', function() {
+        validateEditField('editCity', editCity.value ? editCity.value.trim() : '');
+    });
+    if (editPincode) editPincode.addEventListener('input', function() {
+        validateEditField('editPincode', editPincode.value ? editPincode.value.trim() : '');
+    });
+    if (editState) editState.addEventListener('input', function() {
+        validateEditField('editState', editState.value ? editState.value.trim() : '');
+    });
+
+    // Validation for Add Address Form on Submit
+    if (addAddressForm) {
+        addAddressForm.addEventListener('submit', function(event) {
+            event.preventDefault();
+
+            let isValid = true;
+
+            const fields = [
+                { id: 'addAddressType', value: addAddressType ? addAddressType.value.trim() : '' },
+                { id: 'addFullName', value: addFullName ? addFullName.value.trim() : '' },
+                { id: 'addMobileNo', value: addMobileNo ? addMobileNo.value.trim() : '' },
+                { id: 'addAltPhone', value: addAltPhone ? addAltPhone.value.trim() : '' },
+                { id: 'addLandMark', value: addLandMark ? addLandMark.value.trim() : '' },
+                { id: 'addCity', value: addCity ? addCity.value.trim() : '' },
+                { id: 'addPincode', value: addPincode ? addPincode.value.trim() : '' },
+                { id: 'addState', value: addState ? addState.value.trim() : '' }
+            ];
+
+            fields.forEach(function(field) {
+                if (!validateAddField(field.id, field.value)) {
+                    isValid = false;
+                }
+            });
+
+            if (isValid) {
+                const formData = {
+                    addressType: addAddressType.value,
+                    name: addFullName.value,
+                    phone: addMobileNo.value,
+                    altPhone: addAltPhone.value,
+                    landMark: addLandMark.value,
+                    city: addCity.value,
+                    pincode: addPincode.value,
+                    state: addState.value
+                };
+
+                fetch('/add-address', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(formData)
+                })
+                .then(function(response) {
+                    if (!response.ok) {
+                        return response.text().then(text => {
+                            throw new Error('Network response was not ok: ' + response.status + ' ' + text);
+                        });
+                    }
+                    return response.json();
+                })
+                .then(function(result) {
+                    if (result.success) {
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Address Added',
+                            text: 'Your new address has been added successfully',
+                            timer: 1500,
+                            showConfirmButton: false
+                        }).then(function() {
+                            addModal.classList.remove('show');
+                            document.body.style.overflow = '';
+                            document.getElementById('addAddressForm').reset();
+                            document.querySelectorAll('#addAddressForm .error-message').forEach(function(error) {
+                                if (error) error.textContent = '';
+                            });
+                            window.location.reload();
+                        });
+                    } else {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Error',
+                            text: result.message || 'Failed to add address',
+                            confirmButtonText: 'OK'
+                        });
+                    }
+                })
+                .catch(function(error) {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error',
+                        text: 'An error occurred: ' + error.message,
+                        confirmButtonText: 'OK'
+                    });
+                });
+            }
+        });
+    }
+
+    // Validation for Edit Address Form on Submit
+    if (editAddressForm) {
+        editAddressForm.addEventListener('submit', function(event) {
+            event.preventDefault();
+
+            let isValid = true;
+
+            const fields = [
+                { id: 'editAddressType', value: editAddressType ? editAddressType.value.trim() : '' },
+                { id: 'editFullName', value: editFullName ? editFullName.value.trim() : '' },
+                { id: 'editMobileNo', value: editMobileNo ? editMobileNo.value.trim() : '' },
+                { id: 'editAltPhone', value: editAltPhone ? editAltPhone.value.trim() : '' },
+                { id: 'editLandMark', value: editLandMark ? editLandMark.value.trim() : '' },
+                { id: 'editCity', value: editCity ? editCity.value.trim() : '' },
+                { id: 'editPincode', value: editPincode ? editPincode.value.trim() : '' },
+                { id: 'editState', value: editState ? editState.value.trim() : '' }
+            ];
+
+            fields.forEach(function(field) {
+                if (!validateEditField(field.id, field.value)) {
+                    isValid = false;
+                }
+            });
+
+            if (isValid) {
+                const formData = {
+                    addressId: editAddressId.value,
+                    addressType: editAddressType.value,
+                    name: editFullName.value,
+                    phone: editMobileNo.value,
+                    altPhone: editAltPhone.value,
+                    landMark: editLandMark.value,
+                    city: editCity.value,
+                    pincode: editPincode.value,
+                    state: editState.value
+                };
+
+                fetch('/edit-address', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(formData)
+                })
+                .then(function(response) {
+                    if (!response.ok) {
+                        return response.text().then(text => {
+                            throw new Error('Network response was not ok: ' + response.status + ' ' + text);
+                        });
+                    }
+                    return response.json();
+                })
+                .then(function(result) {
+                    if (result.success) {
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Address Updated',
+                            text: 'Your address has been updated successfully',
+                            timer: 1500,
+                            showConfirmButton: false
+                        }).then(function() {
+                            editModal.classList.remove('show');
+                            document.body.style.overflow = '';
+                            document.querySelectorAll('#editAddressForm .error-message').forEach(function(error) {
+                                if (error) error.textContent = '';
+                            });
+                            window.location.reload();
+                        });
+                    } else {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Error',
+                            text: result.message || 'Failed to update address',
+                            confirmButtonText: 'OK'
+                        });
+                    }
+                })
+                .catch(function(error) {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error',
+                        text: 'An error occurred: ' + error.message,
+                        confirmButtonText: 'OK'
+                    });
+                });
+            }
+        });
+    }
+
+    // Populate Edit Modal
+    document.querySelectorAll('.edit-btn').forEach(function(btn) {
+        btn.addEventListener('click', function(e) {
+            e.preventDefault();
+            let address;
+            try {
+                address = JSON.parse(this.getAttribute('data-address'));
+            } catch (error) {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: 'Failed to load address data. Please try again.',
+                    confirmButtonText: 'OK'
+                });
+                return;
+            }
+
+            editAddressId.value = address._id || '';
+            editAddressType.value = address.addressType || 'Home';
+            editFullName.value = address.name || '';
+            editMobileNo.value = address.phone || '';
+            editAltPhone.value = address.altPhone || '';
+            editLandMark.value = address.landMark || '';
+            editCity.value = address.city || '';
+            editPincode.value = address.pincode || '';
+            editState.value = address.State || '';
+
+            editModal.classList.add('show');
+            document.body.style.overflow = 'hidden';
+
+            validateEditField('editAddressType', editAddressType.value.trim());
+            validateEditField('editFullName', editFullName.value.trim());
+            validateEditField('editMobileNo', editMobileNo.value.trim());
+            validateEditField('editAltPhone', editAltPhone.value.trim());
+            validateEditField('editLandMark', editLandMark.value.trim());
+            validateEditField('editCity', editCity.value.trim());
+            validateEditField('editPincode', editPincode.value.trim());
+            validateEditField('editState', editState.value.trim());
+        });
+    });
+
+    // Handle Delete Address
+    document.querySelectorAll('.remove-btn').forEach(function(btn) {
+        btn.addEventListener('click', function(e) {
+            e.preventDefault();
+            const addressId = this.getAttribute('data-id');
+
+            Swal.fire({
+                icon: 'question',
+                title: 'Delete Address',
+                text: 'Are you sure you want to delete this address?',
+                showCancelButton: true,
+                confirmButtonText: 'Yes, Delete',
+                cancelButtonText: 'No'
+            }).then(function(result) {
+                if (result.isConfirmed) {
+                    fetch('/delete-address?id=' + addressId, {
+                        method: 'GET'
+                    })
+                    .then(function(response) {
+                        if (!response.ok) {
+                            return response.text().then(text => {
+                                throw new Error('Network response was not ok: ' + response.status + ' ' + text);
+                            });
+                        }
+                        return response.json();
+                    })
+                    .then(function(result) {
+                        if (result.success) {
+                            Swal.fire({
+                                icon: 'success',
+                                title: 'Address Deleted',
+                                text: 'The address has been removed successfully',
+                                timer: 1500,
+                                showConfirmButton: false
+                            }).then(function() {
+                                window.location.reload();
+                            });
+                        } else {
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'Error',
+                                text: result.message || 'Failed to delete address',
+                                confirmButtonText: 'OK'
+                            });
+                        }
+                    })
+                    .catch(function(error) {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Error',
+                            text: 'An error occurred: ' + error.message,
+                            confirmButtonText: 'OK'
+                        });
+                    });
+                }
+            });
+        });
+    });
+
+    // Place Order Button
+    document.getElementById('placeOrder').addEventListener('click', async () => {
+        const selectedAddress = document.querySelector('input[name="selectedAddress"]:checked');
+        const paymentMethod = document.querySelector('input[name="paymentMethod"]:checked');
+
+        if (!selectedAddress) {
+            Swal.fire({
+                title: 'Error!',
+                text: 'Please select an address to proceed',
+                icon: 'error',
+                confirmButtonText: 'OK'
+            });
+            return;
+        }
+
+        if (!paymentMethod) {
+            Swal.fire({
+                title: 'Error!',
+                text: 'Please select a payment method',
+                icon: 'error',
+                confirmButtonText: 'OK'
+            });
+            return;
+        }
+
+        const addressId = selectedAddress.value;
+        const paymentType = paymentMethod.value;
+
+        // Calculate addressIndex by finding the index of the address with the matching addressId
+        const addressCards = document.querySelectorAll('.address-card');
+        let addressIndex = -1;
+        addressCards.forEach((card, index) => {
+            const radio = card.querySelector('input[name="selectedAddress"]');
+            if (radio && radio.value === addressId) {
+                addressIndex = index;
+            }
+        });
+
+        if (addressIndex === -1) {
+            Swal.fire({
+                title: 'Error!',
+                text: 'Selected address not found in the list',
+                icon: 'error',
+                confirmButtonText: 'OK'
+            });
+            return;
+        }
+
         try {
-            const response = await fetch('/select-address', {
+            // First, select the address
+            const addressResponse = await fetch('/select-address', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ addressIndex })
             });
-            const data = await response.json();
-            if (data.success) {
-                // Update UI to reflect selected address
-                document.querySelectorAll('.address-card').forEach(card => card.classList.remove('selected'));
-                button.closest('.address-card').classList.add('selected');
-                document.querySelectorAll('input[name="selectedAddress"]').forEach(radio => radio.checked = false);
-                document.querySelector(`input[name="selectedAddress"][value="${addressIndex}"]`).checked = true;
+            const addressData = await addressResponse.json();
+
+            if (!addressData.success) {
+                Swal.fire({
+                    title: 'Error!',
+                    text: addressData.message || 'Failed to select address',
+                    icon: 'error',
+                    confirmButtonText: 'OK'
+                });
+                return;
+            }
+
+            // Then, place the order
+            const orderResponse = await fetch('/place-order', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ paymentMethod: paymentType })
+            });
+            const orderData = await orderResponse.json();
+
+            if (orderData.success) {
+                window.location.href = `/order-success?orderId=${orderData.orderId}`;
             } else {
                 Swal.fire({
                     title: 'Error!',
-                    text: data.message,
+                    text: orderData.message || 'Failed to place order',
                     icon: 'error',
-                    confirmButtonText: 'OK',
+                    confirmButtonText: 'OK'
                 });
             }
         } catch (error) {
             Swal.fire({
                 title: 'Error!',
-                text: 'Error selecting address',
+                text: 'An unexpected error occurred while placing the order',
                 icon: 'error',
-                confirmButtonText: 'OK',
+                confirmButtonText: 'OK'
             });
         }
     });
-});
-
-// Place Order Button
-document.getElementById('placeOrder').addEventListener('click', async () => {
-    const selectedAddress = document.querySelector('input[name="selectedAddress"]:checked');
-    const paymentMethod = document.querySelector('input[name="paymentMethod"]:checked');
-
-    if (!selectedAddress) {
-        Swal.fire({
-            title: 'Error!',
-            text: 'Please select an address to proceed',
-            icon: 'error',
-            confirmButtonText: 'OK',
-        });
-        return;
-    }
-
-    if (!paymentMethod) {
-        Swal.fire({
-            title: 'Error!',
-            text: 'Please select a payment method',
-            icon: 'error',
-            confirmButtonText: 'OK',
-        });
-        return;
-    }
-
-    const addressIndex = selectedAddress.value;
-    const paymentType = paymentMethod.value;
-
-    try {
-        // First, select the address
-        const addressResponse = await fetch('/select-address', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ addressIndex })
-        });
-        const addressData = await addressResponse.json();
-
-        if (!addressData.success) {
-            Swal.fire({
-                title: 'Error!',
-                text: addressData.message || 'Failed to select address',
-                icon: 'error',
-                confirmButtonText: 'OK',
-            });
-            return;
-        }
-
-        // Then, place the order
-        const orderResponse = await fetch('/place-order', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ paymentMethod: paymentType })
-        });
-        const orderData = await orderResponse.json();
-
-        if (orderData.success) {
-            window.location.href = `/order-success?orderId=${orderData.orderId}`;
-        } else {
-            Swal.fire({
-                title: 'Error!',
-                text: orderData.message || 'Failed to place order',
-                icon: 'error',
-                confirmButtonText: 'OK',
-            });
-        }
-    } catch (error) {
-        console.error('Error during order placement:', error);
-        Swal.fire({
-            title: 'Error!',
-            text: 'An unexpected error occurred while placing the order',
-            icon: 'error',
-            confirmButtonText: 'OK',
-        });
-    }
 });
 </script>
 <%- include("../partials/user/footer") %>

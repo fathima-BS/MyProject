@@ -10,6 +10,7 @@ const setuppassport=require('./config/passport')(passport)
 const userRouter=require('./routes/userRouter')
 const adminRouter=require('./routes/adminRouter')
 const User = require('./models/userSchema')
+const { getCartCount } = require('./controllers/user/cartController');
 db()
 app.use(express.json())
 app.use(express.urlencoded({extended:true}))
@@ -23,6 +24,16 @@ app.use(session({
         maxAge:72*60*60*1000
     }
 }))
+
+app.use(async (req, res, next) => {
+   const userId = req.session.user; 
+
+   res.locals.user = req.session.user;
+   res.locals.cartCount = await getCartCount(userId);
+
+   next();
+});
+
 
 
 

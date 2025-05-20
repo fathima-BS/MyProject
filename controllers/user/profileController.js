@@ -342,7 +342,7 @@ const editProfile = (req, res) => {
                 return res.status(401).json({ success: false, message: 'User not authenticated' });
             }
 
-            const { fullName, birthdate, email, phone } = req.body;
+            const { fullName, birthdate, phone } = req.body;
 
             // Validation
             // Full Name: Required, 2+ characters, letters/spaces/hyphens only
@@ -351,14 +351,6 @@ const editProfile = (req, res) => {
             }
             if (!/^[a-zA-Z\s-]+$/.test(fullName.trim())) {
                 return res.status(400).json({ success: false, message: 'Full Name can only contain letters, spaces, or hyphens' });
-            }
-
-            // Email: Required, valid format
-            if (!email || typeof email !== 'string') {
-                return res.status(400).json({ success: false, message: 'Email is required' });
-            }
-            if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim())) {
-                return res.status(400).json({ success: false, message: 'Invalid email format' });
             }
 
             // Birthdate: Optional, valid date, user must be at least 13 years old
@@ -391,7 +383,6 @@ const editProfile = (req, res) => {
             let hasChanges = false;
             const updateData = {
                 username: fullName.trim(),
-                email: user.email,
                 phone: phone ? phone.trim() : user.phone || '',
                 ...(parsedBirthdate && { dateOfBirth: parsedBirthdate }),
             };
@@ -418,16 +409,6 @@ const editProfile = (req, res) => {
                 hasChanges = true;
             }
 
-            // Handle email verification
-            if (req.session.emailVerified && req.session.newEmail) {
-                updateData.email = req.session.newEmail;
-                req.session.newEmail = null;
-                req.session.emailVerified = false;
-                hasChanges = true;
-            } else if (email !== user.email) {
-                return res.status(400).json({ success: false, message: 'Please verify your new email address before saving.' });
-            }
-
             // Update only if there are changes
             if (hasChanges) {
                 const updatedUser = await User.findByIdAndUpdate(userId, updateData, { new: true });
@@ -451,6 +432,22 @@ const editProfile = (req, res) => {
         }
     });
 };
+
+const changeEmail = async (req, res) => {
+    try {
+        const userId = req.session.user;
+        const userData = await User.findById(userId);
+
+        res.render('changeEmail', {
+            title: 'Change Email',
+            user: userData || null 
+        });
+    } catch (error) {
+        console.error('Error loading changeEmail page:', error);
+        res.status(500).send('Internal Server Error');
+    }
+};
+
 
 const sendOtp = async (req, res) => {
     try {
@@ -500,6 +497,7 @@ const verifyOtp = async (req, res) => {
         const { email, otp } = req.body;
         const storedOtp = req.session.userOtp;
         const newEmail = req.session.newEmail;
+        const userId = req.session.user;
 
         if (!newEmail || !storedOtp) {
             return res.json({ success: false, message: "Session expired. Please request a new OTP." });
@@ -510,8 +508,12 @@ const verifyOtp = async (req, res) => {
         }
 
         if (otp === storedOtp) {
-            req.session.emailVerified = true;
-            return res.json({ success: true });
+            await User.findByIdAndUpdate(userId, { email: newEmail });
+            req.session.userOtp = null;
+            req.session.newEmail = null;
+            req.session.emailVerified = null;
+
+            return res.json({ success: true, message: "Email verified and updated successfully." });
         } else {
             return res.json({ success: false, message: "Invalid OTP. Please try again." });
         }
@@ -520,6 +522,7 @@ const verifyOtp = async (req, res) => {
         return res.status(500).json({ success: false, message: "Server Error" });
     }
 };
+
 
 module.exports = {
     forgetPassword,
@@ -533,6 +536,7 @@ module.exports = {
     PhoneNo,
     loadEditProfile,
     editProfile,
+    changeEmail,
     sendOtp,
     getVerifyOtp,
     verifyOtp

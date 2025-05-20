@@ -33,7 +33,7 @@
         <input type="text" id="otp-6" class="otp-input" maxlength="1">
       </div>
       
-      <p class="timer-text">Code expires in <span id="countdown">05:00</span></p>
+      <p class="timer-text">Code expires in <span id="countdown">01:00</span></p>
       
       <button id="verify-otp-btn" class="verify-button">
         Verify Email
@@ -254,6 +254,7 @@
   }
 </style>
 
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
   document.addEventListener('DOMContentLoaded', function() {
     // Get email from URL query parameter
@@ -326,7 +327,7 @@
     }
     
     // Countdown timer
-    let timeLeft = 300; // 5 minutes in seconds
+    let timeLeft = 60; // 1 minute in seconds
     const countdownEl = document.getElementById('countdown');
     
     function updateCountdown() {
@@ -358,7 +359,7 @@
       otpInputs[0].focus();
       
       // Reset timer
-      timeLeft = 300;
+      timeLeft = 60;
       clearInterval(countdownInterval);
       setInterval(updateCountdown, 1000);
       
@@ -421,17 +422,20 @@
             input.classList.remove('error');
           });
           
-          otpMessage.textContent = '✓ Email verified successfully! Redirecting...';
-          otpMessage.className = 'verification-status success';
-          
           // Update button to show success
           verifyBtn.textContent = 'Verified Successfully';
           verifyBtn.style.backgroundColor = 'var(--success-color)';
           
-          // Redirect after delay
-          setTimeout(() => {
-            window.location.href = '/edit-profile?emailVerified=true';
-          }, 1500);
+          // Show SweetAlert success message
+          Swal.fire({
+            title: 'Success!',
+            text: 'Email Verified Successfully',
+            icon: 'success',
+            confirmButtonText: 'OK'
+          }).then(() => {
+            // Redirect to userProfile.ejs after user clicks OK
+            window.location.href = '/userProfile';
+          });
         } else {
           // Show error state
           otpInputs.forEach(input => {

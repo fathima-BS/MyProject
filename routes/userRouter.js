@@ -7,6 +7,7 @@ const addressController = require('../controllers/user/addressController');
 const cartController = require('../controllers/user/cartController');
 const checkoutController=require('../controllers/user/checkoutController')
 const orderController = require('../controllers/user/orderController'); 
+const wishlistController=require('../controllers/user/wishlistController')
 const passport = require('passport');
 const { userAuth } = require('../middlewares/auth');
 
@@ -59,9 +60,12 @@ router.get('/userProfile', userAuth, profileController.loadUserProfile);
 router.post('/update-phone', userAuth, profileController.PhoneNo);
 router.get('/edit-profile', userAuth, profileController.loadEditProfile);
 router.post('/edit-profile', userAuth, profileController.editProfile);
-router.post('/send-otp', userAuth, profileController.sendOtp);
+
+router.get('/change-email',userAuth,profileController.changeEmail)
+router.post('/change-email',userAuth,profileController.sendOtp)
 router.get('/verify-otp', userAuth, profileController.getVerifyOtp);
 router.post('/verify-otp', userAuth, profileController.verifyOtp);
+
 router.post('/update-password', userAuth, profileController.postNewPassword);
 
 // Address
@@ -72,19 +76,20 @@ router.get('/delete-address', userAuth, addressController.deleteAddress);
 router.post('/deliver-address', userAuth, addressController.deliverAddress);
 
 // Cart 
-router.get('/cart', userAuth, userController.loadCartPage);
-router.post('/add', userAuth, userController.addToCart);
-router.post('/increment', userAuth, userController.incrementQuantity);
-router.post('/decrement', userAuth, userController.decrementQuantity);
-router.post('/remove', userAuth, userController.removeItem);
-router.get('/checkout', userAuth, checkoutController.loadCheckout);
+router.get('/cart', userAuth, cartController.loadCartPage)
+router.post('/add', userAuth, cartController.addToCart)
+router.post('/increment', userAuth, cartController.incrementQuantity)
+router.post('/decrement', userAuth, cartController.decrementQuantity)
+router.post('/remove', userAuth, cartController.removeItem)
+router.get('/checkout', userAuth, checkoutController.loadCheckout)
+router.get('/wallet',userAuth,checkoutController.loadWallet)
 
 // Wishlist
-router.get('/wishlist', userAuth, userController.wishlist);
-router.post('/wishlist/add', userAuth, userController.addToWishlist);
-router.post('/wishlist/remove', userAuth, userController.removeWishlist);
+router.get('/wishlist', userAuth, wishlistController.wishlist)
+router.post('/wishlist/add', userAuth, wishlistController.addToWishlist)
+router.post('/wishlist/remove', userAuth, wishlistController.removeWishlist)
 
-// Payment
+// Checkout
 router.get('/checkout', userAuth, checkoutController.loadCheckout);
 router.post('/select-address', userAuth, checkoutController.selectAddress);
 router.post('/place-order', userAuth, checkoutController.placeOrder);
@@ -92,9 +97,10 @@ router.get('/order-success', userAuth, checkoutController.loadOrderSuccess);
 
 //order
 router.get('/orders',userAuth, orderController.getMyOrders);
-router.get('/order-details/:id',userAuth, orderController.orderDetails);
-router.post('/returnItem', orderController.requestReturnItem);
-router.post('/cancelItem', orderController.cancelItem);
+router.get('/order-details/:id',userAuth, orderController.orderDetails)
+router.post('/cancelItem',userAuth, orderController.cancelItem) 
+router.post('/cancelOrder', userAuth, orderController.cancelOrder)
+router.post('/returnOrder', userAuth, orderController.returnOrder)
 
 
 module.exports = router;
