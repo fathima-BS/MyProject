@@ -85,11 +85,7 @@
                                 </div>
                             </div>
                             <div class="row mb-3">
-                                <div class="col">
-                                    <label for="regularPrice" class="form-label text-white">Regular Price (₹)</label>
-                                    <input type="number" class="form-control bg-dark text-white" id="regularPrice"
-                                        name="regularPrice" step="0.01">
-                                </div>
+                               
                                 <div class="col">
                                     <label for="salePrice" class="form-label text-white">Sale Price (₹)</label>
                                     <input type="number" class="form-control bg-dark text-white" id="salePrice"
@@ -402,7 +398,7 @@
 
                 const productName = document.getElementById("productName").value.trim();
                 const quantity = document.getElementById("productQuantity").value.trim();
-                const regularPrice = document.getElementById("regularPrice").value.trim();
+                
                 const salePrice = document.getElementById("salePrice").value.trim();
                 
                 const description = document.getElementById("productDescription").value.trim();
@@ -443,15 +439,7 @@
                     });
                 }
 
-                if (regularPrice === "" || isNaN(regularPrice) || parseFloat(regularPrice) <= 0) {
-                    return Swal.fire({
-                        icon: "warning",
-                        title: "Invalid Regular Price",
-                        text: "Regular Price must be greater than 0.",
-                        timer: 3000,
-                        showConfirmButton: false,
-                    });
-                }
+             
 
                 if (salePrice === "" || isNaN(salePrice) || parseFloat(salePrice) <= 0) {
                     return Swal.fire({
@@ -462,15 +450,7 @@
                         showConfirmButton: false,
                     });
                 }
-               if (salePrice > regularPrice) {
-                    return Swal.fire({
-                        icon: "warning",
-                        title: "Invalid Sale Price",
-                        text: "Sale Price must be less than regular price",
-                        timer: 3000,
-                        showConfirmButton: false,
-                    }); 
-                }
+               
 
               
                 if (!description) {
@@ -530,7 +510,6 @@
                 const formData = new FormData();
                 formData.append("productName", productName);
                 formData.append("quantity", quantity);
-                formData.append("regularPrice", regularPrice);
                 formData.append("salePrice", salePrice);
                
                 formData.append("description", description);
@@ -682,7 +661,7 @@
 
                         document.getElementById("productName").value = product.productName;
                         document.getElementById("productQuantity").value = product.quantity;
-                        document.getElementById("regularPrice").value = product.regularPrice;
+                       
                         document.getElementById("salePrice").value = product.salePrice;
                      
                         document.getElementById("productDescription").value = product.description;

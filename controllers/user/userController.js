@@ -213,8 +213,6 @@ const loadHomePage = async (req, res) => {
       .populate('category') 
       .lean();
 
-  
-
     let productsWithOffers = products;
     if (Offer) {
       const currentDate = new Date();
@@ -264,7 +262,7 @@ const loadHomePage = async (req, res) => {
     });
   } catch (err) {
     console.error('Error loading home page:', err.message, err.stack);
-    res.status(500).render('error', { message: 'Unable to load home page' });
+    res.status(500).render('page404', { message: 'Unable to load home page' });
   }
 };
 
@@ -360,8 +358,6 @@ const loadShopPage = async (req, res) => {
       .populate('category')
       .lean();
 
- 
-
     const currentDate = new Date();
 
     // Add offer data for each product
@@ -421,7 +417,7 @@ const loadShopPage = async (req, res) => {
       message: req.session.userMsg || null,
     });
     req.session.userMsg = null;
-  }  catch (error) {
+  } catch (error) {
     console.log('Error loading shop page:', error);
     res.redirect('/pageNotFound');
   }

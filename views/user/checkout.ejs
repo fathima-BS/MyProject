@@ -160,9 +160,9 @@
         font-weight: 600;
         color: #1f2937;
     }
-    .original-price {
-        font-size: 0.75rem;
-        color: #6b7280;
+    .strike-price {
+        font-size: 0.875rem;
+        color: #999;
         text-decoration: line-through;
     }
     .discount {
@@ -203,9 +203,13 @@
                             <p class="text-sm font-medium text-gray-800"><%= item.productId.productName %></p>
                             <p class="text-xs text-gray-600">Qty: <%= item.quantity %></p>
                             <div class="price-offer">
-                                <span class="sale-price">₹<%= (item.salePrice * item.quantity).toLocaleString("en-IN", { minimumFractionDigits: 2, maximumFractionDigits: 2 }) %></span>
-                                <span class="original-price">₹<%= (item.regularPrice * item.quantity).toLocaleString("en-IN", { minimumFractionDigits: 2, maximumFractionDigits: 2 }) %></span>
-                               
+                                <% if (item.finalOffer) { %>
+                                    <span class="sale-price">₹<%= (item.discountedPrice * item.quantity).toLocaleString("en-IN", { minimumFractionDigits: 2, maximumFractionDigits: 2 }) %></span>
+                                    <span class="strike-price">₹<%= (item.salePrice * item.quantity).toLocaleString("en-IN", { minimumFractionDigits: 2, maximumFractionDigits: 2 }) %></span>
+                                    <span class="discount"><%= item.finalOffer.discountAmount %>% OFF</span>
+                                <% } else { %>
+                                    <span class="sale-price">₹<%= (item.salePrice * item.quantity).toLocaleString("en-IN", { minimumFractionDigits: 2, maximumFractionDigits: 2 }) %></span>
+                                <% } %>
                             </div>
                         </div>
                     </div>
@@ -224,9 +228,9 @@
                     <span>Coupon Discount</span>
                     <span>-₹<%= coupon.toLocaleString("en-IN", { minimumFractionDigits: 2, maximumFractionDigits: 2 }) %></span>
                 </div>
-                <div class="flex justify-between mb-2 text-gray-600">
+                <div class="flex justify-between mb-2 text-gray-600" data-shipping-cost="<%= shippingCost %>">
                     <span>Shipping</span>
-                    <span>Free</span>
+                    <span>₹<%= (shippingCost || 0).toLocaleString("en-IN", { minimumFractionDigits: 2, maximumFractionDigits: 2 }) %></span>
                 </div>
                 <div class="flex justify-between font-semibold text-lg text-gray-800 border-t pt-2">
                     <span>TOTAL</span>
@@ -349,34 +353,6 @@
                     </div>
                     <div class="form-group">
                         <label for="addPincode">Pincode <span class="required">*</span></label>
-                        <input type="text" class="form-control" id="addPincode" name="pincode" placeholder="Enter pincode">
-                        <span id="addPincodeError" class="error-message"></span>
-                    </div>
-                </div>
-                <div class="form-group">
-                    <label for="addState">State <span class="required">*</span></label>
-                    <input type="text" class="form-control" id="addState" name="State" placeholder="Enter state">
-                    <span id="addStateError" class="error-message"></span>
-                </div>
-                <button type="submit" class="save-btn">Save</button>
-            </form>
-        </div>
-    </div>
-</div>
-
-<!-- Edit Address Modal -->
-<div class="modal" id="editAddressModal">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title">Edit Address</h5>
-                <button type="button" class="close-btn" id="closeEditAddressModal">✕</button>
-            </div>
-            <form id="editAddressForm">
-                <input type="hidden" id="editAddressId" name="addressId">
-                <div class="form-group">
-                    <label for="editAddressType">Address Type <span class="required">*</span></label>
-                    <select class="form-control" id="editAddressType" name="addressType">
                         <option value="Home">Home</option>
                         <option value="Work">Work</option>
                         <option value="Other">Other</option>

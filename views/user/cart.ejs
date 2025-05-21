@@ -59,7 +59,7 @@
         font-weight: 600;
         color: #1f2937;
     }
-    .original-price {
+    .strike-price {
         font-size: 0.875rem;
         color: #6b7280;
         text-decoration: line-through;
@@ -70,8 +70,6 @@
         font-weight: 600;
     }
 </style>
-
-
 
 <!-- Main Content -->
 <div class="container mx-auto p-6 max-w-6xl">
@@ -104,11 +102,10 @@
                                 <div class="price-offer mt-3">
                                     <% if (item.finalOffer) { %>
                                         <span class="discounted-price">₹<%= (item.discountedPrice * item.quantity).toLocaleString("en-IN", { minimumFractionDigits: 2, maximumFractionDigits: 2 }) %></span>
-                                        <span class="original-price">₹<%= (item.productId.salePrice * item.quantity).toLocaleString("en-IN", { minimumFractionDigits: 2, maximumFractionDigits: 2 }) %></span>
+                                        <span class="strike-price">₹<%= (item.productId.salePrice * item.quantity).toLocaleString("en-IN", { minimumFractionDigits: 2, maximumFractionDigits: 2 }) %></span>
                                         <span class="discount"><%= item.finalOffer.discountAmount %>% OFF</span>
                                     <% } else { %>
                                         <span class="discounted-price">₹<%= (item.productId.salePrice * item.quantity).toLocaleString("en-IN", { minimumFractionDigits: 2, maximumFractionDigits: 2 }) %></span>
-                                        <span class="original-price">₹<%= (item.productId.regularPrice * item.quantity).toLocaleString("en-IN", { minimumFractionDigits: 2, maximumFractionDigits: 2 }) %></span>
                                     <% } %>
                                 </div>
                                 <% if (item.productId.quantity <= 0) { %>

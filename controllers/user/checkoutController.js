@@ -3,8 +3,8 @@ const User = require('../../models/userSchema');
 const Product = require('../../models/productSchema');
 const Address = require('../../models/addressSchema');
 const Order = require('../../models/orderSchema');
-const Wallet = require('../../models/walletSchema')
-const Offer=require('../../models/offerSchema')
+const Wallet = require('../../models/walletSchema');
+const Offer = require('../../models/offerSchema');
 
 const loadCheckout = async (req, res) => {
   try {
@@ -70,7 +70,7 @@ const loadCheckout = async (req, res) => {
           isActive: true,
           validFrom: { $lte: currentDate },
           validUpto: { $gte: currentDate }
-        }).lean() : null;
+        }).lean() : null; // Fixed syntax error here
 
         let finalOffer = null;
         if (productOffer && categoryOffer) {
@@ -82,14 +82,16 @@ const loadCheckout = async (req, res) => {
         }
 
         const salePrice = Number(item.productId.salePrice);
-        const regularPrice = Number(item.productId.regularPrice) || salePrice;
         const quantity = Number(item.quantity) || 1;
-        const discountedPrice = finalOffer
-          ? salePrice * (1 - finalOffer.discountAmount / 100)
-          : salePrice;
+        let discountedPrice = salePrice;
+        let discountTotal = 0;
+
+        if (finalOffer) {
+          discountedPrice = salePrice * (1 - finalOffer.discountAmount / 100);
+          discountTotal = (salePrice - discountedPrice) * quantity;
+        }
 
         const saleTotal = salePrice * quantity;
-        const discountTotal = (salePrice - discountedPrice) * quantity;
         subtotal += saleTotal;
         offerDiscount += discountTotal;
         totalItems += quantity;
@@ -99,7 +101,6 @@ const loadCheckout = async (req, res) => {
           finalOffer,
           discountedPrice,
           saleTotal,
-          regularPrice,
           salePrice
         };
       }));
@@ -108,7 +109,10 @@ const loadCheckout = async (req, res) => {
       return res.redirect('/cart');
     }
 
-    total = subtotal - offerDiscount;
+    const shippingCost = subtotal < 2000 ? 60 : 0;
+    console.log('Checkout - Subtotal:', subtotal, 'Shipping Cost:', shippingCost); // Debug log
+
+    total = (subtotal + shippingCost) - offerDiscount;
     if (cart.coupon && Number(cart.coupon.amount)) {
       coupon = Number(cart.coupon.amount) || 0;
       total -= coupon;
@@ -124,6 +128,7 @@ const loadCheckout = async (req, res) => {
       offerDiscount: offerDiscount.toFixed(2),
       coupon: coupon.toFixed(2),
       total: total.toFixed(2),
+      shippingCost: shippingCost.toFixed(2),
       totalItems,
       addresses: addressDoc || { address: [] },
     });
@@ -226,20 +231,55 @@ const placeOrder = async (req, res) => {
         let subtotal = 0;
         let offerDiscount = 0;
         let coupon = cart.coupon && Number(cart.coupon.amount) ? Number(cart.coupon.amount) : 0;
+        const currentDate = new Date();
 
-        const orderedItems = cart.items.map(item => {
+        const orderedItems = await Promise.all(cart.items.map(async (item) => {
             const salePrice = Number(item.price) || Number(item.productId.salePrice);
-            const regularPrice = Number(item.productId.regularPrice) || salePrice;
             const quantity = Number(item.quantity) || 1;
-            subtotal += salePrice * quantity;
-            offerDiscount += (regularPrice - salePrice) * quantity;
+
+            // Fetch offers for the product
+            const productOffer = await Offer.findOne({
+                offerType: 'Product',
+                applicableTo: item.productId._id,
+                isActive: true,
+                validFrom: { $lte: currentDate },
+                validUpto: { $gte: currentDate }
+            }).lean();
+
+            const categoryOffer = item.productId.category ? await Offer.findOne({
+                offerType: 'Category',
+                applicableTo: item.productId.category._id,
+                isActive: true,
+                validFrom: { $lte: currentDate },
+                validUpto: { $gte: currentDate }
+            }).lean() : null;
+
+            let finalOffer = null;
+            if (productOffer && categoryOffer) {
+                finalOffer = productOffer.discountAmount > categoryOffer.discountAmount ? productOffer : categoryOffer;
+            } else if (productOffer) {
+                finalOffer = productOffer;
+            } else if (categoryOffer) {
+                finalOffer = categoryOffer;
+            }
+
+            let discountedPrice = salePrice;
+            if (finalOffer) {
+                discountedPrice = salePrice * (1 - finalOffer.discountAmount / 100);
+            }
+
+            const saleTotal = salePrice * quantity;
+            const discountTotal = (salePrice - discountedPrice) * quantity;
+            subtotal += saleTotal;
+            offerDiscount += discountTotal;
+
             return {
                 product: item.productId._id,
                 quantity,
-                price: salePrice,
+                price: discountedPrice, // Use discounted price for order
                 status: 'Pending',
             };
-        });
+        }));
 
         // Apply coupon discount
         let total = subtotal - coupon;
@@ -266,7 +306,7 @@ const placeOrder = async (req, res) => {
             status: 'Pending',
             createdOn: new Date(),
             couponApplied: coupon > 0,
-            shippingCost // Add shippingCost to the order
+            shippingCost
         });
 
         await order.save();
@@ -291,17 +331,32 @@ const placeOrder = async (req, res) => {
 };
 
 const loadOrderSuccess = async (req, res) => {
-    try {
-        const { orderId } = req.query;
-        if (!orderId) {
-            return res.redirect('/cart');
-        }
-
-        res.render('order-success', { orderId });
-    } catch (error) {
-        console.error('Error loading order success page:', error);
-        res.status(500).send('Server Error');
+  try {
+    const userId = req.session.user;
+    if (!userId) {
+      return res.redirect('/login?error=Please login to view order success');
     }
+
+    const user = await User.findById(userId).lean();
+    if (!user) {
+      return res.status(404).render('error', { message: 'User not found' });
+    }
+
+    const { orderId } = req.query;
+    if (!orderId) {
+      return res.redirect('/cart');
+    }
+
+    const order = await Order.findOne({ orderId: orderId, userId }).lean();
+    if (!order) {
+      return res.status(404).render('error', { message: 'Order not found' });
+    }
+
+    res.render('order-success', { orderId });
+  } catch (error) {
+    console.error('Error loading order success page:', error.message, error.stack);
+    res.status(500).render('page404', { message: 'Unable to load order success page' });
+  }
 };
 
 const loadWallet = async (req, res) => {
