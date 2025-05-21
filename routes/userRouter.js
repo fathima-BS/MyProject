@@ -81,7 +81,8 @@ router.post('/add', userAuth, cartController.addToCart)
 router.post('/increment', userAuth, cartController.incrementQuantity)
 router.post('/decrement', userAuth, cartController.decrementQuantity)
 router.post('/remove', userAuth, cartController.removeItem)
-router.get('/checkout', userAuth, checkoutController.loadCheckout)
+
+//wallet
 router.get('/wallet',userAuth,checkoutController.loadWallet)
 
 // Wishlist
@@ -102,5 +103,8 @@ router.post('/cancelItem',userAuth, orderController.cancelItem)
 router.post('/cancelOrder', userAuth, orderController.cancelOrder)
 router.post('/returnOrder', userAuth, orderController.returnOrder)
 
+//razorpay 
 
+router.post('/createRazorpay',userAuth,checkoutController.createRazorpay)
+router.post('/razorpayPlaceOrder',userAuth,checkoutController.placeRazorpayOrder)
 module.exports = router;
