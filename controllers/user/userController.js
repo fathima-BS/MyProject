@@ -280,7 +280,6 @@ const loadShopPage = async (req, res) => {
     let filter = {
       isDeleted: false,
       isListed: true,
-      quantity: { $gt: 0 },
     };
 
     console.log('Query Parameters:', { search, sort, categoryf, brandf, priceRange, page });

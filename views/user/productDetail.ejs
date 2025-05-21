@@ -372,12 +372,20 @@
             <p class="product-description"><%= product.description %></p>
 
             <div class="status-quantity">
+                <%if(product.quantity > 0) { %>
                 <span class="status">Status: <%= product.status %></span>
+                <%} else{ %>
+                    <span class="status">Out of Stock</span>
+                <%  } %>
                 <span class="quantity">Quantity: <%= product.quantity %> in stock</span>
             </div>
 
             <div class="action-buttons">
+                 <%if(product.quantity > 0) { %>
                 <button class="add-to-cart-btn" onclick="addToCart('<%= product._id %>')">Add to Cart</button>
+                <%} else{ %>
+                <button class="add-to-cart-btn" style="background-color: #eb2e2e;" disabled>Out Of Stock</button>
+                <%  } %>
                 <button class="add-to-wishList" onclick="addToWishlist('<%= product._id %>')">❤️ Add to Wishlist</button>
             </div>
         </div>

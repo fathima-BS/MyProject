@@ -586,7 +586,11 @@
                   <% } %>
                 </p>
               </a>
+              <%  if (product.quantity > 0) {%>
               <button class="add-to-cart-btn" onclick="addToCart('<%= product._id %>')">Add to Cart</button>
+               <% } else { %>
+                <button class="add-to-cart-btn" style="background-color: #444;" disabled>Out of Stock</button>
+                <% } %>
             </div>
           <% }) %>
         <% } else { %>
