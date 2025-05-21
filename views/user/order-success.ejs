@@ -1,132 +1,145 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Order Success</title>
-    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
-    <style>
-        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
-        
-        html, body {
-            height: 100%;
-            margin: 0;
-            padding: 0;
-            font-family: 'Poppins', sans-serif;
-            background-color: #f9fafb;
-            overflow-x: hidden;
-        }
-        
-        .success-animation {
-            animation: successPulse 2s ease-in-out infinite;
-        }
-        
-        .particle {
-            position: absolute;
-            border-radius: 50%;
-            background-color: #22c55e;
-            opacity: 0.7;
-            animation: particleFloat 3s ease-in-out infinite;
-        }
-        
-        @keyframes successPulse {
-            0% { transform: scale(1); }
-            50% { transform: scale(1.05); }
-            100% { transform: scale(1); }
-        }
-        
-        @keyframes particleFloat {
-            0% { transform: translate(0, 0); }
-            50% { transform: translate(10px, -10px); }
-            100% { transform: translate(0, 0); }
-        }
-        
-        .checkmark {
-            stroke-dasharray: 100;
-            stroke-dashoffset: 100;
-            animation: drawCheck 1s forwards;
-        }
-        
-        @keyframes drawCheck {
-            from { stroke-dashoffset: 100; }
-            to { stroke-dashoffset: 0; }
-        }
-        
-        .fullscreen-container {
-            min-height: 100vh;
-            width: 100%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            position: relative;
-            overflow: hidden;
-        }
-        
-        .particle-container {
-            position: absolute;
-            width: 100%;
-            height: 100%;
-            top: 0;
-            left: 0;
-            overflow: hidden;
-            pointer-events: none;
-        }
-    </style>
-</head>
-<body>
-    <div class="fullscreen-container px-4">
-        <!-- Particles Background -->
-        <div class="particle-container">
-            <!-- Particles will be added via JavaScript -->
+<%- include("../partials/user/header") %>
+<link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<style>
+    @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
+    
+    html, body {
+        height: 100%;
+        margin: 0;
+        padding: 0;
+        font-family: 'Poppins', sans-serif;
+        background-color: #f9fafb;
+        overflow-x: hidden;
+    }
+    
+    .success-animation {
+        animation: successPulse 2s ease-in-out infinite;
+    }
+    
+    .particle {
+        position: absolute;
+        border-radius: 50%;
+        background-color: #3b82f6; /* Blue to match checkout */
+        opacity: 0.7;
+        animation: particleFloat 3s ease-in-out infinite;
+    }
+    
+    @keyframes successPulse {
+        0% { transform: scale(1); }
+        50% { transform: scale(1.05); }
+        100% { transform: scale(1); }
+    }
+    
+    @keyframes particleFloat {
+        0% { transform: translate(0, 0); }
+        50% { transform: translate(10px, -10px); }
+        100% { transform: translate(0, 0); }
+    }
+    
+    .checkmark {
+        stroke-dasharray: 100;
+        stroke-dashoffset: 100;
+        animation: drawCheck 1s forwards;
+    }
+    
+    @keyframes drawCheck {
+        from { stroke-dashoffset: 100; }
+        to { stroke-dashoffset: 0; }
+    }
+    
+    .fullscreen-container {
+        min-height: calc(100vh - 128px); /* Adjust for header/footer */
+        width: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        position: relative;
+        overflow: hidden;
+        padding: 1rem;
+    }
+    
+    .particle-container {
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        top: 0;
+        left: 0;
+        overflow: hidden;
+        pointer-events: none;
+    }
+    
+    .btn-primary {
+        transition: background-color 0.3s ease;
+    }
+    
+    .btn-primary:hover {
+        background-color: #1e40af; /* Darker blue */
+    }
+    
+    .btn-secondary {
+        transition: background-color 0.3s ease;
+    }
+    
+    .btn-secondary:hover {
+        background-color: #e5e7eb; /* Lighter grey */
+    }
+</style>
+
+<!-- Main Content -->
+<div class="fullscreen-container px-4">
+    <!-- Particles Background -->
+    <div class="particle-container">
+        <!-- Particles added via JavaScript -->
+    </div>
+    
+    <!-- Success Content -->
+    <div class="relative z-10 text-center max-w-md w-full">
+        <!-- Success Icon -->
+        <div class="mb-6 success-animation">
+            <div class="w-24 h-24 rounded-full bg-blue-600 flex items-center justify-center mx-auto">
+                <svg class="w-12 h-12 text-white" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path class="checkmark" d="M5 13L9 17L19 7" stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+            </div>
         </div>
         
-        <!-- Success Content -->
-        <div class="relative z-10 text-center max-w-md w-full">
-            <!-- Success Icon -->
-            <div class="mb-8 success-animation">
-                <div class="w-32 h-32 rounded-full bg-green-500 flex items-center justify-center mx-auto">
-                    <svg class="w-16 h-16 text-white" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <path class="checkmark" d="M5 13L9 17L19 7" stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
-                    </svg>
-                </div>
-            </div>
-            
-            <!-- Success Text -->
-            <h1 class="text-4xl font-bold text-gray-800 mb-3">Thank you for ordering!</h1>
-            <p class="text-gray-600 text-lg mb-10">Thank you for your purchase! Your order has been successfully placed.</p>
-            
-            <!-- Buttons -->
-            <div class="flex flex-col sm:flex-row gap-4 justify-center">
-                <a href="/orders" class="px-8 py-4 bg-gray-100 text-gray-800 rounded-md font-medium hover:bg-gray-200 transition-colors duration-300">
-                    VIEW ORDER
-                </a>
-                <a href="/shop" class="px-8 py-4 bg-gray-800 text-white rounded-md font-medium hover:bg-gray-700 transition-colors duration-300">
-                    CONTINUE SHOPPING
-                </a>
-            </div>
+        <!-- Success Text -->
+        <h1 class="text-3xl font-bold text-gray-800 mb-2">Thank You for Your Order!</h1>
+        <p class="text-gray-600 text-base mb-2">Your order has been successfully placed.</p>
+        <p class="text-gray-600 text-sm mb-8">Order #<%= orderId %></p>
+        
+        <!-- Buttons -->
+        <div class="flex flex-col sm:flex-row gap-3 justify-center">
+            <a href="/order-details/<%= orderId %>" class="px-6 py-3 bg-gray-100 text-gray-800 rounded-md font-medium btn-secondary">
+                View Order Details
+            </a>
+            <a href="/shop" class="px-6 py-3 bg-blue-900 text-white rounded-md font-medium btn-primary">
+                Continue Shopping
+            </a>
         </div>
     </div>
+</div>
 
-    <script>
-        // Create random particles across the full screen
-        document.addEventListener("DOMContentLoaded", function() {
-            const container = document.querySelector('.particle-container');
-            
-            for (let i = 0; i < 50; i++) {
-                const size = Math.random() * 12 + 2;
-                const particle = document.createElement('div');
-                particle.classList.add('particle');
-                particle.style.width = `${size}px`;
-                particle.style.height = `${size}px`;
-                particle.style.left = `${Math.random() * 100}%`;
-                particle.style.top = `${Math.random() * 100}%`;
-                particle.style.opacity = Math.random() * 0.6 + 0.1;
-                particle.style.animationDelay = `${Math.random() * 3}s`;
-                particle.style.animationDuration = `${Math.random() * 4 + 2}s`;
-                
-                container.appendChild(particle);
-            }
-        });
-    </script>
-</body>
-</html>
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+    const container = document.querySelector('.particle-container');
+    
+    for (let i = 0; i < 50; i++) {
+        const size = Math.random() * 10 + 2;
+        const particle = document.createElement('div');
+        particle.classList.add('particle');
+        particle.style.width = `${size}px`;
+        particle.style.height = `${size}px`;
+        particle.style.left = `${Math.random() * 100}%`;
+        particle.style.top = `${Math.random() * 100}%`;
+        particle.style.opacity = Math.random() * 0.6 + 0.1;
+        particle.style.animationDelay = `${Math.random() * 3}s`;
+        particle.style.animationDuration = `${Math.random() * 4 + 2}s`;
+        
+        container.appendChild(particle);
+    }
+});
+</script>
+
+<%- include("../partials/user/footer") %>

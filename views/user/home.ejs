@@ -126,7 +126,7 @@
       font-weight: 700;
   }
 
-  .product-content-wrap .price-offer .original-price {
+  .product-content-wrap .price-offer .strike-price {
       font-size: 14px;
       color: #999;
       text-decoration: line-through;
@@ -608,11 +608,10 @@
                                 <div class="price-offer">
                                     <% if (product.finalOffer) { %>
                                         <span class="discounted-price">₹<%= product.discountedPrice.toLocaleString("en-IN", { minimumFractionDigits: 2, maximumFractionDigits: 2 }) %></span>
-                                        <span class="original-price">₹<%= product.salePrice.toLocaleString("en-IN", { minimumFractionDigits: 2, maximumFractionDigits: 2 }) %></span>
+                                        <span class="strike-price">₹<%= product.salePrice.toLocaleString("en-IN", { minimumFractionDigits: 2, maximumFractionDigits: 2 }) %></span>
                                         <span class="discount"><%= product.finalOffer.discountAmount %>% OFF</span>
                                     <% } else { %>
                                         <span class="discounted-price">₹<%= product.salePrice.toLocaleString("en-IN", { minimumFractionDigits: 2, maximumFractionDigits: 2 }) %></span>
-                                        <span class="original-price">₹<%= product.regularPrice.toLocaleString("en-IN", { minimumFractionDigits: 2, maximumFractionDigits: 2 }) %></span>
                                     <% } %>
                                 </div>
                                 <button class="cart-btn" onclick="addToCart('<%= product._id %>')">Add to Cart</button>

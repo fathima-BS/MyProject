@@ -280,9 +280,16 @@
   line-height: 1.2;
 }
 
-.product-card p .text-muted {
+.product-card p .strike-price {
   font-size: 12px;
   color: #999;
+  margin-left: 5px;
+  text-decoration: line-through;
+}
+
+.product-card p .discount {
+  color: #ff4444;
+  font-weight: 600;
   margin-left: 5px;
 }
 
@@ -572,17 +579,10 @@
                 <p>
                   <% if (product.finalOffer) { %>
                     ₹<%= product.discountedPrice.toLocaleString("en-IN", { minimumFractionDigits: 2, maximumFractionDigits: 2 }) %>
-                    <span class="text-muted">
-                      <strike>₹<%= product.salePrice.toLocaleString("en-IN", { minimumFractionDigits: 2, maximumFractionDigits: 2 }) %></strike>
-                    </span>
-                    <span style="color: #ff4444; font-weight: 600;">
-                      <%= product.finalOffer.discountAmount %>% OFF
-                    </span>
+                    <span class="strike-price">₹<%= product.salePrice.toLocaleString("en-IN", { minimumFractionDigits: 2, maximumFractionDigits: 2 }) %></span>
+                    <span class="discount"><%= product.finalOffer.discountAmount %>% OFF</span>
                   <% } else { %>
                     ₹<%= product.salePrice.toLocaleString("en-IN", { minimumFractionDigits: 2, maximumFractionDigits: 2 }) %>
-                    <span class="text-muted">
-                      <strike>₹<%= product.regularPrice.toLocaleString("en-IN", { minimumFractionDigits: 2, maximumFractionDigits: 2 }) %></strike>
-                    </span>
                   <% } %>
                 </p>
               </a>

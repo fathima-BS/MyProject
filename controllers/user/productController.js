@@ -98,7 +98,7 @@ const productDetailPage = async (req, res) => {
         }));
 
         // Check if product is in wishlist
-        const wishlist = await Wishlist.findOne({ userId: req.session.user._id });
+        const wishlist = await Wishlist.findOne({ userId: req.session.user?._id });
         const isInWishlist = wishlist ? wishlist.products.some(item => item.productId.toString() === productId) : false;
 
         res.render('productDetail', {

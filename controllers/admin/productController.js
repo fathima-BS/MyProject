@@ -47,9 +47,9 @@ const addProduct = async (req, res) => {
             return res.status(400).json({ message: `Multer error: ${err.message}` });
         }
         try {
-            const { productName, description, brand, category, regularPrice, salePrice, quantity } = req.body;
+            const { productName, description, brand, category, salePrice, quantity } = req.body;
 
-            if (!productName || !description || !brand || !category || !regularPrice || !salePrice || !quantity ) {
+            if (!productName || !description || !brand || !category|| !salePrice || !quantity ) {
                 return res.status(400).json({ message: 'Missing required fields' });
             }
             const validBrand = await Brand.findById(brand); 
@@ -59,7 +59,7 @@ const addProduct = async (req, res) => {
             if (req.files.length > 3) return res.status(400).json({ message: 'Maximum 3 images allowed' });
 
             const productImage = req.files.map(file => `/uploads/products/${file.filename}`).slice(0, 3);
-            const product = new Product({ productName, description, brand, category, regularPrice: parseFloat(regularPrice), salePrice: parseFloat(salePrice), quantity: parseInt(quantity), productImage });
+            const product = new Product({ productName, description, brand, category, salePrice: parseFloat(salePrice), quantity: parseInt(quantity), productImage });
             await product.save();
             res.status(201).json({ message: 'Product added successfully', product });
         } catch (error) {
@@ -86,7 +86,7 @@ const editProduct = async (req, res) => {
             return res.status(400).json({ message: `Multer error: ${err.message}` });
         }
         try {
-            const { productId, productName, description, brand, category, regularPrice, salePrice, quantity } = req.body;
+            const { productId, productName, description, brand, category, salePrice, quantity } = req.body;
             if (!productId) {
                 return res.status(400).json({
                     message: 'Product ID is required'
@@ -106,15 +106,14 @@ const editProduct = async (req, res) => {
                 });
             }
 
-            
+            // Update fields only if provided, but handle quantity carefully
             product.productName = productName || product.productName;
             product.description = description || product.description;
             product.brand = brand || product.brand;
             product.category = category || product.category;
-            product.regularPrice = parseFloat(regularPrice) || product.regularPrice;
-            product.salePrice = parseFloat(salePrice) || product.salePrice;
-            product.quantity = parseInt(quantity) || product.quantity;
-           
+            product.salePrice = salePrice ? parseFloat(salePrice) : product.salePrice;
+            // Fix: Update quantity if provided and valid, including 0
+            product.quantity = quantity !== undefined && quantity !== '' ? parseInt(quantity) : product.quantity;
 
             let updatedImages = product.productImage || [];
             if (req.body.existingImages) {
@@ -123,10 +122,11 @@ const editProduct = async (req, res) => {
             }
             if (req.files && req.files.length > 0) {
                 const newImages = req.files.map(file => `/uploads/products/${file.filename}`);
-                updatedImages = [...updatedImages, ...newImages].slice(0, 3); 
+                updatedImages = [...updatedImages, ...newImages].slice(0, 3);
             }
             if (updatedImages.length > 3) updatedImages = updatedImages.slice(0, 3);
             product.productImage = updatedImages;
+
             await product.save();
             res.status(200).json({ message: 'Product updated successfully', product });
         } catch (error) {

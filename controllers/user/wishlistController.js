@@ -1,7 +1,7 @@
 const Product = require('../../models/productSchema');
-const Wishlist=require('../../models/wishlistSchema')
+const Wishlist = require('../../models/wishlistSchema');
 const mongoose = require('mongoose');
-const Offer=require('../../models/offerSchema')
+const Offer = require('../../models/offerSchema');
 
 const wishlist = async (req, res) => {
   try {
@@ -15,7 +15,7 @@ const wishlist = async (req, res) => {
         path: 'products.productId',
         populate: [
           { path: 'brand' },
-          { path: 'category' } // Added for Category offers
+          { path: 'category' }
         ]
       })
       .lean();
@@ -77,6 +77,7 @@ const wishlist = async (req, res) => {
     res.status(500).render('error', { message: 'Unable to load wishlist page' });
   }
 };
+
 const addToWishlist = async (req, res) => {
     try {
         const userId = req.session.user;
@@ -147,4 +148,4 @@ module.exports = {
     wishlist,
     addToWishlist,
     removeWishlist
-}
+};
