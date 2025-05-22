@@ -75,7 +75,6 @@ const addAddress = async (req, res) => {
 
 const editAddress = async (req, res) => {
     try {
-        console.log('hidsafdsaf')
         const userId = req.session.user;
         if (!userId) {
             return res.status(401).json({

@@ -69,15 +69,22 @@
         color: #ef4444;
         font-weight: 600;
     }
-    
 </style>
 
 <!-- Main Content -->
-<div class="containers mx-auto p-6 max-w-6xl">
+<div class="container mx-auto p-6 max-w-6xl">
+    <!-- Breadcrumbs -->
+    <div class="flex items-center text-sm mb-6">
+        <a href="/" style="text-decoration: none;" class="text-gray-700 hover:text-gray-900">Home</a>
+        <span class="mx-2">></span>
+        <span class="text-gray-500">Cart</span>
+    </div>
+
     <!-- Cart and Summary -->
     <div class="flex flex-col lg:flex-row gap-8">
         <!-- Cart Items -->
         <div class="w-full lg:w-2/3">
+            <h3 class="text-lg font-semibold text-gray-800 mb-4">Your Cart (<%= totalItems %> Items)</h3>
             <% if (cart && cart.items && cart.items.length > 0) { %>
                 <% cart.items.forEach(item => { %>
                     <% if (item.productId) { %>
@@ -92,7 +99,6 @@
                                         </svg>
                                     </button>
                                 </div>
-                                <p class="text-gray-600 text-sm mt-1">Size: <%= item.productId.size || 'Free Size' %></p>
                                 <div class="flex items-center mt-3 space-x-2">
                                     <button class="decrement-quantity quantity-btn bg-gray-200 text-gray-600 rounded-l <%= item.quantity <= 1 || item.productId.quantity <= 0 ? 'opacity-50 cursor-not-allowed' : '' %>" 
                                             data-product-id="<%= item.productId._id %>" <%= item.quantity <= 1 || item.productId.quantity <= 0 ? 'disabled' : '' %>>-</button>

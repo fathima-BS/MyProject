@@ -95,11 +95,15 @@ router.get('/checkout', userAuth, checkoutController.loadCheckout);
 router.post('/select-address', userAuth, checkoutController.selectAddress);
 router.post('/place-order', userAuth, checkoutController.placeOrder);
 router.get('/order-success', userAuth, checkoutController.loadOrderSuccess);
+router.post('/apply-coupon', userAuth,checkoutController.applyCoupon)
+router.post('/remove-coupon', userAuth,checkoutController.removeCoupon)
+router.get('/coupons', userAuth, checkoutController.getCoupons);
 
 //order
 router.get('/orders',userAuth, orderController.getMyOrders);
 router.get('/order-details/:id',userAuth, orderController.orderDetails)
 router.post('/cancelItem',userAuth, orderController.cancelItem) 
+router.post('/returnItem',userAuth,orderController.returnItem)
 router.post('/cancelOrder', userAuth, orderController.cancelOrder)
 router.post('/returnOrder', userAuth, orderController.returnOrder)
 
@@ -107,4 +111,6 @@ router.post('/returnOrder', userAuth, orderController.returnOrder)
 
 router.post('/createRazorpay',userAuth,checkoutController.createRazorpay)
 router.post('/razorpayPlaceOrder',userAuth,checkoutController.placeRazorpayOrder)
+
+
 module.exports = router;
