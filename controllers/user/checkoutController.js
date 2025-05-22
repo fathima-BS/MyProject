@@ -5,6 +5,7 @@ const Address = require('../../models/addressSchema');
 const Order = require('../../models/orderSchema');
 const Wallet = require('../../models/walletSchema');
 const Offer = require('../../models/offerSchema');
+const Coupon = require('../../models/couponSchema');
 const Razorpay = require('razorpay');
 
 const loadCheckout = async (req, res) => {
@@ -111,7 +112,6 @@ const loadCheckout = async (req, res) => {
     }
 
     const shippingCost = subtotal < 2000 ? 60 : 0;
-    console.log('Checkout - Subtotal:', subtotal, 'Shipping Cost:', shippingCost); // Debug log
 
     total = (subtotal + shippingCost) - offerDiscount;
     if (cart.coupon && Number(cart.coupon.amount)) {
@@ -124,15 +124,16 @@ const loadCheckout = async (req, res) => {
     }
 
     res.render('checkout', {
-      cartItems,
-      subtotal: subtotal.toFixed(2),
-      offerDiscount: offerDiscount.toFixed(2),
-      coupon: coupon.toFixed(2),
-      total: total.toFixed(2),
-      shippingCost: shippingCost.toFixed(2),
-      totalItems,
-      addresses: addressDoc || { address: [] },
-      key_id:process.env.RAZORPAY_KEY_ID,
+     cart,
+  cartItems,
+  subtotal: subtotal.toFixed(2),
+  offerDiscount: offerDiscount.toFixed(2),
+  coupon: coupon.toFixed(2),
+  total: total.toFixed(2),
+  shippingCost: shippingCost.toFixed(2),
+  totalItems,
+  addresses: addressDoc || { address: [] },
+  key_id: process.env.RAZORPAY_KEY_ID,
     });
   } catch (error) {
     console.error('Error loading checkout:', error.message, error.stack);
@@ -614,6 +615,115 @@ const placeRazorpayOrder = async (req, res) => {
     }
 };
 
+// ammu
+const applyCoupon = async (req, res) => {
+  try {
+    const userId = req.session.user;
+    if (!userId) {
+      return res.status(401).json({ success: false, message: 'Please login to apply coupon' });
+    }
+
+    const { couponCode } = req.body;
+    if (!couponCode) {
+      return res.status(400).json({ success: false, message: 'Coupon code is required' });
+    }
+
+    const coupon = await Coupon.findOne({
+      couponCode,
+      isActive: true,
+      expireOn: { $gte: new Date() },
+      userId: { $nin: [userId] } // Ensure user hasn't used this coupon
+    });
+
+    if (!coupon) {
+      return res.status(404).json({ success: false, message: 'Invalid or expired coupon' });
+    }
+
+    const cart = await Cart.findOne({ userId });
+    if (!cart || !cart.items || cart.items.length === 0) {
+      return res.status(400).json({ success: false, message: 'Cart is empty' });
+    }
+
+    // Calculate subtotal to check minimumPrice
+    let subtotal = 0;
+    for (const item of cart.items) {
+      subtotal += Number(item.price) * Number(item.quantity);
+    }
+
+    if (subtotal < coupon.minimumPrice) {
+      return res.status(400).json({
+        success: false,
+        message: `Minimum cart value of ₹${coupon.minimumPrice.toLocaleString("en-IN")} is required for this coupon`
+      });
+    }
+
+    // Apply coupon to cart
+    cart.coupon = {
+      code: coupon.couponCode,
+      amount: coupon.offerPrice
+    };
+
+    // Mark coupon as used by this user
+    coupon.userId.push(userId);
+    await coupon.save();
+    await cart.save();
+
+    res.json({
+      success: true,
+      message: 'Coupon applied successfully',
+      couponAmount: coupon.offerPrice
+    });
+  } catch (error) {
+    console.error('Error applying coupon:', error);
+    res.status(500).json({ success: false, message: 'Error applying coupon: ' + error.message });
+  }
+};
+
+const removeCoupon = async (req, res) => {
+  try {
+    const userId = req.session.user;
+    if (!userId) {
+      return res.status(401).json({ success: false, message: 'Please login to remove coupon' });
+    }
+
+    const cart = await Cart.findOne({ userId });
+    if (!cart) {
+      return res.status(400).json({ success: false, message: 'Cart not found' });
+    }
+
+    if (!cart.coupon || !cart.coupon.code) {
+      return res.status(400).json({ success: false, message: 'No coupon applied' });
+    }
+
+    // Remove coupon from cart
+    cart.coupon = { code: '', amount: 0 };
+    await cart.save();
+
+    res.json({ success: true, message: 'Coupon removed successfully' });
+  } catch (error) {
+    console.error('Error removing coupon:', error);
+    res.status(500).json({ success: false, message: 'Error removing coupon: ' + error.message });
+  }
+};
+
+const getCoupons = async (req, res) => {
+  try {
+    const userId = req.session.user;
+    if (!userId) {
+      return res.status(401).json({ success: false, message: 'Please login to view coupons' });
+    }
+    const coupons = await Coupon.find({
+      isActive: true,
+      expireOn: { $gte: new Date() },
+      userId: { $nin: [userId] } // Exclude coupons already used by the user
+    }).lean();
+    res.json({ success: true, coupons });
+  } catch (error) {
+    console.error('Error fetching coupons:', error);
+    res.status(500).json({ success: false, message: 'Error fetching coupons' });
+  }
+};
+
 
 module.exports = {
     loadCheckout,
@@ -624,4 +734,8 @@ module.exports = {
     loadWallet,
     createRazorpay,
     placeRazorpayOrder,
+    // ammu
+    applyCoupon,
+    removeCoupon,
+    getCoupons
 };
