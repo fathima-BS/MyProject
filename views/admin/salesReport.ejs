@@ -1,0 +1,402 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sales Report - Cario Admin</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            background-color: #0f1216;
+            color: #fff;
+            font-family: 'Inter', sans-serif;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1100px;
+            margin: 2rem auto;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .header h1 {
+            font-size: 1.8rem;
+            font-weight: 600;
+        }
+
+        /* Summary Card */
+        .summary-card {
+            background-color: #8B5A2B; /* Brownish */
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+            padding: 20px;
+            margin-bottom: 20px;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .summary-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 6px 16px rgba(0, 0, 0, 0.3);
+            background-color: #A0522D; /* Lighter brown */
+        }
+
+        .summary-card .stats-title {
+            font-size: 14px;
+            font-weight: 500;
+            opacity: 0.8;
+            margin-bottom: 5px;
+        }
+
+        .summary-card .stats-number {
+            font-size: 24px;
+            font-weight: bold;
+        }
+
+        /* Filter Container */
+        .filter-container {
+            margin-bottom: 20px;
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        .filter-container select,
+        .filter-container input {
+            background-color: #1a202c;
+            color: #fff;
+            border: 1px solid #ffffff;
+            border-radius: 4px;
+            padding: 8px;
+            font-size: 14px;
+        }
+
+        .filter-container .btn-primary {
+            background-color: #7c3aed; /* Purple */
+            border: none;
+            padding: 8px 16px;
+            border-radius: 4px;
+            font-weight: 500;
+        }
+
+        .filter-container .btn-primary:hover {
+            background-color: #6d38d1;
+        }
+
+        .filter-container .clear-btn {
+            background-color: #272728;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 4px;
+        }
+
+        .filter-container .clear-btn:hover {
+            background-color: #313131;
+        }
+
+        .filter-container .download-btn {
+            background-color: #28a745; /* Green */
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 4px;
+            font-weight: 500;
+        }
+
+        .filter-container .download-btn:hover {
+            background-color: #218838;
+        }
+
+        .filter-container .excel-btn {
+            background-color: #17a2b8; /* Cyan */
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 4px;
+            font-weight: 500;
+        }
+
+        .filter-container .excel-btn:hover {
+            background-color: #138496;
+        }
+
+        /* Table */
+        .table {
+            color: #fff;
+            border-radius: 8px;
+            overflow: hidden;
+            background-color: #1e2126;
+        }
+
+        .table th {
+            color: #ffffff;
+            font-weight: 500;
+            border-bottom: 1px solid #2d3748;
+            padding: 1rem;
+        }
+
+        .table td {
+            color: white;
+            padding: 1rem;
+            border-bottom: 1px solid #2d3748;
+            vertical-align: middle;
+        }
+
+        /* Status Badges */
+        .status-badge {
+            padding: 5px 10px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+
+        .status-pending { background-color: #ffc107; color: #000; }
+        .status-processing { background-color: #17a2b8; color: #fff; }
+        .status-shipped { background-color: #007bff; color: #fff; }
+        .status-out-for-delivery { background-color: #6f42c1; color: #fff; }
+        .status-delivered { background-color: #28a745; color: #fff; }
+        .status-cancelled { background-color: #dc3545; color: #fff; }
+        .status-return-request { background-color: #fd7e14; color: #fff; }
+        .status-returned { background-color: #6c757d; color: #fff; }
+        .status-return-rejected { background-color: #343a40; color: #fff; }
+
+        /* Pagination */
+        .pagination {
+            display: flex;
+            justify-content: flex-end;
+            align-items: center;
+            gap: 5px;
+            margin-top: 20px;
+            padding: 10px;
+        }
+
+        .page-info {
+            color: #a0a0a0;
+            margin-right: auto;
+            font-size: 0.95rem;
+        }
+
+        .page-btn {
+            width: 30px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 4px;
+            background: transparent;
+            border: none;
+            color: #a0a0a0;
+            cursor: pointer;
+            font-size: 0.95rem;
+            text-decoration: none;
+        }
+
+        .page-btn:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+
+        .page-btn.active {
+            background-color: #7c3aed;
+            color: white;
+        }
+
+        .nav-btn {
+            background: transparent;
+            border: none;
+            color: #a0a0a0;
+            cursor: pointer;
+            padding: 5px;
+            font-size: 0.95rem;
+        }
+
+        .nav-btn:hover {
+            color: #fff;
+        }
+
+        @media (max-width: 640px) {
+            .filter-container {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .table th,
+            .table td {
+                padding: 12px 10px;
+            }
+
+            .pagination {
+                justify-content: center;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <%- include("../partials/admin/sidebar") %>
+
+    <div class="main-content">
+        <div class="container">
+            <div class="header">
+                <h1>Sales Report</h1>
+            </div>
+
+            <!-- Summary Card -->
+            <div class="summary-card">
+                <div class="row">
+                    <div class="col-md-4">
+                        <div class="stats-title">Total Sales Count</div>
+                        <div class="stats-number"><%= totalSalesCount %></div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="stats-title">Total Order Amount</div>
+                        <div class="stats-number">₹<%= totalOrderAmount.toLocaleString('en-IN') %></div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="stats-title">Total Discount</div>
+                        <div class="stats-number">₹<%= totalDiscount.toLocaleString('en-IN') %></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Filter Form -->
+            <div class="filter-container">
+                <select name="filter" id="filter" onchange="toggleDateInputs()">
+                    <option value="daily" <%= filter === 'daily' ? 'selected' : '' %>>Daily</option>
+                    <option value="weekly" <%= filter === 'weekly' ? 'selected' : '' %>>Weekly</option>
+                    <option value="monthly" <%= filter === 'monthly' ? 'selected' : '' %>>Monthly</option>
+                    <option value="custom" <%= filter === 'custom' ? 'selected' : '' %>>Custom</option>
+                </select>
+                <input type="date" name="startDate" id="startDate" value="<%= startDate || '' %>" style="display: <%= filter === 'custom' ? 'inline-block' : 'none' %>">
+                <input type="date" name="endDate" id="endDate" value="<%= endDate || '' %>" style="display: <%= filter === 'custom' ? 'inline-block' : 'none' %>">
+                <button type="button" class="btn-primary" onclick="applyFilter()">Apply</button>
+                <button type="button" class="clear-btn" onclick="clearFilter()">Clear</button>
+                <button type="button" class="download-btn" onclick="downloadPDF()">Download PDF</button>
+                <button type="button" class="excel-btn" onclick="downloadExcel()">Download Excel</button>
+            </div>
+
+            <!-- Sales Report Table -->
+            <div class="table-responsive">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Date</th>
+                            <th>Order ID</th>
+                            <th>Customer</th>
+                            <th>Amount</th>
+                            <th>Offer Discount</th>
+                            <th>Coupon</th>
+                            <th>Coupon Discount</th>
+                            <th>Final Amount</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <% if (orders.length > 0) { %>
+                            <% orders.forEach(order => { %>
+                                <tr>
+                                    <td><%= new Date(order.createdOn).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }) %></td>
+                                    <td><%= order.orderId %></td>
+                                    <td><%= order.userId ? order.userId.username : 'Unknown' %></td>
+                                    <td>₹<%= ((order.totalPrice || 0) + (order.shippingCost || 0)).toLocaleString('en-IN') %></td>
+                                    <td>₹<%= (order.offerDiscount || 0).toLocaleString('en-IN') %></td>
+                                    <td><%= order.couponCodeDisplay || 'None' %></td>
+                                    <td>₹<%= (order.couponDiscount || 0).toLocaleString('en-IN') %></td>
+                                    <td>₹<%= (order.finalAmount || 0).toLocaleString('en-IN') %></td>
+                                    <td>
+                                        <span class="status-badge status-<%= order.status.toLowerCase().replace(/ /g, '-') %>">
+                                            <%= order.status %>
+                                        </span>
+                                    </td>
+                                </tr>
+                            <% }) %>
+                        <% } else { %>
+                            <tr>
+                                <td colspan="9" class="text-center">No orders found for the selected period.</td>
+                            </tr>
+                        <% } %>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Pagination -->
+            <% if (totalPages > 1) { %>
+                <div class="pagination">
+                    <span class="page-info">Page <%= currentPage %> of <%= totalPages %></span>
+                    <% if (currentPage > 1) { %>
+                        <a href="?filter=<%= filter %>&startDate=<%= startDate || '' %>&endDate=<%= endDate || '' %>&page=<%= currentPage - 1 %>" class="nav-btn"><i class="fas fa-chevron-left"></i></a>
+                    <% } %>
+                    <% for (let i = 1; i <= totalPages; i++) { %>
+                        <a href="?filter=<%= filter %>&startDate=<%= startDate || '' %>&endDate=<%= endDate || '' %>&page=<%= i %>" class="page-btn <%= i === currentPage ? 'active' : '' %>"><%= i %></a>
+                    <% } %>
+                    <% if (currentPage < totalPages) { %>
+                        <a href="?filter=<%= filter %>&startDate=<%= startDate || '' %>&endDate=<%= endDate || '' %>&page=<%= currentPage + 1 %>" class="nav-btn"><i class="fas fa-chevron-right"></i></a>
+                    <% } %>
+                </div>
+            <% } %>
+        </div>
+    </div>
+
+    <script>
+        function toggleDateInputs() {
+            const filter = document.getElementById('filter').value;
+            const startDateInput = document.getElementById('startDate');
+            const endDateInput = document.getElementById('endDate');
+            if (filter === 'custom') {
+                startDateInput.style.display = 'inline-block';
+                endDateInput.style.display = 'inline-block';
+            } else {
+                startDateInput.style.display = 'none';
+                endDateInput.style.display = 'none';
+            }
+        }
+
+        function applyFilter() {
+            const filter = document.getElementById('filter').value;
+            const startDate = document.getElementById('startDate').value;
+            const endDate = document.getElementById('endDate').value;
+            let url = `/admin/SalesReport?filter=${filter}`;
+            if (filter === 'custom' && startDate && endDate) {
+                url += `&startDate=${startDate}&endDate=${endDate}`;
+            }
+            window.location.href = url;
+        }
+
+        function clearFilter() {
+            window.location.href = '/admin/SalesReport';
+        }
+
+        function downloadPDF() {
+            const filter = document.getElementById('filter').value;
+            const startDate = document.getElementById('startDate').value;
+            const endDate = document.getElementById('endDate').value;
+            let url = `/admin/downloadSalesReportPDF?filter=${filter}`;
+            if (filter === 'custom' && startDate && endDate) {
+                url += `&startDate=${startDate}&endDate=${endDate}`;
+            }
+            window.location.href = url;
+        }
+
+        function downloadExcel() {
+            const filter = document.getElementById('filter').value;
+            const startDate = document.getElementById('startDate').value;
+            const endDate = document.getElementById('endDate').value;
+            let url = `/admin/downloadSalesReportExcel?filter=${filter}`;
+            if (filter === 'custom' && startDate && endDate) {
+                url += `&startDate=${startDate}&endDate=${endDate}`;
+            }
+            window.location.href = url;
+        }
+    </script>
+</body>
+
+</html>

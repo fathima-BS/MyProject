@@ -112,5 +112,8 @@ router.post('/returnOrder', userAuth, orderController.returnOrder)
 router.post('/createRazorpay',userAuth,checkoutController.createRazorpay)
 router.post('/razorpayPlaceOrder',userAuth,checkoutController.placeRazorpayOrder)
 
+router.get('/payment-failure', userAuth, checkoutController.loadPaymentFailure);
+
+
 
 module.exports = router;

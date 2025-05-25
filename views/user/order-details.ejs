@@ -687,6 +687,15 @@
                                 <span>₹<%= order.totalPrice ? order.totalPrice.toLocaleString('en-IN') : '0.00' %></span>
                             </div>
                             <div class="summary-row">
+                                <span>Coupon Discount</span>
+                                <span>
+                               -₹<%= (order.totalPrice && order.finalAmount)
+                              ? (order.totalPrice - order.finalAmount).toLocaleString('en-IN')
+                             : '0.00' %>
+                                </span>
+
+                            </div>
+                            <div class="summary-row">
                                 <span>Shipping <%= order.totalPrice >= 2000 ? '(Free)' : '' %></span>
                                 <span>₹<%= order.shippingCost ? order.shippingCost.toLocaleString('en-IN') : '0.00' %></span>
                             </div>
