@@ -1,5 +1,5 @@
 const Order = require('../../models/orderSchema');
-const Address = require('../../models/addressSchema');
+const Wallet = require('../../models/walletSchema');
 
 const ITEMS_PER_PAGE = 10;
 
@@ -69,11 +69,30 @@ const cancelOrder = async (req, res) => {
         }
 
         order.status = 'Cancelled';
+        let refundAmount = order.finalAmount; // Refund the final amount (including shipping if applicable)
         order.orderedItems.forEach(item => {
             item.status = 'Cancelled';
         });
 
-        await order.save();
+        // Update wallet
+        let wallet = await Wallet.findOne({ userId: req.user._id });
+        if (!wallet) {
+            wallet = new Wallet({
+                userId: req.user._id,
+                balance: 0,
+                transactions: [],
+            });
+        }
+
+        wallet.balance += refundAmount;
+        wallet.transactions.push({
+            amount: refundAmount,
+            type: 'credit',
+            description: `Refund for cancelled order #${orderId}`,
+            date: new Date(),
+        });
+
+        await Promise.all([order.save(), wallet.save()]);
         res.status(200).json({ success: true, message: 'Order cancelled successfully.' });
     } catch (error) {
         console.error('Error cancelling order:', error.message, error.stack);
@@ -101,7 +120,8 @@ const cancelItem = async (req, res) => {
         }
 
         item.status = 'Cancelled';
-        order.totalPrice -= item.price * item.quantity;
+        const refundAmount = item.price * item.quantity;
+        order.totalPrice -= refundAmount;
         order.finalAmount = order.totalPrice + (order.totalPrice >= 2000 ? 0 : order.shippingCost);
 
         const allItemsCancelled = order.orderedItems.every(item => item.status === 'Cancelled');
@@ -109,7 +129,25 @@ const cancelItem = async (req, res) => {
             order.status = 'Cancelled';
         }
 
-        await order.save();
+        // Update wallet
+        let wallet = await Wallet.findOne({ userId: req.user._id });
+        if (!wallet) {
+            wallet = new Wallet({
+                userId: req.user._id,
+                balance: 0,
+                transactions: [],
+            });
+        }
+
+        wallet.balance += refundAmount;
+        wallet.transactions.push({
+            amount: refundAmount,
+            type: 'credit',
+            description: `Refund for cancelled item in order #${orderId}`,
+            date: new Date(),
+        });
+
+        await Promise.all([order.save(), wallet.save()]);
         res.status(200).json({ success: true, message: 'Item cancelled successfully.' });
     } catch (error) {
         console.error('Error cancelling item:', error.message, error.stack);

@@ -499,15 +499,19 @@
                                         </td>
                                     </tr>
                                     <% }) %>
-                                        <tr class="total-row">
-                                            <td style="color: rgb(255, 255, 255);" colspan="4" class="text-end">Total
-                                            </td>
-                                            <td style="color: rgb(255, 255, 255);">₹<%=
-                                                    order.finalAmount.toLocaleString('en-IN', { minimumFractionDigits:
-                                                    2, maximumFractionDigits: 2 }) %>
-                                            </td>
-                                            <td></td>
-                                        </tr>
+                                        <% let calculatedTotal=0; order.orderedItems.forEach(item=> {
+                                            calculatedTotal += item.price * item.quantity;
+                                            });
+                                            %>
+                                            <tr class="total-row">
+                                                <td colspan="4" class="text-end" style="color: white;">Total</td>
+                                                <td style="color: white;">
+                                                    ₹<%= calculatedTotal.toLocaleString('en-IN', {
+                                                        minimumFractionDigits: 2, maximumFractionDigits: 2 }) %>
+                                                </td>
+                                                <td></td>
+                                            </tr>
+
                             </tbody>
                         </table>
                     </div>

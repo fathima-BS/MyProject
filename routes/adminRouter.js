@@ -54,6 +54,11 @@ router.get('/orders/:id', adminAuth, adminOrderController.getOrderDetails);
 router.post('/orders/:orderId/status', adminAuth, adminOrderController.updateOrderStatus);
 router.get('/returnOrder', adminAuth, adminOrderController.handleReturnRequest);
 
+// Sales Report
+router.get('/SalesReport', adminAuth, adminOrderController.getSalesReport);
+router.get('/downloadSalesReportPDF', adminAuth, adminOrderController.downloadSalesReportPDF);
+router.get('/downloadSalesReportExcel', adminAuth, adminOrderController.downloadSalesReportExcel);
+
 //coupon management
 router.get('/coupons', adminAuth, couponController.loadCoupon);
 router.post('/coupons/add', adminAuth, couponController.addCoupon);

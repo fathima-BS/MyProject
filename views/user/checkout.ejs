@@ -1393,39 +1393,23 @@
         });
 
         // Place Order Button
-        document.getElementById('placeOrder').addEventListener('click', async () => {
+        const placeOrderBtn = document.getElementById('placeOrder');
+        if (!placeOrderBtn) {
+            console.warn('Place Order button not found. Ensure element with id="placeOrder" exists in the DOM.');
+            return;
+        }
+
+        placeOrderBtn.addEventListener('click', async () => {
             const selectedAddress = document.querySelector('input[name="selectedAddress"]:checked');
             const paymentMethod = document.querySelector('input[name="paymentMethod"]:checked');
 
             if (!selectedAddress) {
-                Swal.fire({
-                    title: 'Error!',
-                    text: 'Please select an address to proceed',
-                    icon: 'error',
-                    confirmButtonText: 'OK',
-                    width: '400px',
-                    customClass: {
-                        popup: 'custom-swal',
-                        title: 'custom-swal-title',
-                        content: 'custom-swal-content'
-                    }
-                });
+                alert('Please select an address to proceed.');
                 return;
             }
 
             if (!paymentMethod) {
-                Swal.fire({
-                    title: 'Error!',
-                    text: 'Please select a payment method',
-                    icon: 'error',
-                    confirmButtonText: 'OK',
-                    width: '400px',
-                    customClass: {
-                        popup: 'custom-swal',
-                        title: 'custom-swal-title',
-                        content: 'custom-swal-content'
-                    }
-                });
+                alert('Please select a payment method.');
                 return;
             }
 
@@ -1442,18 +1426,7 @@
             });
 
             if (addressIndex === -1) {
-                Swal.fire({
-                    title: 'Error!',
-                    text: 'Selected address not found in the list',
-                    icon: 'error',
-                    confirmButtonText: 'OK',
-                    width: '400px',
-                    customClass: {
-                        popup: 'custom-swal',
-                        title: 'custom-swal-title',
-                        content: 'custom-swal-content'
-                    }
-                });
+                alert('Selected address not found in the list.');
                 return;
             }
 
@@ -1461,6 +1434,11 @@
                 if (paymentType === "OnlinePayment") {
                     const response = await fetch('/createRazorpay', { method: 'POST' });
                     const order = await response.json();
+
+                    if (!order.id) {
+                        alert(order.message || 'Failed to create Razorpay order.');
+                        return;
+                    }
 
                     const options = {
                         key: "<%= key_id %>",
@@ -1479,18 +1457,7 @@
                                 const addressData = await addressResponse.json();
 
                                 if (!addressData.success) {
-                                    Swal.fire({
-                                        title: 'Error!',
-                                        text: addressData.message || 'Failed to select address',
-                                        icon: 'error',
-                                        confirmButtonText: 'OK',
-                                        width: '400px',
-                                        customClass: {
-                                            popup: 'custom-swal',
-                                            title: 'custom-swal-title',
-                                            content: 'custom-swal-content'
-                                        }
-                                    });
+                                    alert(addressData.message || 'Failed to select address.');
                                     return;
                                 }
                                 const orderResult = await fetch('/razorpayPlaceOrder', {
@@ -1507,43 +1474,25 @@
                                 });
 
                                 const result = await orderResult.json();
-
+                                   console.log(result,'result')
                                 if (result.success) {
                                     window.location.href = `/order-success?orderId=${result.orderId}`;
                                 } else {
-                                    Swal.fire({
-                                        icon: 'error',
-                                        title: 'Order Failed',
-                                        text: result.message || 'Order could not be placed',
-                                        width: '400px',
-                                        customClass: {
-                                            popup: 'custom-swal',
-                                            title: 'custom-swal-title',
-                                            content: 'custom-swal-content'
-                                        }
-                                    });
+                                    window.location.href = `/payment-failure?orderId=${result.orderId}&error=${encodeURIComponent(result.message || 'Order could not be placed.')}`;
                                 }
                             } catch (error) {
-                                console.error('Order placement error:', error);
-                                Swal.fire({
-                                    icon: 'error',
-                                    title: 'Payment Success, But Order Failed',
-                                    text: 'Please contact support.',
-                                    width: '400px',
-                                    customClass: {
-                                        popup: 'custom-swal',
-                                        title: 'custom-swal-title',
-                                        content: 'custom-swal-content'
-                                    }
-                                });
+                                window.location.href = `/payment-failure?orderId=${order.id}&error=${encodeURIComponent('Payment success, but order placement failed.')}`;
                             }
                         },
                         theme: {
-                            color: "#3399cc",
-                        },
+                            color: "#2563eb"
+                        }
                     };
 
                     const rzp = new Razorpay(options);
+                    rzp.on('payment.failed', function (response) {
+                        window.location.href = `/payment-failure?orderId=${order.id}&error=${encodeURIComponent(response.error.description || 'Payment failed. Please try another payment method.')}`;
+                    });
                     rzp.open();
                 } else {
                     const addressResponse = await fetch('/select-address', {
@@ -1554,18 +1503,7 @@
                     const addressData = await addressResponse.json();
 
                     if (!addressData.success) {
-                        Swal.fire({
-                            title: 'Error!',
-                            text: addressData.message || 'Failed to select address',
-                            icon: 'error',
-                            confirmButtonText: 'OK',
-                            width: '400px',
-                            customClass: {
-                                popup: 'custom-swal',
-                                title: 'custom-swal-title',
-                                content: 'custom-swal-content'
-                            }
-                        });
+                        alert(addressData.message || 'Failed to select address.');
                         return;
                     }
 
@@ -1579,33 +1517,11 @@
                     if (orderData.success) {
                         window.location.href = `/order-success?orderId=${orderData.orderId}`;
                     } else {
-                        Swal.fire({
-                            title: 'Error!',
-                            text: orderData.message || 'Failed to place order',
-                            icon: 'error',
-                            confirmButtonText: 'OK',
-                            width: '400px',
-                            customClass: {
-                                popup: 'custom-swal',
-                                title: 'custom-swal-title',
-                                content: 'custom-swal-content'
-                            }
-                        });
+                        window.location.href = `/payment-failure?orderId=${orderData.orderId || ''}&error=${encodeURIComponent(orderData.message || 'Failed to place order.')}`;
                     }
                 }
             } catch (error) {
-                Swal.fire({
-                    title: 'Error!',
-                    text: 'An unexpected error occurred while placing the order',
-                    icon: 'error',
-                    confirmButtonText: 'OK',
-                    width: '400px',
-                    customClass: {
-                        popup: 'custom-swal',
-                        title: 'custom-swal-title',
-                        content: 'custom-swal-content'
-                    }
-                });
+                alert('An unexpected error occurred while placing the order.');
             }
         });
     });

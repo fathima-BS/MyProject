@@ -18,9 +18,9 @@ const orderedItemSchema = new Schema({
     },
     status: {
         type: String,
-        enum: ['Pending', 'Processing', 'Shipped', 'Out for Delivery', 'Delivered', 'Cancelled', 'Return Request', 'Returned', 'Return Rejected'] // Added 'Return Rejected'
+        enum: ['Pending', 'Processing', 'Shipped', 'Out for Delivery', 'Delivered', 'Cancelled', 'Return Request', 'Returned', 'Return Rejected']
     },
-    returnRejectReason: { // Added field for rejection reason at item level
+    returnRejectReason: {
         type: String
     }
 });
@@ -63,7 +63,7 @@ const orderSchema = new Schema({
     status: {
         type: String,
         required: true,
-        enum: ['Pending', 'Processing', 'Shipped', 'Out for Delivery', 'Delivered', 'Cancelled', 'Return Request', 'Returned', 'Return Rejected'] // Added 'Return Rejected'
+        enum: ['Pending', 'Processing', 'Shipped', 'Out for Delivery', 'Delivered', 'Cancelled', 'Return Request', 'Returned', 'Return Rejected']
     },
     paymentMethod: {
         type: String,
@@ -78,11 +78,15 @@ const orderSchema = new Schema({
         type: Boolean,
         default: false
     },
+    couponCode: { 
+        type: String,
+        default: null
+    },
     shippingCost: {
         type: Number,
         required: true
     },
-    returnRejectReason: { // Added field for rejection reason at order level
+    returnRejectReason: {
         type: String
     }
 });
