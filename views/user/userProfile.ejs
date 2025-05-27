@@ -1,110 +1,530 @@
-<%- include("../../views/partials/user/header") %>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Profile - Bag Store</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css" rel="stylesheet">
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+            background-color: #fff;
+            color: #333;
+        }
 
-<!-- Include SweetAlert2 CDN -->
-<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+        .profile-container {
+            display: flex;
+            min-height: calc(100vh - 120px);
+        }
 
-<div class="profile-container">
-    <!-- Include the sidebar partial with active state -->
-    <div class="sidebar-container">
-        <%- include('../../views/partials/user/sidebar', {active: 'personal-info'}) %>
-    </div>
-    
-    <div class="profile-content">
-        <div class="profile-header">
-            <div class="profile-info">
-                <div class="profile-avatar">
-                    <div class="user-profile-image">
-                        <% if (user.profileImage) { %>
-                            <img src="<%= user.profileImage %>" alt="Profile Image" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';" />
-                            <div class="profile-placeholder" style="display: none;">
-                                <span><%= user.username.charAt(0).toUpperCase() %></span>
-                            </div>
-                        <% } else { %>
-                            <div class="profile-placeholder">
-                                <span><%= user.username.charAt(0).toUpperCase() %></span>
-                            </div>
-                        <% } %>
+        .sidebar-container {
+            flex: 0 0 220px;
+        }
+
+        .profile-content {
+            flex: 1;
+            padding: 2rem;
+        }
+
+        .profile-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 3rem;
+        }
+
+        .profile-info {
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+        }
+
+        .profile-avatar {
+            flex: 0 0 auto;
+        }
+
+        .user-profile-image {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            overflow: hidden;
+            background-color: #f0f0f0;
+            position: relative;
+        }
+
+        .user-profile-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+        }
+
+        .profile-placeholder {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2.5rem;
+            font-weight: 500;
+            color: #666;
+            background-color: #e0e0e0;
+        }
+
+        .profile-details {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .profile-name {
+            font-size: 1.8rem;
+            margin: 0;
+            font-weight: 600;
+        }
+
+        .profile-membership {
+            color: #666;
+            margin: 0.5rem 0 0;
+            font-size: 0.9rem;
+        }
+
+        .edit-profile-btn {
+            background-color: #1e88e5;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            padding: 0.6rem 1.2rem;
+            font-size: 0.9rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            text-decoration: none;
+        }
+
+        .edit-profile-btn:hover {
+            background-color: #1976d2;
+        }
+
+        .profile-data-container {
+            display: flex;
+            flex-direction: column;
+            gap: 2rem;
+        }
+
+        .profile-data-row {
+            display: flex;
+            gap: 5%;
+        }
+
+        .profile-data-item {
+            flex: 1;
+        }
+
+        .profile-data-item label {
+            display: block;
+            color: #666;
+            font-size: 0.9rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .profile-data-item p {
+            font-size: 1rem;
+            margin: 0;
+        }
+
+        .section-heading h2 {
+            font-size: 1.3rem;
+            margin: 0 0 1.5rem 0;
+            padding-bottom: 0.5rem;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .form-group {
+            margin-bottom: 1rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-size: 0.9rem;
+            color: #555;
+        }
+
+        .form-control {
+            width: 100%;
+            max-width: 400px;
+            padding: 0.75rem;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            font-size: 1rem;
+        }
+
+        .login-details-section {
+            margin-top: 3rem;
+        }
+
+        .login-actions {
+            display: flex;
+            gap: 2rem;
+            flex-wrap: wrap;
+        }
+
+        .action-card {
+            flex: 1;
+            min-width: 250px;
+            background-color: #f9f9f9;
+            padding: 1.5rem;
+            border-radius: 8px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+
+        .action-card h3 {
+            font-size: 1.1rem;
+            margin: 0 0 0.5rem 0;
+        }
+
+        .action-card p {
+            color: #666;
+            font-size: 0.9rem;
+            margin: 0 0 1.5rem 0;
+        }
+
+        .action-btn {
+            background-color: #fff;
+            color: #1e88e5;
+            border: 1px solid #1e88e5;
+            border-radius: 4px;
+            padding: 0.6rem 1.2rem;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .action-btn:hover {
+            background-color: #f0f7ff;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-content {
+            background-color: #fff;
+            padding: 2rem;
+            border-radius: 10px;
+            width: 100%;
+            max-width: 500px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+        }
+
+        .modal-content h2 {
+            font-size: 1.5rem;
+            margin: 0 0 1.5rem 0;
+            font-weight: 600;
+        }
+
+        .modal-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 1rem;
+            margin-top: 1.5rem;
+        }
+
+        .cancel-btn {
+            background-color: #fff;
+            color: #333;
+            border: 1px solid #ccc;
+            border-radius: 20px;
+            padding: 0.6rem 1.5rem;
+            font-size: 0.9rem;
+            cursor: pointer;
+            text-transform: uppercase;
+        }
+
+        .cancel-btn:hover {
+            background-color: #f0f0f0;
+        }
+
+        .update-password-btn {
+            background-color: #f5c518;
+            color: #333;
+            border: none;
+            border-radius: 20px;
+            padding: 0.6rem 1.5rem;
+            font-size: 0.9rem;
+            cursor: pointer;
+            text-transform: uppercase;
+        }
+
+        .update-password-btn:hover {
+            background-color: #e0b415;
+        }
+
+        .form-section {
+            margin-bottom: 2.5rem;
+            border-bottom: 1px solid #f0f0f0;
+            padding-bottom: 1.5rem;
+        }
+
+        .form-section:last-child {
+            border-bottom: none;
+        }
+
+        .form-section h2 {
+            font-size: 1.2rem;
+            margin: 0 0 1.5rem 0;
+            font-weight: 500;
+        }
+
+        .change-email-btn {
+            background-color: transparent;
+            color: #1e88e5;
+            border: 1px solid #1e88e5;
+            border-radius: 4px;
+            padding: 0.6rem 1.2rem;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .change-email-btn:hover {
+            background-color: #e3f2fd;
+        }
+
+        .google-login-notice {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            background: #f8f9fa;
+            padding: 1rem;
+            border-radius: 8px;
+            margin-top: 1rem;
+        }
+
+        .google-login-notice i {
+            color: #1e88e5;
+            font-size: 1.2rem;
+        }
+
+        .google-login-notice p {
+            margin: 0;
+            color: #666;
+            font-size: 0.9rem;
+        }
+
+        .referral-section {
+            background-color: #f8f5f0;
+            border-radius: 10px;
+            padding: 2rem;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+            margin-top: 2rem;
+            border: 1px solid #e6ded3;
+        }
+
+        .referral-section h2 {
+            font-size: 1.5rem;
+            color: #4a3728;
+            margin: 0 0 1rem 0;
+            font-weight: 600;
+        }
+
+        .referral-section p {
+            font-size: 1rem;
+            color: #6b5b4a;
+            margin: 0 0 1.5rem 0;
+        }
+
+        .referral-code-container {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            background-color: #fff;
+            padding: 0.75rem 1rem;
+            border-radius: 6px;
+            border: 1px solid #d3c7a8;
+            max-width: 300px;
+        }
+
+        .referral-code {
+            font-size: 1rem;
+            font-weight: 500;
+            color: #4a3728;
+            margin: 0;
+        }
+
+        .copy-btn, .generate-btn {
+            background-color: #8b6f47;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            padding: 0.6rem 1.2rem;
+            font-size: 0.9rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: background-color 0.2s ease;
+        }
+
+        .copy-btn:hover, .generate-btn:hover {
+            background-color: #7a5f3d;
+        }
+
+        @media (max-width: 768px) {
+            .profile-container {
+                flex-direction: column;
+            }
+
+            .sidebar-container {
+                flex: auto;
+                width: 100%;
+            }
+
+            .profile-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 1rem;
+            }
+
+            .profile-actions {
+                width: 100%;
+                margin-top: 1rem;
+            }
+
+            .edit-profile-btn {
+                width: 100%;
+                justify-content: center;
+            }
+
+            .profile-data-row {
+                flex-direction: column;
+                gap: 1.5rem;
+            }
+
+            .modal-content {
+                margin: 1rem;
+                padding: 1.5rem;
+            }
+
+            .referral-section {
+                padding: 1.5rem;
+            }
+
+            .referral-code-container {
+                max-width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <%- include("../../views/partials/user/header") %>
+
+    <div class="profile-container">
+        <div class="sidebar-container">
+            <%- include('../../views/partials/user/sidebar', { active: 'personal-info' }) %>
+        </div>
+
+        <div class="profile-content">
+            <div class="profile-header">
+                <div class="profile-info">
+                    <div class="profile-avatar">
+                        <div class="user-profile-image">
+                            <% if (user.profileImage) { %>
+                                <img src="<%= user.profileImage %>" alt="Profile Image"
+                                    onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';" />
+                                <div class="profile-placeholder" style="display: none;">
+                                    <span><%= user.username.charAt(0).toUpperCase() %></span>
+                                </div>
+                            <% } else { %>
+                                <div class="profile-placeholder">
+                                    <span><%= user.username.charAt(0).toUpperCase() %></span>
+                                </div>
+                            <% } %>
+                        </div>
+                    </div>
+
+                    <div class="profile-details">
+                        <h1 class="profile-name"><%= user.username %></h1>
+                        <% const date = new Date(user.createdOn); %>
+                        <p class="profile-membership">Member since <%= date.toLocaleString('en', { month: 'long' }) %> <%= date.getDate() %>, <%= date.getFullYear() %></p>
                     </div>
                 </div>
-                
-                <div class="profile-details">
-                    <h1 class="profile-name"><%= user.username %></h1>
-                    <% const date = new Date(user.createdOn); %>
-                    <p class="profile-membership">Member since <%= date.toLocaleString('default', { month: 'long' }) %> <%= date.getDate() %></p>
+                <div class="profile-actions">
+                    <a href="/edit-profile" class="edit-profile-btn">
+                        <i class="fa fa-pencil"></i> Edit Profile
+                    </a>
                 </div>
             </div>
-            <div class="profile-actions">
-                <a href="/edit-profile" class="edit-profile-btn">
-                    <i class="fa fa-pencil"></i> Edit Profile 
-                </a>
-            </div>
-        </div>
-        <div class="profile-data-container">
-            <div class="section-heading">
-                <h2>Profile Details</h2>
-            </div>
-        
-            <div class="profile-data-row">
-                <div class="profile-data-item">
-                    <label>Full Name</label>
-                    <p><%= user.username %></p>
+
+            <div class="profile-data-container">
+                <div class="section-heading">
+                    <h2>Profile Details</h2>
                 </div>
-            </div> 
-        
-            <div class="profile-data-row">  
-                <div class="profile-data-item">
-                    <label>Email Address</label>
-                    <p><%= user.email %></p>
+
+                <div class="profile-data-row">
+                    <div class="profile-data-item">
+                        <label>Full Name</label>
+                        <p><%= user.username %></p>
+                    </div>
                 </div>
-            </div>
-        
-            <div class="profile-data-row">    
-                <div class="profile-data-item">
-                    <label>Date of Birth</label>
-                    <% 
-                      let formattedDob = 'N/A';
-                      if (user.dateOfBirth) {
-                        const dob = new Date(user.dateOfBirth);
-                        const day = dob.getDate().toString().padStart(2, '0');
-                        const month = (dob.getMonth() + 1).toString().padStart(2, '0');
-                        const year = dob.getFullYear();
-                        formattedDob = `${day}-${month}-${year}`;
-                      }
-                    %>
-                    <p><%= formattedDob %></p>
+
+                <div class="profile-data-row">
+                    <div class="profile-data-item">
+                        <label>Email Address</label>
+                        <p><%= user.email %></p>
+                    </div>
                 </div>
-            </div> 
-        
-            <div class="profile-data-row">  
-                <div class="profile-data-item">
-                    <label>Phone Number</label>
-                    <p><%= user.phone ? user.phone : 'N/A' %></p>
+
+                <div class="profile-data-row">
+                    <div class="profile-data-item">
+                        <label>Date of Birth</label>
+                        <% let formattedDob = 'N/A'; if (user.dateOfBirth) { 
+                            const dob = new Date(user.dateOfBirth);
+                            const day = dob.getDate().toString().padStart(2, '0');
+                            const month = (dob.getMonth() + 1).toString().padStart(2, '0');
+                            const year = dob.getFullYear();
+                            formattedDob = `${day}-${month}-${year}`;
+                        } %>
+                        <p><%= formattedDob %></p>
+                    </div>
+                </div>
+
+                <div class="profile-data-row" style="padding-bottom: 50px;">
+                    <div class="profile-data-item">
+                        <label>Phone Number</label>
+                        <p><%= user.phone || 'N/A' %></p>
+                    </div>
                 </div>
             </div>
-        </div>
-        
-        
-       <div class="form-section">
-      
-                <h2 style="padding-top: 50px;">Login Details</h2><hr>
+
+            <div class="form-section">
+                <h2>Login Details</h2>
+                <hr>
                 <% if (!user.googleId) { %>
                     <div class="profile-data-container login-details-section">
-                        <div class="login-actions">
-                            <div class="action-card">
-                                <h3>Change Password</h3>
-                                <p>Update your password for better security</p>
-                                <button class="action-btn change-password-btn" onclick="openPasswordModal()">Change Password</button>
-                            </div>
+                        <div class="action-card">
+                            <h3>Change Password</h3>
+                            <p>Update your password for better security</p>
+                            <button class="action-btn change-password-btn" onclick="openPasswordModal()">Change Password</button>
                         </div>
-
-                        <div class="form-section action-card">
-                            <h2>Change Email</h2>
-                            <p style="color: #666; font-size: 0.9rem; margin-bottom: 1rem;">
-                                Update your email for better security
-                            </p>
-                            <button type="button" class="change-email-btn" onclick="window.location.href='/change-email'">
-                                Change Email
-                            </button>
+                        <div class="action-card">
+                            <h3>Change Email</h3>
+                            <p>Update your email address for better security</p>
+                            <button class="action-btn change-email-btn" onclick="window.location.href='/change-email'">Change Email</button>
                         </div>
                     </div>
                 <% } else { %>
@@ -115,561 +535,277 @@
                 <% } %>
             </div>
 
-        <!-- Password Change Modal -->
-        <div id="passwordModal" class="modal">
-            <div class="modal-content">
-                <h2>Change Password</h2>
-                <form id="changePasswordForm">
-                    <div class="form-group">
-                        <label for="currentPassword">Current Password</label>
-                        <input type="password" id="currentPassword" name="password" class="form-control" required />
-                    </div>
-                    <div class="form-group">
-                        <label for="newPassword">New Password</label>
-                        <input type="password" id="newPassword" name="NewPassword" class="form-control" required />
-                    </div>
-                    <div class="form-group">
-                        <label for="confirmNewPassword">Confirm New Password</label>
-                        <input type="password" id="confirmNewPassword" name="confirmNewPassword" class="form-control" required />
-                    </div>
-                    <div class="modal-actions">
-                        <button type="button" class="cancel-btn" onclick="closePasswordModal()">CANCEL</button>
-                        <button type="submit" class="update-password-btn">UPDATE PASSWORD</button>
-                    </div>
-                </form>
+            <div class="referral-section">
+                <h2>Invite & Earn</h2>
+                <p>Share your referral code with friends and earn ₹1000 for each successful referral!</p>
+                <div class="referral-code-container">
+                    <span class="referral-code" id="referralCode">
+                        <%= user.referralCode || 'Not available' %>
+                    </span>
+                    <% if (user.referralCode) { %>
+                        <button class="copy-btn" onclick="copyToClipboard('<%= user.referralCode %>')">
+                            <i class="fa fa-copy"></i> Copy
+                        </button>
+                    <% } else { %>
+                        <button class="generate-btn" onclick="generateReferralCode()">
+                            <i class="fa fa-plus"></i> Generate Referral Code
+                        </button>
+                    <% } %>
+                </div>
+            </div>
+
+            <div id="passwordModal" class="modal">
+                <div class="modal-content">
+                    <h2>Change Password</h2>
+                    <form id="changePasswordForm">
+                        <div class="form-group">
+                            <label for="currentPassword">Current Password</label>
+                            <input type="password" id="currentPassword" name="password" class="form-control" required />
+                            <span id="currentPasswordError" class="error-message"></span>
+                        </div>
+                        <div class="form-group">
+                            <label for="newPassword">New Password</label>
+                            <input type="password" id="newPassword" name="NewPassword" class="form-control" required />
+                            <span id="newPasswordError" class="error-message"></span>
+                        </div>
+                        <div class="form-group">
+                            <label for="confirmNewPassword">Confirm New Password</label>
+                            <input type="password" id="confirmNewPassword" name="confirmNewPassword" class="form-control" required />
+                            <span id="confirmNewPasswordError" class="error-message"></span>
+                        </div>
+                        <div class="modal-actions">
+                            <button type="button" class="cancel-btn" onclick="closePasswordModal()">Cancel</button>
+                            <button type="submit" class="update-password-btn">Update</button>
+                        </div>
+                    </form>
+                </div>
             </div>
         </div>
     </div>
-</div>
 
-<%- include('../../views/partials/user/footer') %>
+    <%- include("../../views/partials/user/footer") %>
 
-<style>
-    body {
-        margin: 0;
-        padding: 0;
-        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
-        background-color: #fff;
-        color: #333;
-    }
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const modal = document.getElementById('passwordModal');
+            const changePasswordForm = document.getElementById('changePasswordForm');
+            const currentPasswordInput = document.getElementById('currentPassword');
+            const newPasswordInput = document.getElementById('newPassword');
+            const confirmNewPasswordInput = document.getElementById('confirmNewPassword');
+            const currentPasswordError = document.getElementById('currentPasswordError');
+            const newPasswordError = document.getElementById('newPasswordError');
+            const confirmNewPasswordError = document.getElementById('confirmNewPasswordError');
 
-    .profile-container {
-        display: flex;
-        min-height: calc(100vh - 120px);
-    }
+            // Modal functions
+            window.openPasswordModal = () => {
+                modal.style.display = 'flex';
+                changePasswordForm.reset();
+                [currentPasswordError, newPasswordError, confirmNewPasswordError].forEach(error => {
+                    error.style.display = 'none';
+                    error.textContent = '';
+                });
+            };
 
-    .sidebar-container {
-        flex: 0 0 220px;
-    }
-
-    .profile-content {
-        flex: 1;
-        padding: 2rem;
-    }
-
-    .profile-header {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        margin-bottom: 3rem;
-    }
-
-    .profile-info {
-        display: flex;
-        align-items: center;
-        gap: 1.5rem;
-    }
-
-    .profile-avatar {
-        flex: 0 0 auto;
-    }
-
-    .user-profile-image {
-        width: 100px;
-        height: 100px;
-        border-radius: 50%;
-        overflow: hidden;
-        background-color: #f0f0f0;
-        position: relative;
-    }
-
-    .user-profile-image img {
-        width: 100%;
-        height: 100%;
-        object-fit: cover;
-        display: block;
-    }
-
-    .profile-placeholder {
-        width: 100%;
-        height: 100%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 2.5rem;
-        font-weight: 500;
-        color: #666;
-        background-color: #e0e0e0;
-    }
-
-    .profile-details {
-        display: flex;
-        flex-direction: column;
-    }
-
-    .profile-name {
-        font-size: 1.8rem;
-        margin: 0;
-        font-weight: 600;
-    }
-
-    .profile-membership {
-        color: #666;
-        margin: 0.5rem 0 0;
-        font-size: 0.9rem;
-    }
-
-    .edit-profile-btn {
-        background-color: #1e88e5;
-        color: white;
-        border: none;
-        border-radius: 5px;
-        padding: 0.6rem 1.2rem;
-        font-size: 0.9rem;
-        cursor: pointer;
-        display: flex;
-        align-items: center;
-        gap: 0.5rem;
-        text-decoration: none;
-    }
-
-    .edit-profile-btn:hover {
-        background-color: #1976d2;
-    }
-
-    .profile-data-container {
-        display: flex;
-        flex-direction: column;
-        gap: 2rem;
-    }
-
-    .profile-data-row {
-        display: flex;
-        gap: 5%;
-    }
-
-    .profile-data-item {
-        flex: 1;
-    }
-
-    .profile-data-item label {
-        display: block;
-        color: #666;
-        font-size: 0.9rem;
-        margin-bottom: 0.5rem;
-    }
-
-    .profile-data-item p {
-        font-size: 1rem;
-        margin: 0;
-    }
-    
-    .section-heading h2 {
-        font-size: 1.3rem;
-        margin: 0 0 1.5rem 0;
-        padding-bottom: 0.5rem;
-        border-bottom: 1px solid #e0e0e0;
-    }
-    
-    .phone-update-section {
-        margin-top: 2rem;
-        padding-top: 1rem;
-        border-top: 1px solid #f0f0f0;
-    }
-    
-    .phone-update-section h3 {
-        font-size: 1.1rem;
-        margin-bottom: 1rem;
-        font-weight: 500;
-    }
-    
-    .form-group {
-        margin-bottom: 1rem;
-    }
-    
-    .form-group label {
-        display: block;
-        margin-bottom: 0.5rem;
-        font-size: 0.9rem;
-        color: #555;
-    }
-    
-    .form-control {
-        width: 100%;
-        max-width: 400px;
-        padding: 0.75rem;
-        border: 1px solid #ccc;
-        border-radius: 4px;
-        font-size: 1rem;
-    }
-    
-    .update-btn {
-        background-color: #1e88e5;
-        color: white;
-        border: none;
-        border-radius: 4px;
-        padding: 0.75rem 1.5rem;
-        font-size: 0.9rem;
-        cursor: pointer;
-        margin-top: 0.5rem;
-    }
-    
-    .update-btn:hover {
-        background-color: #1976d2;
-    }
-    
-    .login-details-section {
-        margin-top: 3rem;
-    }
-    
-    .login-actions {
-        display: flex;
-        gap: 2rem;
-        flex-wrap: wrap;
-    }
-    
-    .action-card {
-        flex: 1;
-        min-width: 250px;
-        background-color: #f9f9f9;
-        padding: 1.5rem;
-        border-radius: 8px;
-        box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-    }
-    
-    .action-card h3 {
-        font-size: 1.1rem;
-        margin: 0 0 0.5rem 0;
-    }
-    
-    .action-card p {
-        color: #666;
-        font-size: 0.9rem;
-        margin: 0 0 1.5rem 0;
-    }
-    
-    .action-btn {
-        background-color: #fff;
-        color: #1e88e5;
-        border: 1px solid #1e88e5;
-        border-radius: 4px;
-        padding: 0.6rem 1.2rem;
-        font-size: 0.9rem;
-        cursor: pointer;
-        transition: all 0.2s ease;
-    }
-    
-    .action-btn:hover {
-        background-color: #f0f7ff;
-    }
-
-    /* Modal Styles */
-    .modal {
-        display: none;
-        position: fixed;
-        z-index: 1000;
-        left: 0;
-        top: 0;
-        width: 100%;
-        height: 100%;
-        background-color: rgba(0,0,0,0.5);
-        align-items: center;
-        justify-content: center;
-    }
-
-    .modal-content {
-        background-color: #fff;
-        padding: 2rem;
-        border-radius: 10px;
-        width: 100%;
-        max-width: 500px;
-        box-shadow: 0 4px 10px rgba(0,0,0,0.2);
-    }
-
-    .modal-content h2 {
-        font-size: 1.5rem;
-        margin: 0 0 1.5rem 0;
-        font-weight: 600;
-    }
-
-    .modal-actions {
-        display: flex;
-        justify-content: flex-end;
-        gap: 1rem;
-        margin-top: 1.5rem;
-    }
-
-    .cancel-btn {
-        background-color: #fff;
-        color: #333;
-        border: 1px solid #ccc;
-        border-radius: 20px;
-        padding: 0.6rem 1.5rem;
-        font-size: 0.9rem;
-        cursor: pointer;
-        text-transform: uppercase;
-    }
-
-    .cancel-btn:hover {
-        background-color: #f0f0f0;
-    }
-
-    .update-password-btn {
-        background-color: #f5c518;
-        color: #333;
-        border: none;
-        border-radius: 20px;
-        padding: 0.6rem 1.5rem;
-        font-size: 0.9rem;
-        cursor: pointer;
-        text-transform: uppercase;
-    }
-
-    .update-password-btn:hover {
-        background-color: #e0b415;
-    }
-
-    .forgot-password {
-        margin-top: 1.5rem;
-    }
-
-    .forgot-password p {
-        color: #666;
-        font-size: 0.9rem;
-        margin: 0 0 0.5rem 0;
-    }
-
-    .reset-password-btn {
-        background-color: #fff;
-        color: #1e88e5;
-        border: 1px solid #1e88e5;
-        border-radius: 20px;
-        padding: 0.6rem 1.2rem;
-        font-size: 0.9rem;
-        cursor: pointer;
-        text-transform: uppercase;
-    }
-
-    .reset-password-btn:hover {
-        background-color: #f0f7ff;
-    }
-     .form-section {
-        margin-bottom: 2.5rem;
-        border-bottom: 1px solid #f0f0f0;
-        padding-bottom: 1.5rem;
-    }
-
-    .form-section:last-child {
-        border-bottom: none;
-    }
-
-    .form-section h2 {
-        font-size: 1.2rem;
-        margin: 0 0 1.5rem 0;
-        font-weight: 500;
-    }
-     .change-email-btn {
-        background-color: transparent;
-        color: #1e88e5;
-        border: 1px solid #1e88e5;
-        border-radius: 4px;
-        padding: 0.6rem 1.2rem;
-        font-size: 0.9rem;
-        cursor: pointer;
-        transition: all 0.2s ease;
-    }
-
-    .change-email-btn:hover {
-        background-color: #e3f2fd;
-    }
-
-    /* Responsive design */
-    @media (max-width: 768px) {
-        .profile-container {
-            flex-direction: column;
-        }
-
-        .sidebar-container {
-            flex: auto;
-            width: 100%;
-        }
-
-        .profile-header {
-            flex-direction: column;
-            align-items: flex-start;
-            gap: 1rem;
-        }
-
-        .profile-actions {
-            width: 100%;
-            margin-top: 1rem;
-        }
-
-        .edit-profile-btn {
-            width: 100%;
-            justify-content: center;
-        }
-
-        .profile-data-row {
-            flex-direction: column;
-            gap: 1.5rem;
-        }
-
-        .modal-content {
-            margin: 1rem;
-            padding: 1.5rem;
-        }
-    }
-</style>
-
-<script>
-    document.addEventListener('DOMContentLoaded', function() {
-        const modal = document.getElementById('passwordModal');
-        const changePasswordForm = document.getElementById('changePasswordForm');
-        const phoneUpdateForm = document.querySelector('.phone-update-form');
-
-        // Password change modal functions
-        window.openPasswordModal = function() {
-            modal.style.display = 'flex';
-        };
-
-        window.closePasswordModal = function() {
-            modal.style.display = 'none';
-            changePasswordForm.reset();
-        };
-
-        window.onclick = function(event) {
-            if (event.target === modal) {
-                closePasswordModal();
-            }
-        };
-
-        // Handle password change form submission
-        changePasswordForm.addEventListener('submit', async function(event) {
-            event.preventDefault();
-
-            const newPassword = document.getElementById('newPassword').value;
-            const confirmNewPassword = document.getElementById('confirmNewPassword').value;
-            const currentPassword = document.getElementById('currentPassword').value;
-
-            if (newPassword !== confirmNewPassword) {
+            window.closePasswordModal = () => {
                 Swal.fire({
-                    icon: 'error',
-                    title: 'Error',
-                    text: 'New password and confirmation do not match.',
-                    confirmButtonText: 'OK'
+                    title: 'Are you sure?',
+                    text: 'Any unsaved changes will be lost.',
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonText: 'Yes, close it!',
+                    cancelButtonText: 'No, keep editing'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        modal.style.display = 'none';
+                        changePasswordForm.reset();
+                        [currentPasswordError, newPasswordError, confirmNewPasswordError].forEach(error => {
+                            error.style.display = 'none';
+                            error.textContent = '';
+                        });
+                    }
                 });
-                return;
-            }
+            };
 
-            const formData = new URLSearchParams();
-            formData.append('password', currentPassword);
-            formData.append('NewPassword', newPassword);
-            formData.append('confirmNewPassword', confirmNewPassword);
-
-            console.log("Form data being sent:", Object.fromEntries(formData));
-
-            try {
-                console.log("Sending request to /update-password...");
-                const response = await fetch('/update-password', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/x-www-form-urlencoded'
-                    },
-                    body: formData
-                });
-
-                console.log("Response status:", response.status);
-                console.log("Response headers:", response.headers.get('content-type'));
-
-                const result = await response.json();
-                console.log("Response body:", result);
-
-                if (result.success) {
-                    Swal.fire({
-                        icon: 'success',
-                        title: 'Success',
-                        text: 'Password updated successfully',
-                        confirmButtonText: 'OK'
-                    }).then(() => {
-                        window.location.reload();
-                    });
+            window.onclick = (event) => {
+                if (event.target === modal) {
                     closePasswordModal();
-                } else {
-                    Swal.fire({
-                        icon: 'error',
-                        title: 'Error',
-                        text: result.message || 'Failed to update password',
-                        confirmButtonText: 'OK'
-                    }).then(() => {
-                        if (result.redirectUrl) {
-                            window.location.href = result.redirectUrl;
-                        }
-                    });
                 }
-            } catch (error) {
-                console.error("Fetch error:", error);
-                Swal.fire({
-                    icon: 'error',
-                    title: 'Error',
-                    text: 'An error occurred while updating the password: ' + error.message,
-                    confirmButtonText: 'OK'
-                });
+            };
+
+            // Password validation
+            function validatePasswordForm() {
+                let isValid = true;
+                const passwordPattern = /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d@$!%*#?&]{6,}$/;
+                const currentPassword = currentPasswordInput.value.trim();
+                const newPassword = newPasswordInput.value.trim();
+                const confirmNewPassword = confirmNewPasswordInput.value.trim();
+
+                currentPasswordError.style.display = 'none';
+                newPasswordError.style.display = 'none';
+                confirmNewPasswordError.style.display = 'none';
+
+                if (!currentPassword) {
+                    currentPasswordError.style.display = 'block';
+                    currentPasswordError.textContent = 'Current password is required';
+                    isValid = false;
+                }
+
+                if (!newPassword) {
+                    newPasswordError.style.display = 'block';
+                    newPasswordError.textContent = 'New password is required';
+                    isValid = false;
+                } else if (!passwordPattern.test(newPassword)) {
+                    newPasswordError.style.display = 'block';
+                    newPasswordError.textContent = 'Password must be at least 6 characters, with letters and numbers';
+                    isValid = false;
+                }
+
+                if (!confirmNewPassword) {
+                    confirmNewPasswordError.style.display = 'block';
+                    confirmNewPasswordError.textContent = 'Please confirm your password';
+                    isValid = false;
+                } else if (newPassword !== confirmNewPassword) {
+                    confirmNewPasswordError.style.display = 'block';
+                    confirmNewPasswordError.textContent = 'Passwords do not match';
+                    isValid = false;
+                }
+
+                return isValid;
             }
-        });
 
-        // Handle phone number update form submission
-        if (phoneUpdateForm) {
-            phoneUpdateForm.addEventListener('submit', async function(event) {
-                event.preventDefault();
+            // Real-time validation
+            currentPasswordInput.addEventListener('input', validatePasswordForm);
+            newPasswordInput.addEventListener('input', validatePasswordForm);
+            confirmNewPasswordInput.addEventListener('input', validatePasswordForm);
 
-                const formData = new FormData(this);
+            // Password form submission
+            changePasswordForm.addEventListener('submit', async (e) => {
+                e.preventDefault();
+
+                if (!validatePasswordForm()) {
+                    return;
+                }
+
+                const formData = new URLSearchParams();
+                formData.append('password', currentPasswordInput.value.trim());
+                formData.append('NewPassword', newPasswordInput.value.trim());
+                formData.append('confirmNewPassword', confirmNewPasswordInput.value.trim());
 
                 try {
-                    const response = await fetch('/update-phone', {
+                    const response = await fetch('/update-password', {
                         method: 'POST',
-                        body: formData
+                        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                        body: formData,
                     });
-
                     const result = await response.json();
 
                     if (result.success) {
                         Swal.fire({
                             icon: 'success',
                             title: 'Success',
-                            text: result.message || 'Phone number updated successfully',
-                            confirmButtonText: 'OK'
+                            text: 'Password updated successfully',
                         }).then(() => {
-                            window.location.href = result.redirectUrl || '/userProfile';
+                            closePasswordModal();
+                            window.location.reload(true);
                         });
                     } else {
                         Swal.fire({
                             icon: 'error',
                             title: 'Error',
-                            text: result.message || 'Failed to update phone number',
-                            confirmButtonText: 'OK'
+                            text: result.message || 'Failed to update password',
+                        }).then(() => {
+                            if (result.redirectUrl) {
+                                window.location.href = result.redirectUrl;
+                            }
                         });
                     }
                 } catch (error) {
-                    console.error("Fetch error:", error);
                     Swal.fire({
                         icon: 'error',
                         title: 'Error',
-                        text: 'An error occurred while updating the phone number: ' + error.message,
-                        confirmButtonText: 'OK'
+                        text: 'An error occurred: ' + error.message,
                     });
                 }
             });
-        }
-    });
-</script>
+
+            // Referral code functions
+            window.copyToClipboard = (text) => {
+                if (!text || text === 'Not available') {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error',
+                        text: 'No referral code to copy.',
+                    });
+                    return;
+                }
+
+                navigator.clipboard.writeText(text).then(() => {
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Copied!',
+                        text: 'Referral code copied to clipboard.',
+                        timer: 1500,
+                        showConfirmButton: false,
+                    });
+                }).catch(() => {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error',
+                        text: 'Failed to copy referral code.',
+                    });
+                });
+            };
+
+            window.generateReferralCode = async () => {
+                try {
+                    const response = await fetch('/generate-referral-code', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                    });
+                    const result = await response.json();
+
+                    if (result.success) {
+                        const referralCodeElement = document.getElementById('referralCode');
+                        referralCodeElement.textContent = result.referralCode;
+
+                        const container = referralCodeElement.parentElement;
+                        const generateBtn = container.querySelector('.generate-btn');
+                        if (generateBtn) {
+                            generateBtn.remove();
+                        }
+
+                        const copyBtn = document.createElement('button');
+                        copyBtn.className = 'copy-btn';
+                        copyBtn.innerHTML = '<i class="fa fa-copy"></i> Copy';
+                        copyBtn.onclick = () => copyToClipboard(result.referralCode);
+                        container.appendChild(copyBtn);
+
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Success',
+                            text: 'Referral code generated successfully.',
+                        });
+                    } else {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Error',
+                            text: result.message || 'Failed to generate referral code.',
+                        }).then(() => {
+                            if (result.redirectUrl) {
+                                window.location.href = result.redirectUrl;
+                            }
+                        });
+                    }
+                } catch (error) {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error',
+                        text: 'An error occurred while generating the referral code.',
+                    });
+                }
+            };
+        });
+    </script>
+</body>
+</html>

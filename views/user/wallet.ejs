@@ -1,6 +1,5 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -15,27 +14,21 @@
             color: #1f2937;
             min-height: 100vh;
         }
-
-        /* Breadcrumb Styling */
         .breadcrumb a {
             color: #4b5563;
             transition: color 0.2s ease;
             text-decoration: none;
         }
-
         .breadcrumb a:hover {
             color: #1f2937;
         }
-
         .breadcrumb span {
             color: #9ca3af;
         }
-
-        /* Wallet Card (ATM Card Style) */
         .wallet-card {
-            width: 324px; /* 85.6mm * 3.779px/mm */
-            height: 204px; /* 53.98mm * 3.779px/mm */
-            background-color: #8B5A2B; /* Warm brown */
+            width: 324px;
+            height: 204px;
+            background-color: #8B5A2B;
             border-radius: 12px;
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
             padding: 16px;
@@ -48,13 +41,11 @@
             justify-content: space-between;
             margin-bottom: 24px;
         }
-
         .wallet-card:hover {
             transform: translateY(-4px);
             box-shadow: 0 6px 16px rgba(0, 0, 0, 0.3);
-            background-color: #A0522D; /* Lighter brown on hover */
+            background-color: #A0522D;
         }
-
         .wallet-card::before {
             content: '';
             position: absolute;
@@ -65,20 +56,17 @@
             background: radial-gradient(circle at 80% 20%, rgba(255, 255, 255, 0.2), transparent 50%);
             opacity: 0.3;
         }
-
         .wallet-card h2 {
             font-size: 16px;
             font-weight: 600;
             margin-bottom: 8px;
             z-index: 1;
         }
-
         .wallet-card .balance {
             font-size: 24px;
             font-weight: 700;
             z-index: 1;
         }
-
         .wallet-card .user-name {
             font-size: 17px;
             font-weight: 500;
@@ -86,8 +74,6 @@
             text-transform: uppercase;
             letter-spacing: 1px;
         }
-
-        /* Transaction Card */
         .transaction-card {
             background-color: white;
             border-radius: 12px;
@@ -96,50 +82,40 @@
             margin-bottom: 24px;
             transition: box-shadow 0.3s ease;
         }
-
         .transaction-card:hover {
             box-shadow: 0 6px 16px rgba(0, 0, 0, 0.1);
         }
-
-        /* Transaction Table */
         .transaction-table {
             width: 100%;
             border-collapse: collapse;
             margin-top: 16px;
         }
-
         .transaction-table th,
         .transaction-table td {
             padding: 12px;
             text-align: left;
             border-bottom: 1px solid #f3f4f6;
         }
-
         .transaction-table th {
             background-color: #f3f4f6;
             font-weight: 600;
             color: #1f2937;
             font-size: 14px;
         }
-
         .transaction-table td {
             color: #4b5563;
             font-size: 14px;
         }
-
         .credit {
             color: #059669;
             font-weight: 500;
         }
-
         .debit {
             color: #dc2626;
             font-weight: 500;
         }
-
-        /* Buttons */
         .btn-primary {
-            background-color: #8B5A2B; /* Match card brown */
+            background-color: #8B5A2B;
             color: white;
             padding: 10px 16px;
             border-radius: 8px;
@@ -147,12 +123,9 @@
             transition: background-color 0.3s ease;
             text-decoration: none;
         }
-
         .btn-primary:hover {
             background-color: #A0522D;
         }
-
-        /* Responsive Adjustments */
         @media (max-width: 640px) {
             .wallet-card {
                 width: 100%;
@@ -161,34 +134,25 @@
                 aspect-ratio: 85.6 / 53.98;
                 padding: 12px;
             }
-
             .wallet-card h2 {
                 font-size: 14px;
             }
-
             .wallet-card .balance {
                 font-size: 20px;
             }
-
             .wallet-card .user-name {
                 font-size: 12px;
             }
         }
     </style>
 </head>
-
 <body>
     <%- include("../partials/user/header") %>
-
     <div class="flex min-h-screen">
-        <!-- Sidebar -->
         <div id="sidebar" class="hidden md:block">
             <%- include("../partials/user/sidebar", { active: 'wallet' }) %>
         </div>
-
-        <!-- Main Content -->
         <div class="flex-1 max-w-6xl mx-auto px-4 py-8">
-            <!-- Breadcrumb Navigation -->
             <div class="breadcrumb flex items-center text-sm mb-6">
                 <a href="/">Home</a>
                 <span class="mx-2">></span>
@@ -196,20 +160,16 @@
                 <span class="mx-2">></span>
                 <span class="text-gray-500">My Wallet</span>
             </div>
-
-            <!-- Wallet Balance Card (ATM Style) -->
             <div class="wallet-card">
                 <div>
                     <h2>My Wallet</h2>
-                    <p class="balance">₹<%= wallet.balance.toLocaleString('en-IN') %></p>
+                    <p class="balance">₹<%= (user?.walletBalance ?? 0).toLocaleString('en-IN') %></p>
                 </div>
-                <p class="user-name"><%= user.username %></p>
+                <p class="user-name"><%= user?.username || 'Guest' %></p>
             </div>
-
-            <!-- Transaction History -->
             <div class="transaction-card">
                 <h2 class="text-lg font-semibold mb-4">Transaction History</h2>
-                <% if (wallet.transactions && wallet.transactions.length > 0) { %>
+                <% if (user?.walletTransactions?.length > 0) { %>
                     <table class="transaction-table">
                         <thead>
                             <tr>
@@ -220,9 +180,9 @@
                             </tr>
                         </thead>
                         <tbody>
-                            <% wallet.transactions.forEach(transaction => { %>
+                            <% user.walletTransactions.forEach(transaction => { %>
                                 <tr>
-                                    <td><%= new Date(transaction.date).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }) %></td>
+                                    <td><%= new Date(transaction.createdAt).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }) %></td>
                                     <td><%= transaction.description %></td>
                                     <td>
                                         <span class="<%= transaction.type === 'credit' ? 'credit' : 'debit' %>">
@@ -240,8 +200,6 @@
             </div>
         </div>
     </div>
-
     <%- include("../partials/user/footer") %>
 </body>
-
 </html>

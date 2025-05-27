@@ -63,6 +63,7 @@ router.post('/edit-profile', userAuth, profileController.editProfile);
 
 router.get('/change-email',userAuth,profileController.changeEmail)
 router.post('/change-email',userAuth,profileController.sendOtp)
+router.post('/resend-otp',userAuth, profileController.resendOtp);
 router.get('/verify-otp', userAuth, profileController.getVerifyOtp);
 router.post('/verify-otp', userAuth, profileController.verifyOtp);
 
@@ -113,6 +114,9 @@ router.post('/createRazorpay',userAuth,checkoutController.createRazorpay)
 router.post('/razorpayPlaceOrder',userAuth,checkoutController.placeRazorpayOrder)
 
 router.get('/payment-failure', userAuth, checkoutController.loadPaymentFailure);
+
+// New route for referral
+router.post('/generate-referral-code', userAuth, profileController.generateReferralCode);
 
 
 

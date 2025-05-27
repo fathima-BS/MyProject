@@ -41,9 +41,10 @@ const userSchema = new Schema({
     type: Schema.Types.ObjectId,
     ref: "Cart"
   }],
-  wallet: {
+  walletBalance: {
     type: Number,
-    default: 0
+    default: 0,
+    min: 0
   },
   phone: {
     type: String,
@@ -61,15 +62,22 @@ const userSchema = new Schema({
     type: Date,
     default: Date.now
   },
-  referalCode: {
-    type: String
+  referralCode: {
+    type: String,
+    unique: true,
+    required: false
   },
   redeemed: {
-    type: Boolean
+    type: Boolean,
+    default: false
   },
   redeemedUsers: [{
     type: Schema.Types.ObjectId,
     ref: "User"
+  }],
+  walletTransactions: [{
+    type: Schema.Types.ObjectId,
+    ref: 'WalletTransaction'
   }],
   searchHistory: [{
     category: {
@@ -87,5 +95,4 @@ const userSchema = new Schema({
 });
 
 const User = mongoose.models.User || mongoose.model('User', userSchema);
-
 module.exports = User;

@@ -94,7 +94,7 @@
         <form id="emailForm" action="/change-email" method="post">
             <div class="form-group">
                 <label for="email">New Email Address</label>
-                <input type="email" id="email" name="email" placeholder="Enter your new email address">
+                <input type="text" id="email" name="email" placeholder="Enter your new email address">
                 <p class="error" id="emailError">Please enter a valid email address</p>
             </div>
             <button type="submit" id="verifyButton">Verify</button>
@@ -106,19 +106,26 @@
         const emailInput = document.getElementById('email');
         const emailError = document.getElementById('emailError');
         const verifyButton = document.getElementById('verifyButton');
-        
+        const currentEmail = '<%= currentEmail %>'; // Get current email from server
+
         // Email validation function
         function isValidEmail(email) {
             const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
             return emailRegex.test(email);
         }
-        
+
         // Validate on input
         emailInput.addEventListener('input', () => {
-            if (emailInput.value.trim() === '') {
+            const email = emailInput.value.trim();
+            if (email === '') {
                 emailError.style.display = 'none';
                 emailInput.style.borderColor = '#d1d5db';
-            } else if (!isValidEmail(emailInput.value)) {
+            } else if (email.toLowerCase() === currentEmail.toLowerCase()) {
+                emailError.textContent = 'This is your current email address';
+                emailError.style.display = 'block';
+                emailInput.style.borderColor = '#ef4444';
+            } else if (!isValidEmail(email)) {
+                emailError.textContent = 'Please enter a valid email address';
                 emailError.style.display = 'block';
                 emailInput.style.borderColor = '#ef4444';
             } else {
@@ -126,7 +133,7 @@
                 emailInput.style.borderColor = '#10b981';
             }
         });
-        
+
         // Form submission
         emailForm.addEventListener('submit', async (e) => {
             e.preventDefault();
@@ -136,6 +143,18 @@
             if (email === '') {
                 emailError.textContent = 'Email address is required';
                 emailError.style.display = 'block';
+                emailInput.style.borderColor = '#ef4444';
+                return;
+            }
+
+            if (email.toLowerCase() === currentEmail.toLowerCase()) {
+                await Swal.fire({
+                    icon: 'error',
+                    title: 'Invalid Email',
+                    text: 'You cannot use your current email address.',
+                    confirmButtonText: 'OK',
+                    width: '400px'
+                });
                 emailInput.style.borderColor = '#ef4444';
                 return;
             }

@@ -3,7 +3,7 @@ const User = require('../../models/userSchema');
 const Product = require('../../models/productSchema');
 const Address = require('../../models/addressSchema');
 const Order = require('../../models/orderSchema');
-const Wallet = require('../../models/walletSchema');
+const WalletTransaction = require('../../models/walletSchema');
 const Offer = require('../../models/offerSchema');
 const Coupon = require('../../models/couponSchema');
 const Razorpay = require('razorpay');
@@ -357,26 +357,37 @@ const loadOrderSuccess = async (req, res) => {
 const loadWallet = async (req, res) => {
   try {
     const userId = req.session.user;
-
-    let user = await User.findById(userId).select('username');
-    if (!user || !user.username) {
-      user = { username: 'User' };
+    if (!userId) {
+      console.log('No user session found, redirecting to login');
+      return res.redirect('/login');
     }
 
-    let wallet = await Wallet.findOne({ userId });
-    if (!wallet) {
-      wallet = { balance: 0, transactions: [] };
-    } else if (wallet.transactions) {
-      wallet.transactions.sort((a, b) => b.date - a.date);
+    const user = await User.findById(userId)
+      .select('username walletBalance walletTransactions')
+      .populate({
+        path: 'walletTransactions',
+        options: { sort: { createdAt: -1 } }
+      })
+      .lean();
+
+    if (!user) {
+      console.log('User not found for ID:', userId);
+      return res.redirect('/login');
     }
 
-    res.render('wallet', {
-      wallet,
-      user,
+    user.walletBalance = user.walletBalance ?? 0;
+    user.walletTransactions = user.walletTransactions || [];
+
+    console.log('User wallet data:', {
+      username: user.username,
+      walletBalance: user.walletBalance,
+      walletTransactions: user.walletTransactions
     });
+
+    res.render('wallet', { user });
   } catch (error) {
     console.error('Error loading wallet page:', error);
-    res.status(500).send('Server Error');
+    res.redirect('/pageNotFound');
   }
 };
 

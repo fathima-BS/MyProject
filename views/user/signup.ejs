@@ -49,6 +49,15 @@
                         <input type="password" id="confirmPassword" class="form-control" name="cPassword" placeholder="Confirm password">
                         <span id="error5" class="error-message"></span>
                     </div>
+
+                    <!-- Only showing the changed part -->
+               <div id="referralField" class="mb-3">
+                <label for="referralField" class="form-label">Referral Code (Optional)</label>
+                <input type="text" id="referralField" class="form-control" name="referral" placeholder="Type Referral Code...">
+                <span id="error6" class="error-message"></span>
+            </div>
+
+
                     <button id="signupButton" type="submit" class="btn btn-dark w-100">Sign Up</button>
                 </form>
 
@@ -72,6 +81,7 @@
         const dobInput = document.getElementById("dob");
         const passwordInput = document.getElementById("password");
         const confirmPasswordInput = document.getElementById("confirmPassword");
+        const referralId = document.getElementById("referalCode")
         const error1 = document.getElementById("error1");
         const error2 = document.getElementById("error2");
         const error3 = document.getElementById("error3");
@@ -180,6 +190,21 @@
             }
 
             return isValid;
+        }
+
+        function referralValidateChecking() {
+            const referralval = referralid.value.trim();
+            const referralPattern = /^WLT[A-Z0-9]{9}$/;
+
+            if (referralval && !referralPattern.test(referralval)) {
+            error5.style.display = "block";
+            error5.innerHTML = "Invalid referral code. Must start with 'WLT' followed by 9 alphanumeric characters.";
+            return false;
+            } else {
+            error5.style.display = "none";
+            error5.innerHTML = "";
+            return true;
+            }
         }
 
         // Real-time validation on input

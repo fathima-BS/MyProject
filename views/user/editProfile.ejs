@@ -84,16 +84,6 @@
                 </div>
             </div>
 
-            <!-- <div class="form-section">
-                <h2>Change Email</h2>
-                <p style="color: #666; font-size: 0.9rem; margin-bottom: 1rem;">
-                    Update your email for better security
-                </p>
-                <button type="button" class="change-email-btn" onclick="window.location.href='/change-email'">
-                    Change Email
-                </button>
-            </div> -->
-
             <div class="form-actions">
                 <button type="button" class="cancel-btn"
                     onclick="window.location.href='/userProfile'">Cancel</button>
@@ -503,7 +493,8 @@
         const applyCropBtn = document.getElementById('apply-crop-btn');
         const cancelCropBtn = document.getElementById('cancel-crop-btn');
         const editProfileForm = document.getElementById('editProfileForm');
-        let croppedBlob = null; // Store the cropped image Blob
+        const phoneInput = document.getElementById('phone');
+        let croppedBlob = null;
 
         // Image upload and crop functionality
         imageInput.addEventListener('change', function (event) {
@@ -521,7 +512,6 @@
             ];
 
             if (file) {
-                // 🔴 File type check
                 if (!allowedTypes.includes(file.type)) {
                     Swal.fire({
                         icon: 'error',
@@ -559,17 +549,29 @@
                     height: 200
                 });
                 canvas.toBlob(function (blob) {
-                    croppedBlob = blob; // Store the Blob
+                    croppedBlob = blob;
                     const url = URL.createObjectURL(blob);
                     imagePreviewWrapper.style.display = 'none';
                     cropper.destroy();
                     cropper = null;
-                    // Update preview
-                    const previewImg = document.querySelector('.profile-img');
+
+                    const currentImageDiv = document.querySelector('.current-image');
+                    const placeholder = currentImageDiv.querySelector('.profile-placeholder');
+                    let previewImg = currentImageDiv.querySelector('.profile-img');
+
+                    if (placeholder) {
+                        // Remove placeholder and create new img element
+                        placeholder.remove();
+                        previewImg = document.createElement('img');
+                        previewImg.className = 'profile-img';
+                        previewImg.alt = 'Profile Image';
+                        currentImageDiv.appendChild(previewImg);
+                    }
+
                     if (previewImg) {
                         previewImg.src = url;
                     }
-                    // Clear the original file input to avoid sending it
+
                     imageInput.value = '';
                 }, 'image/jpeg', 0.8);
             }
@@ -585,17 +587,51 @@
             croppedBlob = null;
         });
 
+        // Phone number validation
+        phoneInput.addEventListener('input', function () {
+            const phone = phoneInput.value.trim();
+            const phoneRegex = /^\d{10}$/;
+            const errorMessage = document.createElement('span');
+            errorMessage.className = 'error-message';
+            errorMessage.style.color = 'red';
+            errorMessage.style.fontSize = '0.8rem';
+
+            // Remove existing error message
+            const existingError = phoneInput.parentElement.querySelector('.error-message');
+            if (existingError) existingError.remove();
+
+            if (phone && !phoneRegex.test(phone)) {
+                errorMessage.textContent = 'Phone number must be 10 digits';
+                phoneInput.parentElement.appendChild(errorMessage);
+            }
+        });
+
         // Form submission
         editProfileForm.addEventListener('submit', async function (event) {
             event.preventDefault();
 
+            const phone = phoneInput.value.trim();
+            const phoneRegex = /^\d{10}$/;
+            if (phone && !phoneRegex.test(phone)) {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Invalid Phone Number',
+                    text: 'Phone number must be 10 digits',
+                    width: '400px',
+                    customClass: {
+                        popup: 'custom-swal',
+                        title: 'custom-swal-title',
+                        content: 'custom-swal-content'
+                    }
+                });
+                return;
+            }
+
             const formData = new FormData();
-            // Manually add form fields (exclude original profileImage input)
             formData.append('fullName', document.getElementById('fullName').value);
             formData.append('birthdate', document.getElementById('birthdate').value);
-            formData.append('phone', document.getElementById('phone').value);
+            formData.append('phone', phone);
 
-            // Append the cropped image or original image
             if (croppedBlob) {
                 formData.append('profileImage', croppedBlob, 'cropped-image.jpg');
             } else if (imageInput.files[0]) {

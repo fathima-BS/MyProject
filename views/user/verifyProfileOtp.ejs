@@ -42,7 +42,7 @@
       <p id="otp-message" class="verification-status"></p>
       
       <div class="additional-actions">
-        <p>Didn't receive the code? <a href="#" id="resend-otp">Resend Code</a></p>
+        <p>Didn't receive the code? <a href="#" id="resend-otp" class="resend-link">Resend Code</a></p>
       </div>
     </div>
   </div>
@@ -186,8 +186,13 @@
     transition: background-color 0.2s ease;
   }
 
-  .verify-button:hover {
+  .verify-button:hover:not(:disabled) {
     background-color: var(--primary-hover);
+  }
+
+  .verify-button:disabled {
+    background-color: #9ca3af;
+    cursor: not-allowed;
   }
 
   .verification-status {
@@ -211,13 +216,21 @@
     color: var(--text-secondary);
   }
 
-  .additional-actions a {
+  .resend-link {
     color: var(--primary-color);
     text-decoration: none;
     font-weight: 500;
+    pointer-events: none;
+    opacity: 0.5;
+    transition: opacity 0.2s ease;
   }
 
-  .additional-actions a:hover {
+  .resend-link.enabled {
+    pointer-events: auto;
+    opacity: 1;
+  }
+
+  .resend-link.enabled:hover {
     text-decoration: underline;
   }
 
@@ -324,10 +337,18 @@
         }
         otpValue += input.value;
       });
+      
+      // Only enable verify button if all inputs are filled and OTP is not expired
+      if (allFilled && !isExpired) {
+        verifyBtn.disabled = false;
+      } else {
+        verifyBtn.disabled = true;
+      }
     }
     
     // Countdown timer
     let timeLeft = 60; // 1 minute in seconds
+    let isExpired = false;
     const countdownEl = document.getElementById('countdown');
     
     function updateCountdown() {
@@ -337,8 +358,12 @@
       
       if (timeLeft === 0) {
         clearInterval(countdownInterval);
-        resendBtn.style.pointerEvents = 'auto';
-        resendBtn.style.opacity = '1';
+        isExpired = true;
+        verifyBtn.disabled = true;
+        verifyBtn.style.backgroundColor = '#9ca3af';
+        resendBtn.classList.add('enabled'); // Enable resend link
+        otpMessage.textContent = 'OTP has expired. Please resend a new code.';
+        otpMessage.className = 'verification-status error';
       } else {
         timeLeft--;
       }
@@ -348,40 +373,79 @@
     updateCountdown();
     
     // Resend button handling
-    resendBtn.addEventListener('click', function(e) {
+    resendBtn.addEventListener('click', async function(e) {
       e.preventDefault();
       
-      // Reset inputs
-      otpInputs.forEach(input => {
-        input.value = '';
-        input.classList.remove('valid', 'error');
-      });
-      otpInputs[0].focus();
+      if (!isExpired) return; // Prevent resend before expiration
       
-      // Reset timer
-      timeLeft = 60;
-      clearInterval(countdownInterval);
-      setInterval(updateCountdown, 1000);
-      
-      // Show resending message
+      // Disable resend link during API call
+      resendBtn.classList.remove('enabled');
       otpMessage.textContent = 'Sending new verification code...';
       otpMessage.className = 'verification-status';
       
-      // Simulate API call to resend OTP
-      setTimeout(() => {
-        otpMessage.textContent = 'A new verification code has been sent!';
-        otpMessage.className = 'verification-status success';
+      try {
+        const response = await fetch('/resend-otp', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ email }),
+        });
         
-        // Hide message after 3 seconds
-        setTimeout(() => {
-          otpMessage.textContent = '';
-          otpMessage.className = 'verification-status';
-        }, 3000);
-      }, 1500);
+        const result = await response.json();
+        
+        if (result.success) {
+          // Reset inputs
+          otpInputs.forEach(input => {
+            input.value = '';
+            input.classList.remove('valid', 'error');
+          });
+          otpInputs[0].focus();
+          
+          // Reset timer and state
+          timeLeft = 60;
+          isExpired = false;
+          verifyBtn.disabled = false;
+          verifyBtn.style.backgroundColor = 'var(--primary-color)';
+          resendBtn.classList.remove('enabled'); // Disable resend link again
+          clearInterval(countdownInterval);
+          const newCountdownInterval = setInterval(updateCountdown, 1000);
+          
+          // Show success message
+          otpMessage.textContent = 'A new verification code has been sent!';
+          otpMessage.className = 'verification-status success';
+          
+          // Hide message after 3 seconds
+          setTimeout(() => {
+            otpMessage.textContent = '';
+            otpMessage.className = 'verification-status';
+          }, 3000);
+        } else {
+          otpMessage.textContent = result.message || 'Failed to resend OTP.';
+          otpMessage.className = 'verification-status error';
+          resendBtn.classList.add('enabled'); // Re-enable resend link on failure
+        }
+      } catch (error) {
+        console.error('Error resending OTP:', error);
+        otpMessage.textContent = 'An error occurred while resending OTP.';
+        otpMessage.className = 'verification-status error';
+        resendBtn.classList.add('enabled'); // Re-enable resend link on error
+      }
     });
     
     // Verify button handling
-    verifyBtn.addEventListener('click', function() {
+    verifyBtn.addEventListener('click', async function() {
+      if (isExpired) {
+        await Swal.fire({
+          icon: 'error',
+          title: 'OTP Expired',
+          text: 'The OTP has expired. Please resend a new code.',
+          confirmButtonText: 'OK',
+          width: '400px'
+        });
+        return;
+      }
+      
       let otpValue = '';
       otpInputs.forEach(input => {
         otpValue += input.value;
@@ -405,17 +469,19 @@
       otpMessage.textContent = 'Verifying your email...';
       otpMessage.className = 'verification-status';
       
-      // API call to verify OTP
-      fetch('/verify-otp', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ email, otp: otpValue }),
-      })
-      .then(response => response.json())
-      .then(data => {
-        if (data.success) {
+      try {
+        // API call to verify OTP
+        const response = await fetch('/verify-otp', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ email, otp: otpValue }),
+        });
+        
+        const result = await response.json();
+        
+        if (result.success) {
           // Show success state
           otpInputs.forEach(input => {
             input.classList.add('valid');
@@ -427,15 +493,16 @@
           verifyBtn.style.backgroundColor = 'var(--success-color)';
           
           // Show SweetAlert success message
-          Swal.fire({
+          await Swal.fire({
             title: 'Success!',
             text: 'Email Verified Successfully',
             icon: 'success',
-            confirmButtonText: 'OK'
-          }).then(() => {
-            // Redirect to userProfile.ejs after user clicks OK
-            window.location.href = '/userProfile';
+            confirmButtonText: 'OK',
+            width: '400px'
           });
+          
+          // Redirect to userProfile.ejs
+          window.location.href = '/userProfile';
         } else {
           // Show error state
           otpInputs.forEach(input => {
@@ -443,22 +510,24 @@
             input.classList.remove('valid');
           });
           
-          otpMessage.textContent = data.message || 'Invalid verification code. Please try again.';
+          otpMessage.textContent = result.message || 'Invalid verification code. Please try again.';
           otpMessage.className = 'verification-status error';
           
           // Reset button
-          verifyBtn.disabled = false;
+          verifyBtn.disabled = isExpired;
           verifyBtn.textContent = 'Verify Email';
+          verifyBtn.style.backgroundColor = isExpired ? '#9ca3af' : 'var(--primary-color)';
         }
-      })
-      .catch(error => {
+      } catch (error) {
+        console.error('Error verifying OTP:', error);
         otpMessage.textContent = 'Connection error. Please try again.';
         otpMessage.className = 'verification-status error';
         
         // Reset button
-        verifyBtn.disabled = false;
+        verifyBtn.disabled = isExpired;
         verifyBtn.textContent = 'Verify Email';
-      });
+        verifyBtn.style.backgroundColor = isExpired ? '#9ca3af' : 'var(--primary-color)';
+      }
     });
   });
 </script>
