@@ -182,7 +182,7 @@
                         <tbody>
                             <% user.walletTransactions.forEach(transaction => { %>
                                 <tr>
-                                    <td><%= new Date(transaction.createdAt).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }) %></td>
+                                    <td><%= new Date(transaction.date).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }) %></td>
                                     <td><%= transaction.description %></td>
                                     <td>
                                         <span class="<%= transaction.type === 'credit' ? 'credit' : 'debit' %>">

@@ -112,11 +112,13 @@ router.post('/returnOrder', userAuth, orderController.returnOrder)
 
 router.post('/createRazorpay',userAuth,checkoutController.createRazorpay)
 router.post('/razorpayPlaceOrder',userAuth,checkoutController.placeRazorpayOrder)
-
 router.get('/payment-failure', userAuth, checkoutController.loadPaymentFailure);
+router.post('/retry-payment/:orderId',userAuth,checkoutController.retryPayment)
+router.post('/payment-success',userAuth, checkoutController.paymentSuccess);
 
 // New route for referral
 router.post('/generate-referral-code', userAuth, profileController.generateReferralCode);
+router.post('/payment-failed-order',userAuth,checkoutController.paymentfailedorder)
 
 
 

@@ -191,7 +191,7 @@ const handleReturnRequest = async (req, res) => {
 const getSalesReport = async (req, res) => {
   try {
     const { filter = 'daily', startDate, endDate, page = 1 } = req.query;
-    let query = {}; // Include all order statuses
+    let query = {status:"Delivered"}; // Include all order statuses
     let dateFilter = {};
 
     // Calculate date range based on filter
@@ -296,7 +296,7 @@ const getSalesReport = async (req, res) => {
 const downloadSalesReportPDF = async (req, res) => {
   try {
     const { filter = 'daily', startDate, endDate } = req.query;
-    let query = {};
+    let query = {status:"Delivered"};
     let dateFilter = {};
 
     // Calculate date range based on filter (same logic as getSalesReport)
@@ -512,7 +512,7 @@ const downloadSalesReportPDF = async (req, res) => {
 const downloadSalesReportExcel = async (req, res) => {
   try {
     const { filter = 'daily', startDate, endDate } = req.query;
-    let query = {};
+    let query = {status:"Delivered"};
     let dateFilter = {};
 
     // Calculate date range based on filter (same logic as getSalesReport)

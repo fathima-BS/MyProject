@@ -4,7 +4,7 @@ const Category = require('../../models/categorySchema');
 const Brand = require('../../models/brandSchema');
 const Cart = require('../../models/cartSchema');
 const Wishlist = require('../../models/wishlistSchema');
-const WalletTransaction = require('../../models/walletSchema');
+const Wallet = require('../../models/walletSchema');
 const nodemailer = require('nodemailer');
 const mongoose = require('mongoose');
 const Offer = require('../../models/offerSchema');
@@ -169,7 +169,7 @@ const verifyOtp = async (req, res) => {
       const { username, dateOfBirth, email, password } = req.session.userData;
       const referralCode = await generateCode();
       const passwordHash = await securePassword(password);
-      
+
       const newUser = new User({
         username,
         email,
@@ -180,37 +180,53 @@ const verifyOtp = async (req, res) => {
         walletBalance: req.session.referralCode ? 500 : 0
       });
       await newUser.save();
-      console.log('New user created:', newUser.email);
 
       if (req.session.referralCode) {
         const referrer = await User.findOne({ referralCode: req.session.referralCode });
-        if (referrer && !referrer.isBlocked) {
-          referrer.walletBalance += 1000;
-          referrer.redeemedUsers.push(newUser._id);
 
-          const referrerTransaction = new WalletTransaction({
-            user: referrer._id,
+        if (referrer && !referrer.isBlocked) {
+          let referrerWallet = await Wallet.findOne({ userId: referrer._id });
+          if (!referrerWallet) {
+            referrerWallet = new Wallet({
+              userId: referrer._id,
+              balance: 0,
+              transactions: [],
+            });
+          }
+
+          referrerWallet.balance += 1000;
+          referrerWallet.transactions.push({
             amount: 1000,
             type: 'credit',
             description: `Referral bonus for referring ${newUser.email}`,
-            transactionId: generateTransactionId()
+            date: new Date(),
           });
-          await referrerTransaction.save();
-          referrer.walletTransactions.push(referrerTransaction._id);
-          await referrer.save();
-          console.log('Referrer bonus applied:', referrer.email, 'Transaction ID:', referrerTransaction.transactionId);
 
-          const newUserTransaction = new WalletTransaction({
-            user: newUser._id,
+          referrer.redeemedUsers.push(newUser._id);
+
+          let newUserWallet = await Wallet.findOne({ userId: newUser._id });
+          if (!newUserWallet) {
+            newUserWallet = new Wallet({
+              userId: newUser._id,
+              balance: 0,
+              transactions: [],
+            });
+          }
+
+          newUserWallet.balance += 500;
+          newUserWallet.transactions.push({
             amount: 500,
             type: 'credit',
             description: `Referral bonus for using referral code ${req.session.referralCode}`,
-            transactionId: generateTransactionId()
+            date: new Date(),
           });
-          await newUserTransaction.save();
-          newUser.walletTransactions.push(newUserTransaction._id);
-          await newUser.save();
-          console.log('New user bonus applied:', newUser.email, 'Transaction ID:', newUserTransaction.transactionId);
+
+          await Promise.all([
+            referrer.save(),
+            referrerWallet.save(),
+            newUser.save(),
+            newUserWallet.save()
+          ]);
         } else {
           console.log('Invalid or blocked referrer for code:', req.session.referralCode);
         }
@@ -258,42 +274,51 @@ const resendOtp = async (req, res) => {
   }
 };
 
-const loadWallet = async (req, res) => {
-  try {
-    const userId = req.session.user;
-    if (!userId) {
-      console.log('No user session found, redirecting to login');
-      return res.redirect('/login');
-    }
+// const loadWallet = async (req, res) => {
+//   try {
+//     const userId = req.session.user;
 
-    const user = await User.findById(userId)
-      .select('username walletBalance walletTransactions')
-      .populate({
-        path: 'walletTransactions',
-        options: { sortBy: { createdAt: -1 } }
-      })
-      .lean();
+//     if (!userId) {
+//       console.log('No user session found, redirecting to login');
+//       return res.redirect('/login');
+//     }
 
-    if (!user) {
-      console.log('User not found for ID:', userId);
-      return res.redirect('/login');
-    }
+//     const user = await User.findById(userId).select('username').lean();
+//     if (!user) {
+//       console.log('User not found for ID:', userId);
+//       return res.redirect('/login');
+//     }
 
-    user.walletBalance = user || 0;
-    user.walletTransactions = user || [];
+//     const wallet = await Wallet.findOne({ userId }).lean();
 
-    console.log('User wallet data:', {
-      username: user.username,
-      walletBalance: user.walletBalance,
-      transactionCount: user.walletTransactions.length
-    });
+//     if (!wallet) {
+//       return res.render('wallet', {
+//         user: {
+//           username: user.username,
+//           walletBalance: 0,
+//           walletTransactions: []
+//         }
+//       });
+//     }
 
-    res.render('wallet', { user: userData });
-  } catch (error) {
-    console.error('Error loading wallet page:', error);
-    res.redirect('/pageNotFound');
-  }
-};
+//     // Sort transactions by latest date
+//     const sortedTransactions = [...wallet.transactions].sort((a, b) => b.date - a.date);
+
+//     // Send data to EJS
+//     res.render('wallet', {
+//       user: {
+//         username: user.username,
+//         walletBalance: wallet.balance,
+//         walletTransactions: sortedTransactions
+//       }
+//     });
+
+//   } catch (error) {
+//     console.error('Error loading wallet page:', error);
+//     res.redirect('/pageNotFound');
+//   }
+// };
+
 
 const login = async (req, res) => {
   try {
@@ -550,7 +575,7 @@ module.exports = {
   pageNotFound,
   loadSignup,
   loadLogin,
-  loadWallet,
+  // loadWallet,
   logout,
   signup,
   verifyOtp,

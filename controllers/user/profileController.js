@@ -4,7 +4,7 @@ const bcrypt = require("bcrypt");
 const fs = require('fs');
 const path = require('path');
 const { profileUpload } = require('../../config/multerconfig');
-const WalletTransaction = require('../../models/walletSchema');
+const Wallet = require('../../models/walletSchema');
 
 function generateOtp() {
     return Math.floor(100000 + Math.random() * 900000).toString();
@@ -638,6 +638,8 @@ const resendOtp = async (req, res) => {
     }
 };
 
+
+
 module.exports = {
     forgetPassword,
     forgetPasswordsubmit,
@@ -655,5 +657,5 @@ module.exports = {
     getVerifyOtp,
     verifyOtp,
     resendOtp,
-    generateReferralCode
+    generateReferralCode,
 };

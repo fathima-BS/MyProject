@@ -1,6 +1,5 @@
 const mongoose = require('mongoose');
 const { Schema } = mongoose;
-const Product = require('./productSchema');
 
 const orderedItemSchema = new Schema({
     product: {
@@ -18,7 +17,7 @@ const orderedItemSchema = new Schema({
     },
     status: {
         type: String,
-        enum: ['Pending', 'Processing', 'Shipped', 'Out for Delivery', 'Delivered', 'Cancelled', 'Return Request', 'Returned', 'Return Rejected']
+        enum: ['Pending','Failed', 'Processing', 'Shipped', 'Out for Delivery', 'Delivered', 'Cancelled', 'Return Request', 'Returned', 'Return Rejected']
     },
     returnRejectReason: {
         type: String
@@ -63,7 +62,7 @@ const orderSchema = new Schema({
     status: {
         type: String,
         required: true,
-        enum: ['Pending', 'Processing', 'Shipped', 'Out for Delivery', 'Delivered', 'Cancelled', 'Return Request', 'Returned', 'Return Rejected']
+        enum: ['Pending','Failed', 'Processing', 'Shipped', 'Out for Delivery', 'Delivered', 'Cancelled', 'Return Request', 'Returned', 'Return Rejected']
     },
     paymentMethod: {
         type: String,
@@ -84,7 +83,7 @@ const orderSchema = new Schema({
     },
     shippingCost: {
         type: Number,
-        required: true
+        required: false,
     },
     returnRejectReason: {
         type: String

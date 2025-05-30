@@ -106,13 +106,11 @@
             <% } %>
         </p>
         <div>
-            <a href="/checkout" class="action-btn retry-btn">Retry Payment</a>
             <% if (orderId) { %>
-                <a href="/order-details/<%= orderId %>" class="action-btn view-order-btn">View Order</a>
+            <a href="/order-details/<%= orderId %>" class="action-btn retry-btn">Retry Payment</a>
             <% } %>
         </div>
-        <a href="/contact" class="support-link">Contact Support</a>
-        <p class="branding">My Shop &copy; <%= new Date().getFullYear() %></p>
+        <p class="branding">Cario &copy; <%= new Date().getFullYear() %></p>
     </div>
 </div>
 
