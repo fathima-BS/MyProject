@@ -73,8 +73,9 @@ const cancelOrder = async (req, res) => {
         order.orderedItems.forEach(item => {
             item.status = 'Cancelled';
         });
-
-        // Update wallet
+         
+        if(order.paymentMethod !== "COD"){
+             // Update wallet
         let wallet = await Wallet.findOne({ userId: req.user._id });
         if (!wallet) {
             wallet = new Wallet({
@@ -83,7 +84,7 @@ const cancelOrder = async (req, res) => {
                 transactions: [],
             });
         }
-
+       
         wallet.balance += refundAmount;
         wallet.transactions.push({
             amount: refundAmount,
@@ -93,6 +94,11 @@ const cancelOrder = async (req, res) => {
         });
 
         await Promise.all([order.save(), wallet.save()]);
+
+        }else{
+            await order.save()
+        }
+       
         res.status(200).json({ success: true, message: 'Order cancelled successfully.' });
     } catch (error) {
         console.error('Error cancelling order:', error.message, error.stack);
@@ -122,15 +128,15 @@ const cancelItem = async (req, res) => {
         item.status = 'Cancelled';
         const refundAmount = item.price * item.quantity;
         order.totalPrice -= refundAmount;
-        order.finalAmount = order.totalPrice + (order.totalPrice >= 2000 ? 0 : order.shippingCost);
+        order.finalAmount = order.totalPrice
 
         const allItemsCancelled = order.orderedItems.every(item => item.status === 'Cancelled');
         if (allItemsCancelled) {
             order.status = 'Cancelled';
         }
-
-        // Update wallet
-        let wallet = await Wallet.findOne({ userId: req.user._id });
+         
+        if(order.paymentMethod !== "COD"){
+             let wallet = await Wallet.findOne({ userId: req.user._id });
         if (!wallet) {
             wallet = new Wallet({
                 userId: req.user._id,
@@ -148,6 +154,11 @@ const cancelItem = async (req, res) => {
         });
 
         await Promise.all([order.save(), wallet.save()]);
+        }else{
+            await order.save()
+        }
+        
+       
         res.status(200).json({ success: true, message: 'Item cancelled successfully.' });
     } catch (error) {
         console.error('Error cancelling item:', error.message, error.stack);

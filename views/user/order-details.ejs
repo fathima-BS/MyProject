@@ -414,9 +414,7 @@
                     <div>
                         <h1 class="text-2xl font-semibold">Order #<%= order.orderId %></h1>
                     </div>
-                    <p class="text-gray-500 text-sm mt-1">Placed on <%= new
-                            Date(order.createdOn).toLocaleDateString('en-GB', { day: 'numeric' , month: 'long' ,
-                            year: 'numeric' }) %></p>
+                    <p class="text-gray-500 text-sm mt-1">Placed on <%= new Date(order.createdOn).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' }) %></p>
                 </div>
                 <div class="mt-4 md:mt-0 flex space-x-3">
                     <button class="btn-secondary" onclick="showInvoiceModal()">
@@ -429,6 +427,19 @@
                             View Invoice
                         </span>
                     </button>
+                    <% if (order.status === "Failed") { %>
+                        <button class="btn-secondary" onclick="retryPayment('<%= order._id %>', '<%= order.orderId %>')">
+                            <span class="flex items-center">
+                                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                                    xmlns="http://www.w3.org/2000/svg">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M12 8v4l3 3m6-3a9 9 0 11-6.219-8.56"></path>
+                                </svg>
+                                Retry Payment
+                            </span>
+                        </button>
+                    <% } %>
+
                     <% if (['Pending', 'Processing'].includes(order.status)) { %>
                         <button class="btn-primary" style="background-color: #dc2626;" onclick="cancelOrder('<%= order.orderId %>')">
                             <span class="flex items-center">
@@ -447,8 +458,7 @@
                                 <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"
                                     xmlns="http://www.w3.org/2000/svg">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                        d="M16 15v-1a4 4 0 00-4-4H8m0 0l3 3m-3-3l3-3m9 14V5a2 2 0 00-2-2H6a2 2 0 00-2 2v16l4-2 4 2 4-2 4 2z">
-                                    </path>
+                                        d="M16 15v-1a4 4 0 00-4-4H8m0 0l3 3m-3-3l3-3m9 14V5a2 2 0 00-2-2H6a2 2 0 00-2 2v16l4-2 4 2 4-2 4 2z"></path>
                                 </svg>
                                 Return Order
                             </span>
@@ -456,54 +466,10 @@
                     <% } %>
                 </div>
             </div>
-
-            <div class="card">
-                <h2 class="text-lg font-semibold mb-6">Order Status</h2>
-                <% if (order.status === 'Cancelled') { %>
-                    <div class="mt-6 p-4 border border-red-200 bg-red-50 rounded-lg">
-                        <div class="flex items-start">
-                            <svg class="w-5 h-5 text-red-500 mt-0.5 mr-3" fill="none" stroke="currentColor"
-                                viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M6 18L18 6M6 6l12 12"></path>
-                            </svg>
-                            <div>
-                                <p class="text-sm font-semibold text-gray-800">Order Cancelled</p>
-                            </div>
-                        </div>
-                    </div>
-                <% } else if (['Return Request', 'Returned', 'Return Rejected'].includes(order.status)) { %>
-                    <div class="step-container">
-                        <div
-                            class="step-line <%= order.status === 'Returned' ? 'step-line-return' : '' %>">
-                        </div>
-                        <% const returnSteps = [
-                            { name: 'Return Request', completed: ['Return Request', 'Returned', 'Return Rejected'].includes(order.status), active: order.status === 'Return Request' },
-                            { name: order.status === 'Return Rejected' ? 'Return Rejected' : 'Returned', completed: ['Returned', 'Return Rejected'].includes(order.status), active: ['Returned', 'Return Rejected'].includes(order.status), rejected: order.status === 'Return Rejected' }
-                        ];
-                        returnSteps.forEach((step, index) => {
-                            const stepClass = step.rejected ? 'step-rejected' : (step.completed ? 'step-completed' : (step.active ? 'step-active' : ''));
-                        %>
-                            <div class="step <%= stepClass %>">
-                                <div
-                                    class="step-circle <%= step.rejected ? 'bg-red-600' : (step.completed ? 'bg-red-600' : (step.active ? 'bg-gray-800' : 'bg-gray-200 text-gray-600')) %>">
-                                    <% if (step.completed && !step.active && !step.rejected) { %>
-                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"
-                                            xmlns="http://www.w3.org/2000/svg">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                d="M5 13l4 4L19 7"></path>
-                                        </svg>
-                                    <% } else { %>
-                                        <%= index + 1 %>
-                                    <% } %>
-                                </div>
-                                <div class="step-text <%= step.active || step.rejected ? 'text-gray-800' : 'text-gray-600' %>">
-                                    <%= step.name %>
-                                </div>
-                            </div>
-                        <% }) %>
-                    </div>
-                    <% if (order.status === 'Return Rejected') { %>
+            <% if (order.status !== "Failed") { %>
+                <div class="card">
+                    <h2 class="text-lg font-semibold mb-6">Order Status</h2>
+                    <% if (order.status === 'Cancelled') { %>
                         <div class="mt-6 p-4 border border-red-200 bg-red-50 rounded-lg">
                             <div class="flex items-start">
                                 <svg class="w-5 h-5 text-red-500 mt-0.5 mr-3" fill="none" stroke="currentColor"
@@ -512,67 +478,102 @@
                                         d="M6 18L18 6M6 6l12 12"></path>
                                 </svg>
                                 <div>
-                                    <p class="text-sm font-semibold text-gray-800">Return Rejected</p>
-                                    
+                                    <p class="text-sm font-semibold text-gray-800">Order Cancelled</p>
                                 </div>
                             </div>
                         </div>
+                    <% } else if (['Return Request', 'Returned', 'Return Rejected'].includes(order.status)) { %>
+                        <div class="step-container">
+                            <div class="step-line <%= order.status === 'Returned' ? 'step-line-return' : '' %>"></div>
+                            <% const returnSteps = [
+                                { name: 'Return Request', completed: ['Return Request', 'Returned', 'Return Rejected'].includes(order.status), active: order.status === 'Return Request' },
+                                { name: order.status === 'Return Rejected' ? 'Return Rejected' : 'Returned', completed: ['Returned', 'Return Rejected'].includes(order.status), active: ['Returned', 'Return Rejected'].includes(order.status), rejected: order.status === 'Return Rejected' }
+                            ]; %>
+                            <% returnSteps.forEach((step, index) => { %>
+                                <% const stepClass = step.rejected ? 'step-rejected' : (step.completed ? 'step-completed' : (step.active ? 'step-active' : '')); %>
+                                <div class="step <%= stepClass %>">
+                                    <div class="step-circle <%= step.rejected ? 'bg-red-600' : (step.completed ? 'bg-red-600' : (step.active ? 'bg-gray-800' : 'bg-gray-200 text-gray-600')) %>">
+                                        <% if (step.completed && !step.active && !step.rejected) { %>
+                                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                                                xmlns="http://www.w3.org/2000/svg">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                    d="M5 13l4 4L19 7"></path>
+                                            </svg>
+                                        <% } else { %>
+                                            <%= index + 1 %>
+                                        <% } %>
+                                    </div>
+                                    <div class="step-text <%= step.active || step.rejected ? 'text-gray-800' : 'text-gray-600' %>">
+                                        <%= step.name %>
+                                    </div>
+                                </div>
+                            <% }) %>
+                        </div>
+                        <% if (order.status === 'Return Rejected') { %>
+                            <div class="mt-6 p-4 border border-red-200 bg-red-50 rounded-lg">
+                                <div class="flex items-start">
+                                    <svg class="w-5 h-5 text-red-500 mt-0.5 mr-3" fill="none" stroke="currentColor"
+                                        viewBox="0 0 24 радио" xmlns="http://www.w3.org/2000/svg">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M6 18L18 6M6 6l12 12"></path>
+                                    </svg>
+                                    <div>
+                                        <p class="text-sm font-semibold text-gray-800">Return Rejected</p>
+                                    </div>
+                                </div>
+                            </div>
+                        <% } %>
+                    <% } else { %>
+                        <div class="step-container">
+                            <div class="step-line <%= ['Processing', 'Shipped', 'Out for Delivery', 'Delivered'].includes(order.status) ? 'step-line-completed' : '' %>"></div>
+                            <% const steps = [
+                                { name: 'Ordered', completed: true, active: false },
+                                { name: 'Processing', completed: ['Processing', 'Shipped', 'Out for Delivery', 'Delivered'].includes(order.status), active: order.status === 'Processing' },
+                                { name: 'Shipped', completed: ['Shipped', 'Out for Delivery', 'Delivered'].includes(order.status), active: order.status === 'Shipped' },
+                                { name: 'Out for Delivery', completed: ['Out for Delivery', 'Delivered'].includes(order.status), active: order.status === 'Out for Delivery' },
+                                { name: 'Delivered', completed: order.status === 'Delivered', active: order.status === 'Delivered' }
+                            ]; %>
+                            <% steps.forEach((step, index) => { %>
+                                <% const stepClass = step.completed ? 'step-completed' : (step.active ? 'step-active' : ''); %>
+                                <div class="step <%= stepClass %>">
+                                    <div class="step-circle <%= step.completed ? 'bg-green-600' : (step.active ? 'bg-gray-800' : 'bg-gray-200 text-gray-600') %>">
+                                        <% if (step.completed && !step.active) { %>
+                                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                                                xmlns="http://www.w3.org/2000/svg">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                    d="M5 13l4 4L19 7"></path>
+                                            </svg>
+                                        <% } else { %>
+                                            <%= index + 1 %>
+                                        <% } %>
+                                    </div>
+                                    <div class="step-text <%= step.active ? 'text-gray-800' : 'text-gray-600' %>">
+                                        <%= step.name %>
+                                    </div>
+                                </div>
+                            <% }) %>
+                        </div>
+                        <% if (order.status === 'Shipped') { %>
+                            <div class="mt-6 p-4 border border-amber-200 bg-amber-50 rounded-lg">
+                                <div class="flex items-start">
+                                    <svg class="w-5 h-5 text-amber-500 mt-0.5 mr-3" fill="none" stroke="currentColor"
+                                        viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                    </svg>
+                                    <div>
+                                        <p class="text-sm font-semibold text-gray-800">Your order is on the way!</p>
+                                    </div>
+                                </div>
+                            </div>
+                        <% } %>
                     <% } %>
-                <% } else { %>
-                    <div class="step-container">
-                        <div
-                            class="step-line <%= ['Processing', 'Shipped', 'Out for Delivery', 'Delivered'].includes(order.status) ? 'step-line-completed' : '' %>">
-                        </div>
-                        <% const steps = [
-                            { name: 'Ordered', completed: true, active: false },
-                            { name: 'Processing', completed: ['Processing', 'Shipped', 'Out for Delivery', 'Delivered'].includes(order.status), active: order.status === 'Processing' },
-                            { name: 'Shipped', completed: ['Shipped', 'Out for Delivery', 'Delivered'].includes(order.status), active: order.status === 'Shipped' },
-                            { name: 'Out for Delivery', completed: ['Out for Delivery', 'Delivered'].includes(order.status), active: order.status === 'Out for Delivery' },
-                            { name: 'Delivered', completed: order.status === 'Delivered', active: order.status === 'Delivered' }
-                        ];
-                        steps.forEach((step, index) => {
-                            const stepClass = step.completed ? 'step-completed' : (step.active ? 'step-active' : '');
-                        %>
-                            <div class="step <%= stepClass %>">
-                                <div
-                                    class="step-circle <%= step.completed ? 'bg-green-600' : (step.active ? 'bg-gray-800' : 'bg-gray-200 text-gray-600') %>">
-                                    <% if (step.completed && !step.active) { %>
-                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"
-                                            xmlns="http://www.w3.org/2000/svg">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                d="M5 13l4 4L19 7"></path>
-                                        </svg>
-                                    <% } else { %>
-                                        <%= index + 1 %>
-                                    <% } %>
-                                </div>
-                                <div class="step-text <%= step.active ? 'text-gray-800' : 'text-gray-600' %>">
-                                    <%= step.name %>
-                                </div>
-                            </div>
-                        <% }) %>
-                    </div>
-
-                    <% if (order.status === 'Shipped') { %>
-                        <div class="mt-6 p-4 border border-amber-200 bg-amber-50 rounded-lg">
-                            <div class="flex items-start">
-                                <svg class="w-5 h-5 text-amber-500 mt-0.5 mr-3" fill="none" stroke="currentColor"
-                                    viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                        d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                                </svg>
-                                <div>
-                                    <p class="text-sm font-semibold text-gray-800">Your order is on the way!</p>
-                                </div>
-                            </div>
-                        </div>
-                    <% } %>
-                <% } %>
-            </div>
+                </div>
+            <% } %>
 
             <div class="card">
                 <h2 class="text-lg font-semibold mb-4">Order Items</h2>
-                <% (order.orderedItems || []).forEach((item)=> { %>
+                <% (order.orderedItems || []).forEach((item) => { %>
                     <div class="order-item">
                         <img src="<%= item.product?.productImage[0] || '/images/placeholder.jpg' %>"
                             alt="<%= item.product?.productName || 'Product' %>">
@@ -583,8 +584,8 @@
                                     <br>
                                 </div>
                                 <div class="mt-2 sm:mt-0 text-right">
-                                    <div class="price">₹<%= (item.price * item.quantity).toLocaleString('en-IN') %></div>
-                                    <div class="quantity mt-1">₹<%= item.price.toLocaleString('en-IN') %> x <%= item.quantity %></div>
+                                    <div class="price">₹<%= (order.totalPrice * item.quantity).toLocaleString('en-IN') %></div>
+                                    <div class="quantity mt-1">₹<%= order.totalPrice.toLocaleString('en-IN') %> x <%= item.quantity %></div>
                                 </div>
                             </div>
                             <div class="mt-3 text-sm font-semibold">
@@ -611,31 +612,22 @@
                         <svg class="w-5 h-5 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"
                             xmlns="http://www.w3.org/2000/svg">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z">
-                            </path>
+                                d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                 d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
                         </svg>
                         <div>
                             <% if (order.address) { %>
-                                <div class="font-semibold">
-                                    <%= order.address.name || 'N/A' %>
-                                </div>
-                                <div class="text-sm text-gray-600">
-                                    <%= order.address.city || '' %>
-                                </div>
+                                <div class="font-semibold"><%= order.address.name || 'N/A' %></div>
+                                <div class="text-sm text-gray-600"><%= order.address.city || '' %></div>
                                 <% if (order.address.landMark) { %>
-                                    <div class="text-sm text-gray-600">
-                                        <%= order.address.landMark %>
-                                    </div>
+                                    <div class="text-sm text-gray-600"><%= order.address.landMark %></div>
                                 <% } %>
-                                    <div class="text-sm text-gray-600">
-                                        <%= order.address.State || '' %>, PIN: <%= order.address.pincode || 'N/A' %>
-                                    </div>
-                                    <div class="text-sm text-gray-600 mt-1">
-                                        Phone: <%= order.address.phone || 'N/A' %>
-                                            <%= order.address.altPhone ? `| Alt: ${order.address.altPhone}` : '' %>
-                                    </div>
+                                <div class="text-sm text-gray-600"><%= order.address.State || '' %>, PIN: <%= order.address.pincode || 'N/A' %></div>
+                                <div class="text-sm text-gray-600 mt-1">
+                                    Phone: <%= order.address.phone || 'N/A' %>
+                                    <%= order.address.altPhone ? `| Alt: ${order.address.altPhone}` : '' %>
+                                </div>
                             <% } else { %>
                                 <div class="text-sm text-red-600">Shipping address not available.</div>
                             <% } %>
@@ -650,18 +642,14 @@
                             <svg class="w-5 h-5 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"
                                 xmlns="http://www.w3.org/2000/svg">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z">
-                                </path>
+                                    d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"></path>
                             </svg>
                             <div>
                                 <div class="font-semibold">Payment Method</div>
-                                <div class="text-sm text-gray-600">
-                                    <%= order.paymentMethod || 'N/A' %>
-                                </div>
-                                <% if (order.paymentMethod==='Credit Card' || order.paymentMethod==='Debit Card' ) { %>
+                                <div class="text-sm text-gray-600"><%= order.paymentMethod || 'N/A' %></div>
+                                <% if (order.paymentMethod === 'Credit Card' || order.paymentMethod === 'Debit Card') { %>
                                     <div class="text-sm text-gray-600">**** **** **** <%= order.cardLastFour || 'N/A' %></div>
-                                    <div class="text-sm text-gray-600 mt-1">Status: <span
-                                            class="font-semibold text-green-600">Paid</span></div>
+                                    <div class="text-sm text-gray-600 mt-1">Status: <span class="font-semibold text-green-600">Paid</span></div>
                                 <% } %>
                             </div>
                         </div>
@@ -669,8 +657,7 @@
                             <svg class="w-5 h-5 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"
                                 xmlns="http://www.w3.org/2000/svg">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707 .293l5.414 5.414a1 1 0 01.293 .707V19a2 2 0 01-2 2z">
-                                </path>
+                                    d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707 .293l5.414 5.414a1 1 0 01.293 .707V19a2 2 0 01-2 2z"></path>
                             </svg>
                             <div>
                                 <div class="font-semibold">Billing Address</div>
@@ -686,15 +673,7 @@
                                 <span>Subtotal</span>
                                 <span>₹<%= order.totalPrice ? order.totalPrice.toLocaleString('en-IN') : '0.00' %></span>
                             </div>
-                            <div class="summary-row">
-                                <span>Coupon Discount</span>
-                                <span>
-                               -₹<%= (order.totalPrice && order.finalAmount)
-                              ? (order.totalPrice - order.finalAmount).toLocaleString('en-IN')
-                             : '0.00' %>
-                                </span>
 
-                            </div>
                             <div class="summary-row">
                                 <span>Shipping <%= order.totalPrice >= 2000 ? '(Free)' : '' %></span>
                                 <span>₹<%= order.shippingCost ? order.shippingCost.toLocaleString('en-IN') : '0.00' %></span>
@@ -707,464 +686,22 @@
                     </div>
                 </div>
             </div>
-        </div>
 
-        <div id="invoiceModal" class="modal">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h2 class="text-lg font-semibold">Invoice - Order #<%= order.orderId %></h2>
-                    <button class="close-modal" onclick="closeInvoiceModal()">×</button>
-                </div>
-                <div class="modal-body">
-                    <div class="invoice-preview">
-                        <div class="mb-4">
-                            <p><strong>Placed on:</strong> <%= new Date(order.createdOn).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' }) %></p>
-                            <p><strong>Customer Name:</strong> <%= order.address?.name || 'N/A' %></p>
-                            <p><strong>Shipping Address:</strong> <%= order.address ? (order.address.city || '') + (order.address.landMark ? ', ' + order.address.landMark : '') + ', ' + (order.address.State || '') + ', PIN: ' + (order.address.pincode || 'N/A') : 'N/A' %></p>
-                            <p><strong>Payment Method:</strong> <%= order.paymentMethod || 'N/A' %> <% if(order.paymentMethod==='Credit Card' || order.paymentMethod==='Debit Card' ) { %> (**** **** **** <%= order.cardLastFour || 'N/A' %>) <% } %></p>
-                            <p><strong>Order Status:</strong> <%= order.status || 'N/A' %></p>
-                        </div>
-                        <table>
-                            <thead>
-                                <tr>
-                                    <th>Item</th>
-                                    <th>Quantity</th>
-                                    <th>Price</th>
-                                    <th>Total</th>
-                                    <th>Status</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <% (order.orderedItems || []).forEach((item)=> { %>
-                                    <tr>
-                                        <td><%= item.product?.productName || 'N/A' %></td>
-                                        <td><%= item.quantity || '0' %></td>
-                                        <td>₹<%= item.price ? item.price.toLocaleString('en-IN') : '0.00' %></td>
-                                        <td>₹<%= item.price && item.quantity ? (item.price * item.quantity).toLocaleString('en-IN') : '0.00' %></td>
-                                        <td><%= item.status %></td>
-                                    </tr>
-                                <% }) %>
-                            </tbody>
-                        </table>
-                        <div>
-                            <p><strong>Subtotal:</strong> ₹<%= order.totalPrice ? order.totalPrice.toLocaleString('en-IN') : '0.00' %></p>
-                            <p><strong>Shipping <%= order.totalPrice >= 2000 ? '(Free)' : '' %>:</strong> ₹<%= order.shippingCost ? order.shippingCost.toLocaleString('en-IN') : '0.00' %></p>
-                            <p><strong>Total:</strong> ₹<%= order.finalAmount ? order.finalAmount.toLocaleString('en-IN') : '0.00' %></p>
-                        </div>
+            <div id="invoiceModal" class="modal">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h2 class="text-lg font-semibold">Invoice - Order #<%= order.orderId %></h2>
+                        <button class="close-modal" onclick="closeInvoiceModal()">×</button>
                     </div>
-                </div>
-                <div class="modal-footer">
-                    <button class="btn-primary" onclick="downloadInvoice()">Download Invoice</button>
-                </div>
-            </div>
-        </div>
-
-        <script>
-            function showInvoiceModal() {
-                document.getElementById('invoiceModal').style.display = 'flex';
-            }
-
-            function closeInvoiceModal() {
-                document.getElementById('invoiceModal').style.display = 'none';
-            }
-
-            function cancelOrder(orderId) {
-                const currentStatus = "<%= order.status %>";
-                if (!['Pending', 'Processing'].includes(currentStatus)) {
-                    Swal.fire({
-                        title: 'Invalid Action!',
-                        text: 'This order cannot be cancelled as it is not in Pending or Processing status.',
-                        icon: 'warning',
-                        background: '#fff',
-                        color: '#1f2937'
-                    });
-                    return;
-                }
-
-                Swal.fire({
-                    title: 'Cancel Order?',
-                    text: 'Are you sure you want to cancel this entire order?',
-                    icon: 'question',
-                    showCancelButton: true,
-                    confirmButtonColor: '#1f2937',
-                    cancelButtonColor: '#dc2626',
-                    confirmButtonText: 'Yes, cancel it!',
-                    background: '#fff',
-                    color: '#1f2937'
-                }).then((result) => {
-                    if (result.isConfirmed) {
-                        fetch('/cancelOrder', {
-                            method: 'POST',
-                            headers: {
-                                'Content-Type': 'application/json'
-                            },
-                            body: JSON.stringify({ orderId })
-                        })
-                        .then(response => {
-                            if (!response.ok) {
-                                throw new Error(`HTTP error! Status: ${response.status}`);
-                            }
-                            return response.json();
-                        })
-                        .then(data => {
-                            if (data.success) {
-                                Swal.fire({
-                                    title: 'Order Cancelled!',
-                                    text: 'The order has been cancelled successfully.',
-                                    icon: 'success',
-                                    toast: true,
-                                    position: 'bottom-end',
-                                    showConfirmButton: false,
-                                    timer: 3000,
-                                    background: '#fff',
-                                    color: '#1f2937'
-                                }).then(() => {
-                                    location.reload();
-                                });
-                            } else {
-                                Swal.fire({
-                                    title: 'Error!',
-                                    text: data.message || 'Failed to cancel order.',
-                                    icon: 'error',
-                                    background: '#fff',
-                                    color: '#1f2937'
-                                });
-                            }
-                        })
-                        .catch(error => {
-                            console.error('Error cancelling order:', error);
-                            Swal.fire({
-                                title: 'Error!',
-                                text: 'Something went wrong while cancelling the order.',
-                                icon: 'error',
-                                background: '#fff',
-                                color: '#1f2937'
-                            });
-                        });
-                    }
-                });
-            }
-
-            function returnOrder(orderId) {
-                const currentStatus = "<%= order.status %>";
-                if (currentStatus !== 'Delivered') {
-                    Swal.fire({
-                        title: 'Invalid Action!',
-                        text: 'This order cannot be returned as it is not in Delivered status.',
-                        icon: 'warning',
-                        background: '#fff',
-                        color: '#1f2937'
-                    });
-                    return;
-                }
-
-                Swal.fire({
-                    title: 'Return Order?',
-                    text: 'Are you sure you want to request a return for this entire order?',
-                    icon: 'question',
-                    showCancelButton: true,
-                    confirmButtonColor: '#1f2937',
-                    cancelButtonColor: '#dc2626',
-                    confirmButtonText: 'Yes, request return!',
-                    background: '#fff',
-                    color: '#1f2937'
-                }).then((result) => {
-                    if (result.isConfirmed) {
-                        fetch('/returnOrder', {
-                            method: 'POST',
-                            headers: {
-                                'Content-Type': 'application/json'
-                            },
-                            body: JSON.stringify({ orderId })
-                        })
-                        .then(response => {
-                            if (!response.ok) {
-                                throw new Error(`HTTP error! Status: ${response.status}`);
-                            }
-                            return response.json();
-                        })
-                        .then(data => {
-                            if (data.success) {
-                                Swal.fire({
-                                    title: 'Return Requested!',
-                                    text: 'Your return request for the order has been submitted.',
-                                    icon: 'success',
-                                    toast: true,
-                                    position: 'bottom-end',
-                                    showConfirmButton: false,
-                                    timer: 3000,
-                                    background: '#fff',
-                                    color: '#1f2937'
-                                }).then(() => {
-                                    location.reload();
-                                });
-                            } else {
-                                Swal.fire({
-                                    title: 'Error!',
-                                    text: data.message || 'Failed to request return.',
-                                    icon: 'error',
-                                    background: '#fff',
-                                    color: '#1f2937'
-                                });
-                            }
-                        })
-                        .catch(error => {
-                            console.error('Error requesting return:', error);
-                            Swal.fire({
-                                title: 'Error!',
-                                text: 'Something went wrong while requesting the return.',
-                                icon: 'error',
-                                background: '#fff',
-                                color: '#1f2937'
-                            });
-                        });
-                    }
-                });
-            }
-
-            function cancelItem(orderId, productId) {
-                Swal.fire({
-                    title: 'Cancel Item?',
-                    text: 'Are you sure you want to cancel this item?',
-                    icon: 'question',
-                    showCancelButton: true,
-                    confirmButtonColor: '#1f2937',
-                    cancelButtonColor: '#dc2626',
-                    confirmButtonText: 'Yes, cancel it!',
-                    background: '#fff',
-                    color: '#1f2937'
-                }).then((result) => {
-                    if (result.isConfirmed) {
-                        fetch('/cancelItem', {
-                            method: 'POST',
-                            headers: {
-                                'Content-Type': 'application/json'
-                            },
-                            body: JSON.stringify({ orderId, productId })
-                        })
-                        .then(response => {
-                            if (!response.ok) {
-                                throw new Error(`HTTP error! Status: ${response.status}`);
-                            }
-                            return response.json();
-                        })
-                        .then(data => {
-                            if (data.success) {
-                                Swal.fire({
-                                    title: 'Cancelled!',
-                                    text: 'The item has been cancelled successfully.',
-                                    icon: 'success',
-                                    toast: true,
-                                    position: 'bottom-end',
-                                    showConfirmButton: false,
-                                    timer: 3000,
-                                    background: '#fff',
-                                    color: '#1f2937'
-                                }).then(() => {
-                                    location.reload();
-                                });
-                            } else {
-                                Swal.fire({
-                                    title: 'Error!',
-                                    text: data.message || 'Failed to cancel item.',
-                                    icon: 'error',
-                                    background: '#fff',
-                                    color: '#1f2937'
-                                });
-                            }
-                        })
-                        .catch(error => {
-                            console.error('Error cancelling item:', error);
-                            Swal.fire({
-                                title: 'Error!',
-                                text: 'Something went wrong while cancelling the item.',
-                                icon: 'error',
-                                background: '#fff',
-                                color: '#1f2937'
-                            });
-                        });
-                    }
-                });
-            }
-
-            function requestReturn(orderId, productId) {
-                Swal.fire({
-                    title: 'Request Return?',
-                    text: 'Are you sure you want to request a return for this item?',
-                    icon: 'question',
-                    showCancelButton: true,
-                    confirmButtonColor: '#1f2937',
-                    cancelButtonColor: '#dc2626',
-                    confirmButtonText: 'Yes, request return!',
-                    background: '#fff',
-                    color: '#1f2937'
-                }).then((result) => {
-                    if (result.isConfirmed) {
-                        fetch('/returnItem', {
-                            method: 'POST',
-                            headers: {
-                                'Content-Type': 'application/json'
-                            },
-                            body: JSON.stringify({ orderId, productId })
-                        })
-                        .then(response => {
-                            if (!response.ok) {
-                                throw new Error(`HTTP error! Status: ${response.status}`);
-                            }
-                            return response.json();
-                        })
-                        .then(data => {
-                            if (data.success) {
-                                Swal.fire({
-                                    title: 'Return Requested!',
-                                    text: 'Your return request has been submitted.',
-                                    icon: 'success',
-                                    toast: true,
-                                    position: 'bottom-end',
-                                    showConfirmButton: false,
-                                    timer: 3000,
-                                    background: '#fff',
-                                    color: '#1f2937'
-                                }).then(() => {
-                                    location.reload();
-                                });
-                            } else {
-                                Swal.fire({
-                                    title: 'Error!',
-                                    text: data.message || 'Failed to request return.',
-                                    icon: 'error',
-                                    background: '#fff',
-                                    color: '#1f2937'
-                                });
-                            }
-                        })
-                        .catch(error => {
-                            console.error('Error requesting return:', error);
-                            Swal.fire({
-                                title: 'Error!',
-                                text: 'Something went wrong while requesting the return.',
-                                icon: 'error',
-                                background: '#fff',
-                                color: '#1f2937'
-                            });
-                        });
-                    }
-                });
-            }
-
-            function downloadInvoice() {
-                const orderId = "<%= order.orderId || 'N/A' %>";
-                const orderDate = new Date("<%= order.createdOn %>").toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' });
-                const customerName = "<%= order.address?.name || 'N/A' %>";
-                const shippingAddress = `<%= order.address ? (order.address.city || '') + (order.address.landMark ? ', ' + order.address.landMark : '') + ', ' + (order.address.State || '') + ', PIN: ' + (order.address.pincode || 'N/A') : 'N/A' %>`;
-                const paymentMethod = `<%= order.paymentMethod || 'N/A' %><% if(order.paymentMethod === 'Credit Card' || order.paymentMethod === 'Debit Card') { %> (**** **** **** <%= order.cardLastFour || 'N/A' %>) <% } %>`;
-                const orderStatus = "<%= order.status || 'N/A' %>";
-
-                const orderedItems = `<% (order.orderedItems || []).forEach((item) => { %>
-                    <tr>
-                        <td><%= item.product?.productName || 'N/A' %></td>
-                        <td><%= item.quantity || '0' %></td>
-                        <td>₹<%= item.price ? item.price.toLocaleString('en-IN') : '0.00' %></td>
-                        <td>₹<%= item.price && item.quantity ? (item.price * item.quantity).toLocaleString('en-IN') : '0.00' %></td>
-                        <td><%= item.status %></td>
-                    </tr>
-                <% }) %>`;
-
-                const subtotal = "₹<%= order.totalPrice ? order.totalPrice.toLocaleString('en-IN') : '0.00' %>";
-                const shippingCost = "₹<%= order.shippingCost ? order.shippingCost.toLocaleString('en-IN') : '0.00' %> <%= order.totalPrice >= 2000 ? '(Free)' : '' %>";
-                const total = "₹<%= order.finalAmount ? order.finalAmount.toLocaleString('en-IN') : '0.00' %>";
-
-                const invoiceContent = `
-                <!DOCTYPE html>
-                <html lang="en">
-                <head>
-                    <meta charset="UTF-8">
-                    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-                    <title>Invoice - Order #${orderId}</title>
-                    <style>
-                        body {
-                            font-family: Arial, sans-serif;
-                            margin: 0;
-                            padding: 20px;
-                            background-color: #f9fafb;
-                        }
-                        .invoice-container {
-                            max-width: 800px;
-                            margin: 0 auto;
-                            background-color: white;
-                            padding: 30px;
-                            border-radius: 8px;
-                            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-                        }
-                        .header {
-                            text-align: center;
-                            margin-bottom: 30px;
-                        }
-                        .header h1 {
-                            margin: 0;
-                            font-size: 24px;
-                            color: #1f2937;
-                        }
-                        .details, .items, .summary {
-                            margin-bottom: 30px;
-                        }
-                        .details div, .summary div {
-                            margin-bottom: 10px;
-                            font-size: 14px;
-                        }
-                        .details strong, .summary strong {
-                            display: inline-block;
-                            width: 150px;
-                            color: #1f2937;
-                        }
-                        .items table {
-                            width: 100%;
-                            border-collapse: collapse;
-                            margin-bottom: 20px;
-                        }
-                        .items th, .items td {
-                            padding: 10px;
-                            text-align: left;
-                            border-bottom: 1px solid #e5e7eb;
-                        }
-                        .items th {
-                            background-color: #f3f4f6;
-                            font-weight: 600;
-                            color: #1f2937;
-                        }
-                        .items td {
-                            color: #4b5563;
-                        }
-                        .total {
-                            font-weight: 600;
-                            font-size: 16px;
-                            text-align: right;
-                            color: #1f2937;
-                        }
-                        .footer {
-                            text-align: center;
-                            font-size: 12px;
-                            color: #6b7280;
-                            margin-top: 30px;
-                        }
-                    </style>
-                </head>
-                <body>
-                    <div class="invoice-container">
-                        <div class="header">
-                            <h1>Cario</h1>
-                            <h1 style="font-size: 15px;">Invoice - #${orderId}</h1>
-                        </div>
-
-                        <div class="details">
-                            <div><strong>Customer Name:</strong> ${customerName}</div>
-                            <div><strong>Shipping Address:</strong> ${shippingAddress}</div>
-                            <div><strong>Payment Method:</strong> ${paymentMethod}</div>
-                            <div><strong>Order Status:</strong> ${orderStatus}</div>
-                            <div><strong>Order Date:</strong> ${orderDate}</div>
-                        </div>
-
-                        <div class="items">
+                    <div class="modal-body">
+                        <div class="invoice-preview">
+                            <div class="mb-4">
+                                <p><strong>Placed on:</strong> <%= new Date(order.createdOn).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' }) %></p>
+                                <p><strong>Customer Name:</strong> <%= order.address?.name || 'N/A' %></p>
+                                <p><strong>Shipping Address:</strong> <%= order.address ? (order.address.city || '') + (order.address.landMark ? ', ' + order.address.landMark : '') + ', ' + (order.address.State || '') + ', PIN: ' + (order.address.pincode || 'N/A') : 'N/A' %></p>
+                                <p><strong>Payment Method:</strong> <%= order.paymentMethod || 'N/A' %> <% if (order.paymentMethod === 'Credit Card' || order.paymentMethod === 'Debit Card') { %> (**** **** **** <%= order.cardLastFour || 'N/A' %>) <% } %></p>
+                                <p><strong>Order Status:</strong> <%= order.status || 'N/A' %></p>
+                            </div>
                             <table>
                                 <thead>
                                     <tr>
@@ -1176,37 +713,590 @@
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    ${orderedItems}
+                                    <% (order.orderedItems || []).forEach((item) => { %>
+                                        <tr>
+                                            <td><%= item.product?.productName || 'N/A' %></td>
+                                            <td><%= item.quantity || '0' %></td>
+                                            <td>₹<%= item.price ? item.price.toLocaleString('en-IN') : '0.00' %></td>
+                                            <td>₹<%= item.price && item.quantity ? (item.price * item.quantity).toLocaleString('en-IN') : '0.00' %></td>
+                                            <td><%= item.status %></td>
+                                        </tr>
+                                    <% }) %>
                                 </tbody>
                             </table>
-                        </div>
-
-                        <div class="summary">
-                            <div><strong>Subtotal:</strong> ${subtotal}</div>
-                            <div><strong>Shipping:</strong> ${shippingCost}</div>
-                            <div class="total"><strong>Total:</strong> ${total}</div>
-                        </div>
-
-                        <div class="footer">
-                            <p>Thank you for shopping with Cario!</p>
-                            <p>Contact us at support@cario.com for any queries.</p>
+                            <div>
+                                <p><strong>Subtotal:</strong> ₹<%= order.totalPrice ? order.totalPrice.toLocaleString('en-IN') : '0.00' %></p>
+                                <p><strong>Shipping <%= order.totalPrice >= 2000 ? '(Free)' : '' %>:</strong> ₹<%= order.shippingCost ? order.shippingCost.toLocaleString('en-IN') : '0.00' %></p>
+                                <p><strong>Total:</strong> ₹<%= order.finalAmount ? order.finalAmount.toLocaleString('en-IN') : '0.00' %></p>
+                            </div>
                         </div>
                     </div>
-                </body>
-                </html>
-                `;
+                    <div class="modal-footer">
+                        <button class="btn-primary" onclick="downloadInvoice()">Download Invoice</button>
+                    </div>
+                </div>
+            </div>
 
-                const blob = new Blob([invoiceContent], { type: 'text/html' });
-                const url = window.URL.createObjectURL(blob);
-                const link = document.createElement('a');
-                link.href = url;
-                link.download = `Invoice-Order-${orderId}.html`;
-                document.body.appendChild(link);
-                link.click();
-                document.body.removeChild(link);
-                window.URL.revokeObjectURL(url);
-                closeInvoiceModal();
+            <!-- Pre-render orderedItems HTML for downloadInvoice -->
+            <% 
+                // Helper function to escape HTML special characters
+                const escapeHtml = (str) => {
+                    if (typeof str !== 'string') return str;
+                    return str.replace(/&/g, '&amp;')
+                              .replace(/</g, '&lt;')
+                              .replace(/>/g, '&gt;')
+                              .replace(/"/g, '&quot;')
+                              .replace(/'/g, '&#039;');
+                };
+                const orderedItemsHtml = (order.orderedItems || []).map(item => `
+                    <tr>
+                        <td>${escapeHtml(item.product?.productName) || 'N/A'}</td>
+                        <td>${item.quantity || '0'}</td>
+                        <td>₹${item.price ? item.price.toLocaleString('en-IN') : '0.00'}</td>
+                        <td>₹${item.price && item.quantity ? (item.price * item.quantity).toLocaleString('en-IN') : '0.00'}</td>
+                        <td>${escapeHtml(item.status)}</td>
+                    </tr>
+                `).join('');
+            %>
+        </div>
+<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+<script>
+    // Helper function to escape HTML special characters
+    function escapeHtml(str) {
+        if (typeof str !== 'string') return str;
+        return str.replace(/&/g, '&amp;')
+                  .replace(/</g, '&lt;')
+                  .replace(/>/g, '&gt;')
+                  .replace(/"/g, '&quot;')
+                  .replace(/'/g, '&#39;');
+    }
+
+    async function retryPayment(orderId, order) {
+        const currentStatus = "<%= order.status %>";
+        if (currentStatus !== 'Failed') {
+            Swal.fire({
+                title: 'Invalid Action!',
+                text: 'Retry payment is only available for failed orders.',
+                icon: 'warning',
+                background: '#fff',
+                color: '#1f2937'
+            });
+            return;
+        }
+        try {
+            const res = await fetch(`/retry-payment/${orderId}`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' }
+            });
+
+            const data = await res.json();
+            if (!data.success) {
+                Swal.fire({
+                    title: 'Error!',
+                    text: data.message || 'Failed to initiate retry payment.',
+                    icon: 'error',
+                    background: '#fff',
+                    color: '#1f2937'
+                });
+                return;
             }
-        </script>
+
+            const options = {
+                key: data.razorpayKeyId,
+                amount: data.amount,
+                currency: 'INR',
+                name: 'Cario',
+                description: 'Retry Payment',
+                order_id: data.razorpayOrderId,
+                handler: async function (response) {
+                    try {
+                        const paymentResponse = await fetch('/payment-success', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json'
+                            },
+                            body: JSON.stringify({
+                                razorpay_payment_id: response.razorpay_payment_id,
+                                razorpay_order_id: response.razorpay_order_id,
+                                razorpay_signature: response.razorpay_signature,
+                                orderId: order // Use the order parameter (orderId string)
+                            })
+                        });
+
+                        const paymentData = await paymentResponse.json();
+                        if (paymentData.success) {
+                            // Redirect to order-success page on successful payment
+                            window.location.href = `/order-success?orderId=${encodeURIComponent(order)}&isRetry=true`;
+                        } else {
+                            // Redirect to payment-failure on error
+                            window.location.href = `/payment-failure?orderId=${encodeURIComponent(order)}&error=${encodeURIComponent(paymentData.message || 'Payment verification failed')}`;
+                        }
+                    } catch (error) {
+                        console.error('Payment success handling failed:', error);
+                        window.location.href = `/payment-failure?orderId=${encodeURIComponent(order)}&error=${encodeURIComponent('Payment verification failed')}`;
+                    }
+                },
+                modal: {
+                    ondismiss: function () {
+                        const errorMessage = 'Payment was cancelled by the user.';
+                        window.location.href = `/payment-failure?orderId=${encodeURIComponent(order)}&error=${encodeURIComponent(errorMessage)}`;
+                    }
+                }
+            };
+
+            const rzp = new Razorpay(options);
+            rzp.on('payment.failed', function (response) {
+                const errorMessage = response.error?.description || 'Payment failed. Please try again.';
+                window.location.href = `/payment-failure?orderId=${encodeURIComponent(order)}&error=${encodeURIComponent(errorMessage)}`;
+            });
+            rzp.open();
+        } catch (error) {
+            console.error('Retry payment failed:', error);
+            Swal.fire({
+                title: 'Error!',
+                text: 'Something went wrong while retrying payment.',
+                icon: 'error',
+                background: '#fff',
+                color: '#1f2937'
+            });
+        }
+    }
+
+    function showInvoiceModal() {
+        document.getElementById('invoiceModal').style.display = 'flex';
+    }
+
+    function closeInvoiceModal() {
+        document.getElementById('invoiceModal').style.display = 'none';
+    }
+
+    function cancelOrder(orderId) {
+        const currentStatus = "<%= order.status %>";
+        if (!['Pending', 'Processing'].includes(currentStatus)) {
+            Swal.fire({
+                title: 'Invalid Action!',
+                text: 'This order cannot be cancelled as it is not in Pending or Processing status.',
+                icon: 'warning',
+                background: '#fff',
+                color: '#1f2937'
+            });
+            return;
+        }
+
+        Swal.fire({
+            title: 'Cancel Order?',
+            text: 'Are you sure you want to cancel this entire order?',
+            icon: 'question',
+            showCancelButton: true,
+            confirmButtonColor: '#1f2937',
+            cancelButtonColor: '#dc2626',
+            confirmButtonText: 'Yes, cancel it!',
+            background: '#fff',
+            color: '#1f2937'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                fetch('/cancelOrder', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ orderId })
+                })
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error(`HTTP error! Status: ${response.status}`);
+                        }
+                        return response.json();
+                    })
+                    .then(data => {
+                        if (data.success) {
+                            Swal.fire({
+                                title: 'Order Cancelled!',
+                                text: 'The order has been cancelled successfully.',
+                                icon: 'success',
+                                toast: true,
+                                position: 'bottom-end',
+                                showConfirmButton: false,
+                                timer: 3000,
+                                background: '#fff',
+                                color: '#1f2937'
+                            }).then(() => {
+                                location.reload();
+                            });
+                        } else {
+                            Swal.fire({
+                                title: 'Error!',
+                                text: data.message || 'Failed to cancel order.',
+                                icon: 'error',
+                                background: '#fff',
+                                color: '#1f2937'
+                            });
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error cancelling order:', error);
+                        Swal.fire({
+                            title: 'Error!',
+                            text: 'Something went wrong while cancelling the order.',
+                            icon: 'error',
+                            background: '#fff',
+                            color: '#1f2937'
+                        });
+                    });
+            }
+        });
+    }
+
+    function returnOrder(orderId) {
+        const currentStatus = "<%= order.status %>";
+        if (currentStatus !== 'Delivered') {
+            Swal.fire({
+                title: 'Invalid Action!',
+                text: 'This order cannot be returned as it is not in Delivered status.',
+                icon: 'warning',
+                background: '#fff',
+                color: '#1f2937'
+            });
+            return;
+        }
+
+        Swal.fire({
+            title: 'Return Order?',
+            text: 'Are you sure you want to request a return for this entire order?',
+            icon: 'question',
+            showCancelButton: true,
+            confirmButtonColor: '#1f2937',
+            cancelButtonColor: '#dc2626',
+            confirmButtonText: 'Yes, request return!',
+            background: '#fff',
+            color: '#1f2937'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                fetch('/returnOrder', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ orderId })
+                })
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error(`HTTP error! Status: ${response.status}`);
+                        }
+                        return response.json();
+                    })
+                    .then(data => {
+                        if (data.success) {
+                            Swal.fire({
+                                title: 'Return Requested!',
+                                text: 'Your return request for the order has been submitted.',
+                                icon: 'success',
+                                toast: true,
+                                position: 'bottom-end',
+                                showConfirmButton: false,
+                                timer: 3000,
+                                background: '#fff',
+                                color: '#1f2937'
+                            }).then(() => {
+                                location.reload();
+                            });
+                        } else {
+                            Swal.fire({
+                                title: 'Error!',
+                                text: data.message || 'Failed to request return.',
+                                icon: 'error',
+                                background: '#fff',
+                                color: '#1f2937'
+                            });
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error requesting return:', error);
+                        Swal.fire({
+                            title: 'Error!',
+                            text: 'Something went wrong while requesting the return.',
+                            icon: 'error',
+                            background: '#fff',
+                            color: '#1f2937'
+                        });
+                    });
+            }
+        });
+    }
+
+    function cancelItem(orderId, productId) {
+        Swal.fire({
+            title: 'Cancel Item?',
+            text: 'Are you sure you want to cancel this item?',
+            icon: 'question',
+            showCancelButton: true,
+            confirmButtonColor: '#1f2937',
+            cancelButtonColor: '#dc2626',
+            confirmButtonText: 'Yes, cancel it!',
+            background: '#fff',
+            color: '#1f2937'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                fetch('/cancelItem', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ orderId, productId })
+                })
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error(`HTTP error! Status: ${response.status}`);
+                        }
+                        return response.json();
+                    })
+                    .then(data => {
+                        if (data.success) {
+                            Swal.fire({
+                                title: 'Cancelled!',
+                                text: 'The item has been cancelled successfully.',
+                                icon: 'success',
+                                toast: true,
+                                position: 'bottom-end',
+                                showConfirmButton: false,
+                                timer: 3000,
+                                background: '#fff',
+                                color: '#1f2937'
+                            }).then(() => {
+                                location.reload();
+                            });
+                        } else {
+                            Swal.fire({
+                                title: 'Error!',
+                                text: data.message || 'Failed to cancel item.',
+                                icon: 'error',
+                                background: '#fff',
+                                color: '#1f2937'
+                            });
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error cancelling item:', error);
+                        Swal.fire({
+                            title: 'Error!',
+                            text: 'Something went wrong while cancelling the item.',
+                            icon: 'error',
+                            background: '#fff',
+                            color: '#1f2937'
+                        });
+                    });
+            }
+        });
+    }
+
+    function requestReturn(orderId, productId) {
+        Swal.fire({
+            title: 'Request Return?',
+            text: 'Are you sure you want to request a return for this item?',
+            icon: 'question',
+            showCancelButton: true,
+            confirmButtonColor: '#1f2937',
+            cancelButtonColor: '#dc2626',
+            confirmButtonText: 'Yes, request return!',
+            background: '#fff',
+            color: '#1f2937'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                fetch('/returnItem', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ orderId, productId })
+                })
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error(`HTTP error! Status: ${response.status}`);
+                        }
+                        return response.json();
+                    })
+                    .then(data => {
+                        if (data.success) {
+                            Swal.fire({
+                                title: 'Return Requested!',
+                                text: 'Your return request has been submitted.',
+                                icon: 'success',
+                                toast: true,
+                                position: 'bottom-end',
+                                showConfirmButton: false,
+                                timer: 3000,
+                                background: '#fff',
+                                color: '#1f2937'
+                            }).then(() => {
+                                location.reload();
+                            });
+                        } else {
+                            Swal.fire({
+                                title: 'Error!',
+                                text: data.message || 'Failed to request return.',
+                                icon: 'error',
+                                background: '#fff',
+                                color: '#1f2937'
+                            });
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error requesting return:', error);
+                        Swal.fire({
+                            title: 'Error!',
+                            text: 'Something went wrong while requesting the return.',
+                            icon: 'error',
+                            background: '#fff',
+                            color: '#1f2937'
+                        });
+                    });
+            }
+        });
+    }
+
+    function downloadInvoice() {
+        const orderId = "<%= order.orderId || 'N/A' %>";
+        const orderDate = new Date("<%= order.createdOn %>").toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' });
+        const customerName = escapeHtml("<%= order.address?.name || 'N/A' %>");
+        const shippingAddress = escapeHtml(`<%= order.address ? (order.address.city || '') + (order.address.landMark ? ', ' + order.address.landMark : '') + ', ' + (order.address.State || '') + ', PIN: ' + (order.address.pincode || 'N/A') : 'N/A' %>`);
+        const paymentMethod = escapeHtml(`<%= order.paymentMethod || 'N/A' %><% if (order.paymentMethod === 'Credit Card' || order.paymentMethod === 'Debit Card') { %> (**** **** **** <%= order.cardLastFour || 'N/A' %>) <% } %>`);
+        const orderStatus = escapeHtml("<%= order.status || 'N/A' %>");
+        const orderedItems = `<%= orderedItemsHtml %>`;
+        const subtotal = "₹<%= order.totalPrice ? order.totalPrice.toLocaleString('en-IN') : '0.00' %>";
+        const shippingCost = "₹<%= order.shippingCost ? order.shippingCost.toLocaleString('en-IN') : '0.00' %> <%= order.totalPrice >= 2000 ? '(Free)' : '' %>";
+        const total = "₹<%= order.finalAmount ? order.finalAmount.toLocaleString('en-IN') : '0.00' %>";
+
+        const invoiceContent = `
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Invoice - Order #${orderId}></title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f9fafb;
+        }
+        .invoice-container {
+            max-width: 800px;
+            margin: 0 auto;
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .header h1 {
+            margin: 0;
+            font-size: 24px;
+            color: #1f2937;
+        }
+        .details, .items, .summary {
+            margin-bottom: 20px;
+        }
+        .details div, .summary div {
+            margin-bottom: 10px;
+            font-size: 14px;
+        }
+        .details strong, .summary strong {
+            display: inline-block;
+            width: 150px;
+            color: #1f2937;
+        }
+        .items table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+        }
+        .items th, .items td {
+            padding: 10px;
+            text-align: left;
+            border-bottom: 1px solid #e5e7eb;
+        }
+        .items th {
+            background-color: #f3f4f6;
+            font-weight: 600;
+            color: #1f2937;
+        }
+        .items td {
+            color: #4b5563;
+        }
+        .total {
+            font-weight: 600;
+            font-size: 16px;
+            text-align: right;
+            color: #1f2937;
+        }
+        .footer {
+            text-align: center;
+            font-size: 12px;
+            color: #6b7280;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="invoice-container">
+        <div class="header">
+            <h1>Cario</h1>
+            <h2 style="font-size: 15px;">Invoice - #${orderId}</h2>
+        </div>
+        <div class="details">
+            <div><strong>Customer Name:</strong> ${customerName}</div>
+            <div><strong>Shipping Address:</strong> ${shippingAddress}</div>
+            <div><strong>Payment Method:</strong> ${paymentMethod}</div>
+            <div><strong>Order Status:</strong> ${orderStatus}</div>
+            <div><strong>Order Date:</strong> ${orderDate}</div>
+        </div>
+        <div class="items">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Item</th>
+                        <th>Quantity</th>
+                        <th>Price</th>
+                        <th>Total</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    ${orderedItems}
+                </tbody>
+            </table>
+        </div>
+        <div class="summary">
+            <div><strong>Subtotal:</strong> ${subtotal}</div>
+            <div><strong>Shipping:</strong> ${shippingCost}</div>
+            <div class="total"><strong>Total:</strong> ${total}</div>
+        </div>
+        <div class="footer">
+            <p>Thank you for shopping with Cario!</p>
+            <p>Contact us at support@cario.com for any queries.</p>
+        </div>
+    </div>
 </body>
+</html>
+        `;
+
+        const blob = new Blob([invoiceContent], { type: 'text/html' });
+        const url = window.URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = `Invoice-Order-${orderId}.html`;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        window.URL.revokeObjectURL(url);
+        closeInvoiceModal();
+    }
+</script>
+    </div>
+</body>
+
 </html>

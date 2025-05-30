@@ -1,6 +1,4 @@
-const User = require('../../models/userSchema');
-
-const Address = require('../../models/addressSchema'); // Adjust path based on your project structure
+const Address = require('../../models/addressSchema');
 
 const loadAddress = async (req, res) => {
     try {
@@ -40,7 +38,7 @@ const addAddress = async (req, res) => {
             altPhone: altPhone || undefined,
             landMark,
             city,
-            State:state,
+            State: state,
             pincode: Number(pincode)
         };
 
@@ -54,10 +52,6 @@ const addAddress = async (req, res) => {
                 address: [addressData]
             });
             await addressDoc.save();
-        }
-
-        if (addressDoc.address.length === 1) {
-            await User.findByIdAndUpdate(userId, { phone });
         }
 
         res.json({
@@ -82,7 +76,6 @@ const editAddress = async (req, res) => {
                 message: 'Please log in to edit an address.'
             });
         }
-       console.log(req.body)
         const { addressId, addressType, name, phone, altPhone, landMark, city, state, pincode } = req.body;
         const addressDoc = await Address.findOne({ userId });
         if (!addressDoc) {
@@ -108,15 +101,11 @@ const editAddress = async (req, res) => {
             altPhone: altPhone || undefined,
             landMark,
             city,
-            State:state,
+            State: state,
             pincode: Number(pincode)
         };
 
         await addressDoc.save();
-
-        if (addressIndex === 0) {
-            await User.findByIdAndUpdate(userId, { phone });
-        }
 
         res.json({
             success: true,
@@ -160,12 +149,6 @@ const deleteAddress = async (req, res) => {
 
         addressDoc.address.splice(addressIndex, 1);
         await addressDoc.save();
-
-        if (addressIndex === 0 && addressDoc.address.length > 0) {
-            await User.findByIdAndUpdate(userId, { phone: addressDoc.address[0].phone });
-        } else if (addressDoc.address.length === 0) {
-            await User.findByIdAndUpdate(userId, { phone: undefined });
-        }
 
         res.json({
             success: true,
@@ -211,8 +194,6 @@ const deliverAddress = async (req, res) => {
         addressDoc.address.unshift(selectedAddress);
         await addressDoc.save();
 
-        await User.findByIdAndUpdate(userId, { phone: selectedAddress.phone });
-
         res.json({
             success: true,
             message: 'Delivery address set successfully.'
@@ -226,7 +207,6 @@ const deliverAddress = async (req, res) => {
     }
 };
 
-// Export all functions
 module.exports = {
     loadAddress,
     addAddress,
