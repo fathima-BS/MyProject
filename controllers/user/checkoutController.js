@@ -151,7 +151,6 @@ const paymentSuccess = async (req, res) => {
   }
 };
 
-// Existing functions remain unchanged
 const loadCheckout = async (req, res) => {
   try {
     const userId = req.session.user;
@@ -176,6 +175,7 @@ const loadCheckout = async (req, res) => {
     }
 
     const addressDoc = await Address.findOne({ userId }).lean();
+    const wallet = await Wallet.findOne({ userId }).lean(); // Fetch wallet
     const currentDate = new Date();
 
     let cartItems = [];
@@ -265,6 +265,8 @@ const loadCheckout = async (req, res) => {
       total = 0;
     }
 
+    const walletBalance = wallet ? wallet.balance : 0; 
+
     res.render('checkout', {
       cart,
       cartItems,
@@ -276,10 +278,11 @@ const loadCheckout = async (req, res) => {
       totalItems,
       addresses: addressDoc || { address: [] },
       key_id: process.env.RAZORPAY_KEY_ID,
+      walletBalance: walletBalance.toFixed(2) 
     });
   } catch (error) {
     console.error('Error loading checkout:', error.message, error.stack);
-    res.status(500).render('error', { message: 'Unable to load checkout page' });
+    res.status(500).render('page404', { message: 'Unable to load checkout page' });
   }
 };
 
@@ -349,7 +352,7 @@ const placeOrder = async (req, res) => {
     }
 
     const { paymentMethod } = req.body;
-    if (paymentMethod !== 'COD') {
+    if (!['COD', 'Wallet', 'OnlinePayment'].includes(paymentMethod)) {
       return res.status(400).json({ success: false, message: 'Invalid payment method' });
     }
 
@@ -357,7 +360,14 @@ const placeOrder = async (req, res) => {
     if (!cart || cart.items.length === 0) {
       return res.status(400).json({ success: false, message: 'Cart is empty' });
     }
-
+    let sum = 0
+    for(let item of cart.items){
+      sum += item.totalPrice
+    }
+    if(paymentMethod != "Wallet" && sum >= 1000){
+      return res.status(400).json({success:false,message:"COD should be less than 1000  "})
+    }
+    console.log(sum,'sum is heere')
     const checkoutSummary = req.session.checkoutSummary || {};
     if (!checkoutSummary.selectedAddress) {
       return res.status(400).json({ success: false, message: 'Please select an address' });
@@ -370,13 +380,13 @@ const placeOrder = async (req, res) => {
       return res.status(400).json({ success: false, message: 'Selected address is incomplete or invalid' });
     }
 
-    let subtotal = 0;
+    let grossTotal = 0; // Before any discounts
     let offerDiscount = 0;
-    let coupon = cart.coupon && Number(cart.coupon.amount) ? Number(cart.coupon.amount) : 0;
+    const coupon = cart.coupon && Number(cart.coupon.amount) ? Number(cart.coupon.amount) : 0;
     const currentDate = new Date();
 
     const orderedItems = await Promise.all(cart.items.map(async (item) => {
-      const salePrice = Number(item.price) || Number(item.productId.salePrice);
+      const salePrice = Number(item.productId.salePrice);
       const quantity = Number(item.quantity) || 1;
 
       const productOffer = await Offer.findOne({
@@ -405,29 +415,53 @@ const placeOrder = async (req, res) => {
       }
 
       let discountedPrice = salePrice;
+      let discountPercentage = 0;
+
       if (finalOffer) {
-        discountedPrice = salePrice * (1 - finalOffer.discountAmount / 100);
+        discountPercentage = finalOffer.discountAmount;
+        discountedPrice = salePrice * (1 - discountPercentage / 100);
       }
 
-      const saleTotal = salePrice * quantity;
+      const originalTotal = salePrice * quantity;
       const discountTotal = (salePrice - discountedPrice) * quantity;
-      subtotal += saleTotal;
+
+      grossTotal += originalTotal;
       offerDiscount += discountTotal;
 
       return {
         product: item.productId._id,
         quantity,
+        originalPrice: salePrice,
         price: discountedPrice,
+        discountPercentage,
         status: 'Pending',
       };
     }));
 
-    let total = subtotal - coupon;
-    if (total < 0) total = 0;
+    const subtotal = Math.max(grossTotal - offerDiscount - coupon, 0); // After all discounts
+    const shippingCost = grossTotal < 2000 ? 60 : 0; // Based on original total
+    const finalAmount = subtotal + shippingCost;
 
-    const shippingCost = subtotal < 2000 ? 60 : 0;
+    // Handle Wallet Payment
+    if (paymentMethod === 'Wallet') {
+      const wallet = await Wallet.findOne({ userId });
+      if (!wallet) {
+        return res.status(400).json({ success: false, message: 'Wallet not found' });
+      }
+      if (wallet.balance < finalAmount) {
+        return res.status(400).json({ success: false, message: 'Insufficient wallet balance' });
+      }
 
-    const finalAmount = total + shippingCost;
+      // Deduct from wallet
+      wallet.balance -= finalAmount;
+      wallet.transactions.push({
+        amount: finalAmount,
+        type: 'debit',
+        description: `Order payment for order ID: ORD-${Date.now()}-${Math.floor(Math.random() * 1000)}`,
+        date: new Date()
+      });
+      await wallet.save();
+    }
 
     const orderId = `ORD-${Date.now()}-${Math.floor(Math.random() * 1000)}`;
 
@@ -435,7 +469,7 @@ const placeOrder = async (req, res) => {
       orderId,
       userId,
       orderedItems,
-      totalPrice: subtotal,
+      totalPrice: subtotal, // price after discounts
       discount: offerDiscount + coupon,
       finalAmount,
       address: selectedAddress,
@@ -445,7 +479,8 @@ const placeOrder = async (req, res) => {
       createdOn: new Date(),
       couponApplied: coupon > 0,
       couponCode: coupon > 0 ? cart.coupon.code : null,
-      shippingCost
+      shippingCost,
+      paymentStatus: paymentMethod === 'Wallet' ? 'Paid' : 'Pending'
     });
 
     await order.save();
@@ -468,6 +503,7 @@ const placeOrder = async (req, res) => {
     res.status(500).json({ success: false, message: 'Error placing order: ' + error.message });
   }
 };
+
 
 const loadWallet = async (req, res) => {
   try {

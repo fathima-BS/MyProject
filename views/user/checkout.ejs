@@ -543,6 +543,15 @@
                                                 class="mr-3 hidden">
                                             <label>RazorPay (Online Payment)</label>
                                         </div>
+                                        <div class="payment-option <%= parseFloat(walletBalance) >= parseFloat(total) ? '' : 'opacity-50 cursor-not-allowed' %>"
+                                            data-value="Wallet" <%=parseFloat(walletBalance)>= parseFloat(total) ? '' :
+                                            'onclick="return false;"' %>>
+                                            <input type="radio" name="paymentMethod" value="Wallet" class="mr-3 hidden"
+                                                <%=parseFloat(walletBalance)>= parseFloat(total) ? '' : 'disabled' %>>
+                                            <label>Wallet (Balance: ₹<%=
+                                                    parseFloat(walletBalance).toLocaleString("en-IN", {
+                                                    minimumFractionDigits: 2, maximumFractionDigits: 2 }) %>)</label>
+                                        </div>
                                     </div>
 
 
@@ -1644,7 +1653,13 @@
                         if (orderData.success) {
                             window.location.href = `/order-success?orderId=${orderData.orderId}`;
                         } else {
-                            window.location.href = `/payment-failure?orderId=${orderData.orderId || ''}&error=${encodeURIComponent(orderData.message || 'Failed to place order.')}`;
+                            // window.location.href = `/payment-failure?orderId=${orderData.orderId || ''}&error=${encodeURIComponent(orderData.message || 'Failed to place order.')}`;
+                              Swal.fire({
+                                icon: 'error',
+                                title: 'Order Failed',
+                                text: orderData.message, // Message comes from backend
+                                confirmButtonText: 'OK'
+                            });
                         }
                     }
                 } catch (error) {
