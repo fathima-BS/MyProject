@@ -8,12 +8,12 @@ const productController=require('../controllers/admin/productController');
 const adminOrderController = require('../controllers/admin/adminOrderController')
 const couponController=require('../controllers/admin/couponController')
 const offerController = require('../controllers/admin/offerController')
+const dashboardController=require('../controllers/admin/dashboardController')
 const {adminAuth}=require('../middlewares/auth')
 
 
 router.get('/login', adminController.loadlogin);
 router.post('/verify', adminController.login);
-router.get('/dashboard', adminAuth, adminController.loadDashboard);
 router.get('/pageerror', adminController.loadErrorPage);
 router.post('/logout', adminController.logout);
 
@@ -70,5 +70,10 @@ router.get('/offers', adminAuth, offerController.loadOffers);
 router.post('/offers/add', adminAuth, offerController.addOffer);
 router.post('/offers/edit', adminAuth, offerController.editOffer);
 router.delete('/offers/delete/:id', adminAuth, offerController.deleteOffer);
+
+//dashboard
+router.get('/dashboard', adminAuth,dashboardController.getDashboard);
+router.get('/dashboard/data', adminAuth,dashboardController.getDashboardData);
+router.get('/dashboard/ledger',  adminAuth,dashboardController.getLedger);
 
 module.exports=router

@@ -12,6 +12,7 @@
     <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <style>
         body {
             font-family: 'Inter', sans-serif;
@@ -513,7 +514,7 @@
                             <div class="mt-6 p-4 border border-red-200 bg-red-50 rounded-lg">
                                 <div class="flex items-start">
                                     <svg class="w-5 h-5 text-red-500 mt-0.5 mr-3" fill="none" stroke="currentColor"
-                                        viewBox="0 0 24 радио" xmlns="http://www.w3.org/2000/svg">
+                                        viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                             d="M6 18L18 6M6 6l12 12"></path>
                                     </svg>
@@ -571,39 +572,39 @@
                 </div>
             <% } %>
 
-            <div class="card">
-                <h2 class="text-lg font-semibold mb-4">Order Items</h2>
-                <% (order.orderedItems || []).forEach((item) => { %>
-                    <div class="order-item">
-                        <img src="<%= item.product?.productImage[0] || '/images/placeholder.jpg' %>"
-                            alt="<%= item.product?.productName || 'Product' %>">
-                        <div class="flex-1">
-                            <div class="flex flex-col sm:flex-row sm:justify-between">
-                                <div>
-                                    <h3><%= item.product?.productName || 'Unknown Product' %></h3>
-                                    <br>
-                                </div>
-                                <div class="mt-2 sm:mt-0 text-right">
-                                    <div class="price">₹<%= (order.totalPrice * item.quantity).toLocaleString('en-IN') %></div>
-                                    <div class="quantity mt-1">₹<%= order.totalPrice.toLocaleString('en-IN') %> x <%= item.quantity %></div>
-                                </div>
-                            </div>
-                            <div class="mt-3 text-sm font-semibold">
-                                Status: <span class="status-<%= item.status.toLowerCase().replace(/ /g, '-') %> rounded-full px-3 py-1 text-xs font-medium">
-                                    <%= item.status %>
-                                </span>
-                                <% if (item.status === 'Delivered') { %>
-                                    <button class="btn-primary mt-2 ml-4" onclick="requestReturn('<%= order.orderId %>', '<%= item.product._id %>')">Request Return</button>
-                                <% } else if (['Pending', 'Processing'].includes(item.status)) { %>
-                                    <button class="btn-primary mt-2 ml-4" style="background-color: #dc2626;" onclick="cancelItem('<%= order.orderId %>', '<%= item.product._id %>')">Cancel Item</button>
-                                <% } else if (item.status === 'Return Rejected') { %>
-                                    <p class="text-sm text-red-600 mt-2">Reason: <%= item.returnRejectReason || 'Not specified' %></p>
-                                <% } %>
-                            </div>
-                        </div>
+           <div class="card">
+    <h2 class="text-lg font-semibold mb-4">Order Items</h2>
+    <% (order.orderedItems || []).forEach((item) => { %>
+        <div class="order-item">
+            <img src="<%= item.product?.productImage[0] || '/images/placeholder.jpg' %>"
+                alt="<%= item.product?.productName || 'Product' %>">
+            <div class="flex-1">
+                <div class="flex flex-col sm:flex-row sm:justify-between">
+                    <div>
+                        <h3><%= item.product?.productName || 'Unknown Product' %></h3>
+                        <br>
                     </div>
-                <% }) %>
+                    <div class="mt-2 sm:mt-0 text-right">
+                        <div class="price">₹<%= (item.price * item.quantity).toLocaleString('en-IN') %></div>
+                        <div class="quantity mt-1">₹<%= item.price.toLocaleString('en-IN') %> x <%= item.quantity %></div>
+                    </div>
+                </div>
+                <div class="mt-3 text-sm font-semibold">
+                    Status: <span class="status-<%= item.status.toLowerCase().replace(/ /g, '-') %> rounded-full px-3 py-1 text-xs font-medium">
+                        <%= item.status %>
+                    </span>
+                    <% if (item.status === 'Delivered') { %>
+                        <button class="btn-primary mt-2 ml-4" onclick="requestReturn('<%= order.orderId %>', '<%= item.product._id %>')">Request Return</button>
+                    <% } else if (['Pending', 'Processing'].includes(item.status)) { %>
+                        <button class="btn-primary mt-2 ml-4" style="background-color: #dc2626;" onclick="cancelItem('<%= order.orderId %>', '<%= item.product._id %>')">Cancel Item</button>
+                    <% } else if (item.status === 'Return Rejected') { %>
+                        <p class="text-sm text-red-600 mt-2">Reason: <%= item.returnRejectReason || 'Not specified' %></p>
+                    <% } %>
+                </div>
             </div>
+        </div>
+    <% }) %>
+</div>
 
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div class="detail-section">
@@ -700,7 +701,7 @@
                                 <p><strong>Customer Name:</strong> <%= order.address?.name || 'N/A' %></p>
                                 <p><strong>Shipping Address:</strong> <%= order.address ? (order.address.city || '') + (order.address.landMark ? ', ' + order.address.landMark : '') + ', ' + (order.address.State || '') + ', PIN: ' + (order.address.pincode || 'N/A') : 'N/A' %></p>
                                 <p><strong>Payment Method:</strong> <%= order.paymentMethod || 'N/A' %> <% if (order.paymentMethod === 'Credit Card' || order.paymentMethod === 'Debit Card') { %> (**** **** **** <%= order.cardLastFour || 'N/A' %>) <% } %></p>
-                                <p><strong>Order Status:</strong> <%= order.status || 'N/A' %></p>
+                                <!-- <p><strong>Order Status:</strong> <%= order.status || 'N/A' %></p> -->
                             </div>
                             <table>
                                 <thead>
@@ -740,13 +741,17 @@
             <!-- Pre-render orderedItems HTML for downloadInvoice -->
             <% 
                 // Helper function to escape HTML special characters
-                const escapeHtml = (str) => {
+                function escapeHtml(str) {
                     if (typeof str !== 'string') return str;
-                    return str.replace(/&/g, '&amp;')
-                              .replace(/</g, '&lt;')
-                              .replace(/>/g, '&gt;')
-                              .replace(/"/g, '&quot;')
-                              .replace(/'/g, '&#039;');
+                    return str.replace(/[&<>"']/g, function(match) {
+                        return {
+                            '&': '&amp;',
+                            '<': '&lt;',
+                            '>': '&gt;',
+                            '"': '&quot;',
+                            "'": '&#39;'
+                        }[match];
+                    });
                 };
                 const orderedItemsHtml = (order.orderedItems || []).map(item => `
                     <tr>
@@ -764,11 +769,15 @@
     // Helper function to escape HTML special characters
     function escapeHtml(str) {
         if (typeof str !== 'string') return str;
-        return str.replace(/&/g, '&amp;')
-                  .replace(/</g, '&lt;')
-                  .replace(/>/g, '&gt;')
-                  .replace(/"/g, '&quot;')
-                  .replace(/'/g, '&#39;');
+        return str.replace(/[&<>"']/g, function(match) {
+            return {
+                '&': '&amp;',
+                '<': '&lt;',
+                '>': '&gt;',
+                '"': '&quot;',
+                "'": '&#39;'
+            }[match];
+        });
     }
 
     async function retryPayment(orderId, order) {
@@ -1159,9 +1168,9 @@
         const orderDate = new Date("<%= order.createdOn %>").toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' });
         const customerName = escapeHtml("<%= order.address?.name || 'N/A' %>");
         const shippingAddress = escapeHtml(`<%= order.address ? (order.address.city || '') + (order.address.landMark ? ', ' + order.address.landMark : '') + ', ' + (order.address.State || '') + ', PIN: ' + (order.address.pincode || 'N/A') : 'N/A' %>`);
-        const paymentMethod = escapeHtml(`<%= order.paymentMethod || 'N/A' %><% if (order.paymentMethod === 'Credit Card' || order.paymentMethod === 'Debit Card') { %> (**** **** **** <%= order.cardLastFour || 'N/A' %>) <% } %>`);
+        const paymentMethod = escapeHtml(`<%= order.paymentMethod || 'N/A' %> <%= order.paymentMethod === 'Credit Card' || order.paymentMethod === 'Debit Card' ? '(**** **** **** ' + (order.cardLastFour || 'N/A') + ')' : '' %>`);
         const orderStatus = escapeHtml("<%= order.status || 'N/A' %>");
-        const orderedItems = `<%= orderedItemsHtml %>`;
+        const orderedItems = `<%- orderedItemsHtml %>`;
         const subtotal = "₹<%= order.totalPrice ? order.totalPrice.toLocaleString('en-IN') : '0.00' %>";
         const shippingCost = "₹<%= order.shippingCost ? order.shippingCost.toLocaleString('en-IN') : '0.00' %> <%= order.totalPrice >= 2000 ? '(Free)' : '' %>";
         const total = "₹<%= order.finalAmount ? order.finalAmount.toLocaleString('en-IN') : '0.00' %>";
@@ -1172,72 +1181,117 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Invoice - Order #${orderId}></title>
+    <title>Invoice - Order #${orderId}</title>
     <style>
         body {
-            font-family: Arial, sans-serif;
+            font-family: 'Arial', sans-serif;
             margin: 0;
-            padding: 20px;
-            background-color: #f9fafb;
+            padding: 20pt;
+            background-color: #ffffff;
+            color: #333333;
         }
         .invoice-container {
-            max-width: 800px;
+            max-width: 595pt; /* A4 width at 72dpi */
             margin: 0 auto;
-            background-color: white;
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            background-color: #ffffff;
+            padding: 20pt;
+            border: 1pt solid #e0e0e0;
         }
         .header {
             text-align: center;
-            margin-bottom: 20px;
+            margin-bottom: 20pt;
+            border-bottom: 1pt solid #e0e0e0;
+            padding-bottom: 10pt;
         }
         .header h1 {
             margin: 0;
-            font-size: 24px;
+            font-size: 24pt;
             color: #1f2937;
         }
-        .details, .items, .summary {
-            margin-bottom: 20px;
+        .header h2 {
+            margin: 5pt 0 0;
+            font-size: 16pt;
+            color: #4b5563;
         }
-        .details div, .summary div {
-            margin-bottom: 10px;
-            font-size: 14px;
+        .details {
+            margin-bottom: 20pt;
         }
-        .details strong, .summary strong {
+        .details div {
+            margin-bottom: 8pt;
+            font-size: 12pt;
+            line-height: 1.5;
+        }
+        .details strong {
             display: inline-block;
-            width: 150px;
+            width: 120pt;
+            font-weight: 600;
             color: #1f2937;
+        }
+        .items {
+            margin-bottom: 20pt;
         }
         .items table {
             width: 100%;
             border-collapse: collapse;
-            margin-bottom: 20px;
+            font-size: 12pt;
         }
         .items th, .items td {
-            padding: 10px;
+            padding: 8pt;
             text-align: left;
-            border-bottom: 1px solid #e5e7eb;
+            border-bottom: 1pt solid #e0e0e0;
         }
         .items th {
-            background-color: #f3f4f6;
+            background-color: #f5f5f5;
             font-weight: 600;
             color: #1f2937;
         }
         .items td {
             color: #4b5563;
         }
-        .total {
-            font-weight: 600;
-            font-size: 16px;
+        .items tr:last-child td {
+            border-bottom: none;
+        }
+        .summary {
+            margin-bottom: 20pt;
+        }
+        .summary div {
+            margin-bottom: 8pt;
+            font-size: 12pt;
             text-align: right;
+        }
+        .summary strong {
+            font-weight: 600;
             color: #1f2937;
+            margin-right: 10pt;
+        }
+        .total {
+            font-size: 14pt;
+            font-weight: 700;
+            color: #1f2937;
+            border-top: 1pt solid #e0e0e0;
+            padding-top: 10pt;
         }
         .footer {
             text-align: center;
-            font-size: 12px;
+            font-size: 10pt;
             color: #6b7280;
-            margin-top: 20px;
+            margin-top: 20pt;
+            border-top: 1pt solid #e0e0e0;
+            padding-top: 10pt;
+        }
+        @page {
+            size: A4;
+            margin: 20pt;
+        }
+        @media print {
+            body {
+                margin: 0;
+            }
+            .invoice-container {
+                box-shadow: none;
+                border: none;
+                padding: 0;
+            }
         }
     </style>
 </head>
@@ -1245,13 +1299,13 @@
     <div class="invoice-container">
         <div class="header">
             <h1>Cario</h1>
-            <h2 style="font-size: 15px;">Invoice - #${orderId}</h2>
+            <h2>Invoice - #${orderId}</h2>
         </div>
         <div class="details">
             <div><strong>Customer Name:</strong> ${customerName}</div>
             <div><strong>Shipping Address:</strong> ${shippingAddress}</div>
             <div><strong>Payment Method:</strong> ${paymentMethod}</div>
-            <div><strong>Order Status:</strong> ${orderStatus}</div>
+           
             <div><strong>Order Date:</strong> ${orderDate}</div>
         </div>
         <div class="items">
@@ -1284,19 +1338,38 @@
 </html>
         `;
 
-        const blob = new Blob([invoiceContent], { type: 'text/html' });
-        const url = window.URL.createObjectURL(blob);
-        const link = document.createElement('a');
-        link.href = url;
-        link.download = `Invoice-Order-${orderId}.html`;
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-        window.URL.revokeObjectURL(url);
-        closeInvoiceModal();
+        // Create a temporary element to hold the invoice content
+        const element = document.createElement('div');
+        element.innerHTML = invoiceContent;
+        document.body.appendChild(element);
+
+        // Configure html2pdf options
+        const opt = {
+            margin: 20,
+            filename: `Invoice-Order-${orderId}.pdf`,
+            image: { type: 'jpeg', quality: 0.98 },
+            html2canvas: { scale: 2, useCORS: true },
+            jsPDF: { unit: 'pt', format: 'a4', orientation: 'portrait' }
+        };
+
+        // Generate and download the PDF
+        html2pdf().set(opt).from(element).save().then(() => {
+            // Clean up
+            document.body.removeChild(element);
+            closeInvoiceModal();
+        }).catch(error => {
+            console.error('Error generating PDF:', error);
+            Swal.fire({
+                title: 'Error!',
+                text: 'Failed to generate PDF invoice.',
+                icon: 'error',
+                background: '#fff',
+                color: '#1f2937'
+            });
+            document.body.removeChild(element);
+        });
     }
 </script>
-    </div>
 </body>
 
 </html>

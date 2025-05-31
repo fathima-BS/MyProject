@@ -83,7 +83,7 @@ const orderSchema = new Schema({
     },
     shippingCost: {
         type: Number,
-        required: false,
+        required: true,
     },
     returnRejectReason: {
         type: String
