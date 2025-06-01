@@ -72,8 +72,7 @@ router.post('/offers/edit', adminAuth, offerController.editOffer);
 router.delete('/offers/delete/:id', adminAuth, offerController.deleteOffer);
 
 //dashboard
-router.get('/dashboard', adminAuth,dashboardController.getDashboard);
-router.get('/dashboard/data', adminAuth,dashboardController.getDashboardData);
-router.get('/dashboard/ledger',  adminAuth,dashboardController.getLedger);
+router.get('/dashboard', adminAuth, dashboardController.getDashboard);
+router.get('/dashboard/data', adminAuth, dashboardController.getDashboardData);
 
 module.exports=router
