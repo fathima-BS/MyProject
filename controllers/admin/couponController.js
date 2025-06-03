@@ -44,12 +44,15 @@ const addCoupon = async (req, res) => {
         const { name, couponCode, description, minimumPrice, offerPrice, createdOn, expireOn } = req.body;
 
         const existingCoupon = await Coupon.findOne({
-                 $or: [{ couponCode }, { name }]
+            $or: [
+                { couponCode: { $regex: `^${couponCode}$`, $options: '' } },
+                { name: { $regex: `^${name}$`, $options: '' } }
+            ]
         });
 
         if (existingCoupon) {
-            return res.json({ success: false, message: 'Coupon code already exists!' });
-        } 
+            return res.json({ success: false, message: 'Coupon already exists!' });
+        }
 
         const newCoupon = new Coupon({
             name,
@@ -73,13 +76,20 @@ const editCoupon = async (req, res) => {
     try {
         const { couponId, name, couponCode, description, minimumPrice, offerPrice, createdOn, expireOn } = req.body;
 
+        function escapeRegex(str) {
+            return str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+        }
+
+        const couponCodeRegex = new RegExp(`^${escapeRegex(name)}$`);
+
         const existingCoupon = await Coupon.findOne({
             _id: { $ne: couponId },
-            couponCode
+            name: couponCodeRegex
         });
 
+
         if (existingCoupon) {
-            return res.json({ success: false, message: 'Coupon code already exists!' });
+            return res.json({ success: false, message: 'Coupon already exists!' });
         }
 
         const updatedCoupon = await Coupon.findByIdAndUpdate(couponId, {

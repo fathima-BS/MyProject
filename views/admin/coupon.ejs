@@ -94,12 +94,12 @@
             </div>
             <div class="mb-3">
               <label for="editMinimumCartValue" class="form-label">Minimum Cart Value</label>
-              <input type="number" class="form-control bg-dark text-white" id="editMinimumCartValue" name="minimumPrice" step="0.01" min="0">
+              <input type="number" class="form-control bg-dark text-white" id="editMinimumCartValue" name="minimumPrice" step="0.01">
               <span id="editCouponForm-minimumPrice-error" class="text-danger"></span>
             </div>
             <div class="mb-3">
               <label for="editOfferAmount" class="form-label">Offer Amount</label>
-              <input type="number" class="form-control bg-dark text-white" id="editOfferAmount" name="offerPrice" step="0.01" min="0">
+              <input type="number" class="form-control bg-dark text-white" id="editOfferAmount" name="offerPrice" step="0.01">
               <span id="editCouponForm-offerPrice-error" class="text-danger"></span>
             </div>
             <div class="mb-3">
@@ -248,37 +248,69 @@
           expireOn: form.querySelector('[name="expireOn"]')
         };
         
-        // Validation rules
-        if (!inputs.name || !inputs.name.value.trim()) {
-          showError(formId, 'name', 'Coupon Name is required');
-          isValid = false;
-        }
-        
-        if (!inputs.couponCode || !inputs.couponCode.value.trim()) {
-          showError(formId, 'couponCode', 'Coupon Code is required');
-          isValid = false;
-        }
-        
-        if (inputs.description && inputs.description.value.trim().length > 80) {
-          showError(formId, 'description', 'Description must not exceed 80 characters');
-          isValid = false;
-        }
-        
-        if (inputs.minimumPrice) {
-          const minPrice = inputs.minimumPrice.value.trim() === '' ? 0 : parseFloat(inputs.minimumPrice.value);
-          if (isNaN(minPrice) || minPrice < 0) {
-            showError(formId, 'minimumPrice', 'Minimum Cart Value must be a non-negative number');
-            isValid = false;
-          }
-        }
-        
-        if (inputs.offerPrice) {
-          const offerAmount = inputs.offerPrice.value.trim() === '' ? 0 : parseFloat(inputs.offerPrice.value);
-          if (isNaN(offerAmount) || offerAmount < 0) {
-            showError(formId, 'offerPrice', 'Offer Amount must be a non-negative number');
-            isValid = false;
-          }
-        }
+       // Validation rules
+if (!inputs.name || !inputs.name.value.trim()) {
+  showError(formId, 'name', 'Coupon Name is required');
+  isValid = false;
+} else {
+  const nameRegex = /^[A-Za-z0-9\s\-]+$/; // Letters, numbers, spaces, hyphens
+  if (!nameRegex.test(inputs.name.value.trim())) {
+    showError(formId, 'name', 'Name can only contain letters, numbers, spaces, and hyphens');
+    isValid = false;
+  }
+}
+
+if (!inputs.couponCode || !inputs.couponCode.value.trim()) {
+  showError(formId, 'couponCode', 'Coupon Code is required');
+  isValid = false;
+} else {
+  const codeRegex = /^[A-Z0-9]+$/; // Only uppercase letters and numbers
+  if (!codeRegex.test(inputs.couponCode.value.trim())) {
+    showError(formId, 'couponCode', 'Coupon Code must be uppercase letters and numbers only');
+    isValid = false;
+  }
+}
+
+if (!inputs.description || !inputs.description.value.trim()) {
+  showError(formId, 'description', 'Description is required');
+  isValid = false;
+} else if (inputs.description.value.trim().length > 80) {
+  showError(formId, 'description', 'Description must not exceed 80 characters');
+  isValid = false;
+} else {
+  const descRegex = /^[\w\s.,!'"()-]*$/; // Allows words, spaces, and common punctuation
+  if (!descRegex.test(inputs.description.value.trim())) {
+    showError(formId, 'description', 'Description contains invalid characters');
+    isValid = false;
+  }
+}
+
+
+// Validate Minimum Price
+if (!inputs.minimumPrice || inputs.minimumPrice.value.trim() === '') {
+  showError(formId, 'minimumPrice', 'Minimum Cart Value is required');
+  isValid = false;
+} else {
+  const minPrice = parseFloat(inputs.minimumPrice.value.trim());
+  if (isNaN(minPrice) || minPrice <= 0) {
+    showError(formId, 'minimumPrice', 'Minimum Cart Value must be greater than 0');
+    isValid = false;
+  }
+}
+
+// Validate Offer Price
+if (!inputs.offerPrice || inputs.offerPrice.value.trim() === '') {
+  showError(formId, 'offerPrice', 'Offer Amount is required');
+  isValid = false;
+} else {
+  const offerAmount = parseFloat(inputs.offerPrice.value.trim());
+  if (isNaN(offerAmount) || offerAmount <= 0) {
+    showError(formId, 'offerPrice', 'Offer Amount must be greater than 0');
+    isValid = false;
+  }
+}
+
+
         
         if (!inputs.createdOn || !inputs.createdOn.value) {
           showError(formId, 'createdOn', 'Valid From date is required');
@@ -300,15 +332,18 @@
         return isValid;
       }
       
+ 
+
       // Show error message for a specific field
-      function showError(formId, fieldName, message) {
-        const errorElement = document.getElementById(`${formId}-${fieldName}-error`);
-        if (errorElement) {
-          element.textContent = message;
-        } else {
-          console.warn(`Error element not found for ${fieldName} in form ${formId}`);
-        }
-      }
+function showError(formId, fieldName, message) {
+  const errorElement = document.getElementById(`${formId}-${fieldName}-error`);
+  if (errorElement) {
+    errorElement.textContent = message; // ✅ Correct variable name used
+  } else {
+    console.warn(`Error element not found for ${fieldName} in form ${formId}`);
+  }
+}
+
       
       // Get form data as an object
       function getFormData(formId) {

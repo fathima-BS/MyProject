@@ -37,7 +37,7 @@
             <input type="hidden" id="discountType" name="discountType" value="percentage">
             <div class="mb-3">
               <label for="discountAmount" class="form-label">Discount Percentage</label>
-              <input type="number" class="form-control bg-dark text-white" id="discountAmount" name="discountAmount" step="0.01" min="0" placeholder="Enter % (e.g., 10)">
+              <input type="number" class="form-control bg-dark text-white" id="discountAmount" name="discountAmount" step="0.01"  placeholder="Enter % (e.g., 10)">
               <span id="addOfferForm-discountAmount-error" class="text-danger"></span>
             </div>
             <div class="mb-3">
@@ -101,7 +101,7 @@
             <input type="hidden" id="editDiscountType" name="discountType" value="percentage">
             <div class="mb-3">
               <label for="editDiscountAmount" class="form-label">Discount Percentage</label>
-              <input type="number" class="form-control bg-dark text-white" id="editDiscountAmount" name="discountAmount" step="0.01" min="0">
+              <input type="number" class="form-control bg-dark text-white" id="editDiscountAmount" name="discountAmount" step="0.01" >
               <span id="editOfferForm-discountAmount-error" class="text-danger"></span>
             </div>
             <div class="mb-3">
@@ -250,10 +250,7 @@
       const categories = <%- JSON.stringify(categories) %>;
       const products = <%- JSON.stringify(products) %>;
 
-      // Log the data to debug
-      console.log('Brands:', brands);
-      console.log('Categories:', categories);
-      console.log('Products:', products);
+
 
       // Utility function to clear all error messages in a form
       function clearErrors(formId) {
@@ -287,24 +284,45 @@
           offerType: form.querySelector('[name="offerType"]'),
           applicableTo: form.querySelector('[name="applicableTo"]')
         };
+        // Validate Offer Name
+if (!inputs.offerName || !inputs.offerName.value.trim()) {
+  showError(formId, 'offerName', 'Offer Name is required');
+  isValid = false;
+} else {
+  const nameRegex = /^[A-Za-z0-9\s\-_,.()]+$/; // allows letters, numbers, spaces, and common punctuation
+  if (!nameRegex.test(inputs.offerName.value.trim())) {
+    showError(formId, 'offerName', 'Offer Name contains invalid characters');
+    isValid = false;
+  }
+}
 
-        if (!inputs.offerName || !inputs.offerName.value.trim()) {
-          showError(formId, 'offerName', 'Offer Name is required');
-          isValid = false;
-        }
+// Validate Description
+if (!inputs.description || !inputs.description.value.trim()) {
+  showError(formId, 'description', 'Description is required');
+  isValid = false;
+} else if (inputs.description.value.trim().length > 80) {
+  showError(formId, 'description', 'Description must not exceed 80 characters');
+  isValid = false;
+} else {
+  const descRegex = /^[\w\s.,!'"()\-]+$/; // allows letters, numbers, punctuation
+  if (!descRegex.test(inputs.description.value.trim())) {
+    showError(formId, 'description', 'Description contains invalid characters');
+    isValid = false;
+  }
+}
 
-        if (!inputs.description || !inputs.description.value.trim()) {
-          showError(formId, 'description', 'Description is required');
-          isValid = false;
-        }
+// Validate Discount Amount
+if (!inputs.discountAmount || inputs.discountAmount.value.trim() === '') {
+  showError(formId, 'discountAmount', 'Discount Percentage is required');
+  isValid = false;
+} else {
+  const discountAmount = parseFloat(inputs.discountAmount.value.trim());
+  if (isNaN(discountAmount) || discountAmount <= 0 || discountAmount > 100) {
+    showError(formId, 'discountAmount', 'Discount Percentage must be between 0 and 100');
+    isValid = false;
+  }
+}
 
-        if (inputs.discountAmount) {
-          const discountAmount = inputs.discountAmount.value.trim() === '' ? 0 : parseFloat(inputs.discountAmount.value);
-          if (isNaN(discountAmount) || discountAmount <= 0 || discountAmount > 100) {
-            showError(formId, 'discountAmount', 'Discount Percentage must be between 0 and 100');
-            isValid = false;
-          }
-        }
 
         if (!inputs.validFrom || !inputs.validFrom.value) {
           showError(formId, 'validFrom', 'Valid From date is required');
