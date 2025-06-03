@@ -2,7 +2,7 @@ const Offer = require('../../models/offerSchema');
 const Category = require('../../models/categorySchema');
 const Brand = require('../../models/brandSchema');
 const Product = require('../../models/productSchema');
-
+const mongoose = require('mongoose');
 const loadOffers = async (req, res) => {
     try {
         let search = '';
@@ -66,7 +66,17 @@ const addOffer = async (req, res) => {
         }
 
         // Check for existing offer with the same name
-        const existingOffer = await Offer.findOne({ offerName });
+        function escapeRegex(str) {
+            return str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+        }
+
+        const offerNameRegex = new RegExp(`^${escapeRegex(offerName)}$`, 'i');
+
+
+        const existingOffer = await Offer.findOne({
+            offerName: offerNameRegex
+        });
+
         if (existingOffer) {
             return res.status(400).json({ success: false, message: 'Offer name already exists!' });
         }
@@ -93,6 +103,7 @@ const addOffer = async (req, res) => {
 const editOffer = async (req, res) => {
     try {
         const { offerId, offerName, description, discountType, discountAmount, validFrom, validUpto, offerType, applicableTo } = req.body;
+        console.log(req.body)
 
         // Validate discountType
         if (discountType !== 'percentage') {
@@ -106,14 +117,35 @@ const editOffer = async (req, res) => {
         }
 
         // Check for existing offer with the same name (excluding the current offer)
-        const existingOffer = await Offer.findOne({
-            _id: { $ne: offerId },
-            offerName
-        });
 
-        if (existingOffer) {
-            return res.status(400).json({ success: false, message: 'Offer name already exists!' });
-        }
+        const mongoose = require('mongoose'); // ✅ Required at the top
+
+// Check for existing offer with the same name (excluding the current offer)
+
+
+// Escape regex special characters
+function escapeRegex(str) {
+  return str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
+
+// Case-insensitive regex (but still exact match)
+const offerNameRegex = new RegExp(`^${escapeRegex(offerName)}$`, 'i');
+
+const existingOffer = await Offer.findOne({
+  _id: { $ne: new mongoose.Types.ObjectId(offerId) }, // Exclude current offer
+  offerName: offerNameRegex                            // Case-insensitive, exact match
+});
+
+console.log(existingOffer, "existing : ");
+
+if (existingOffer) {
+  return res.status(400).json({ success: false, message: 'Offer name already exists!' });
+}
+
+
+
+
+
 
         const updatedOffer = await Offer.findByIdAndUpdate(offerId, {
             $set: {
@@ -125,7 +157,7 @@ const editOffer = async (req, res) => {
                 validUpto: new Date(validUpto),
                 offerType,
                 applicableTo,
-                
+
             }
         });
 

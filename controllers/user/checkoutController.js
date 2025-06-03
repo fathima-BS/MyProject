@@ -876,6 +876,16 @@ const removeCoupon = async (req, res) => {
     if (!cart.coupon || !cart.coupon.code) {
       return res.status(400).json({ success: false, message: 'No coupon applied' });
     }
+     const couponCode = cart.coupon.code;
+
+    // Find the coupon by code
+    const coupon = await Coupon.findOne({ couponCode });
+
+    if (coupon) {
+      // Remove user ID from coupon.userId array
+      coupon.userId = coupon.userId.filter(id => id.toString() !== userId.toString());
+      await coupon.save(); // Save the updated coupon
+    }
 
     cart.coupon = { code: '', amount: 0 };
     await cart.save();

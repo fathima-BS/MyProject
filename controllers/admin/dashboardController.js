@@ -171,26 +171,30 @@ const getDashboard = async (req, res) => {
 
 const getDashboardData = async (req, res) => {
     try {
-        console.log('getDashboardData called with filter:', req.query.filter);
+        
         const filter = req.query.filter || 'daily';
         let groupBy, dateFormat;
 
         switch (filter) {
             case 'yearly':
                 groupBy = { $year: '$createdOn' };
-                dateFormat = '$year';
+                dateFormat = '$_id'; // year number
                 break;
             case 'monthly':
-                groupBy = { $month: '$createdOn' };
-                dateFormat = '$month';
+                groupBy = {
+                    $dateToString: { format: "%Y-%m", date: "$createdOn" }
+                };
+                dateFormat = '$_id'; // year-month string
                 break;
             case 'weekly':
                 groupBy = { $week: '$createdOn' };
-                dateFormat = '$week';
+                dateFormat = '$_id'; // week number (you can convert outside if needed)
                 break;
-            default:
-                groupBy = { $dayOfYear: '$createdOn' };
-                dateFormat = '$dayOfYear';
+            default: // daily
+                groupBy = {
+                    $dateToString: { format: "%Y-%m-%d", date: "$createdOn" }
+                };
+                dateFormat = '$_id'; // date string like '2025-06-03'
         }
 
         const salesData = await Order.aggregate([
@@ -331,18 +335,10 @@ const getDashboardData = async (req, res) => {
             { $limit: 10 }
         ]);
 
-        console.log('getDashboardData results:', {
-            labels: salesData.length,
-            sales: salesData.length,
-            revenue: salesData.length,
-            topProducts: topProducts.length,
-            topCategories: topCategories.length,
-            topBrands: topBrands.length,
-            orderStatus: orderStatus.length
-        });
+        
 
         res.json({
-            labels: salesData.map(data => data._id.toString()),
+            labels: salesData.map(data => data.label),  // date strings for daily/monthly
             sales: salesData.map(data => data.totalSales || 0),
             revenue: salesData.map(data => data.totalRevenue || 0),
             topProducts: topProducts || [],
