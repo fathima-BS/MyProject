@@ -10,6 +10,7 @@ const couponController=require('../controllers/admin/couponController')
 const offerController = require('../controllers/admin/offerController')
 const dashboardController=require('../controllers/admin/dashboardController')
 const {adminAuth}=require('../middlewares/auth')
+const { adminErrorHandler} = require("../middlewares/error")
 
 
 router.get('/login', adminController.loadlogin);
@@ -74,5 +75,8 @@ router.delete('/offers/delete/:id', adminAuth, offerController.deleteOffer);
 //dashboard
 router.get('/dashboard', adminAuth, dashboardController.getDashboard);
 router.get('/dashboard/data', adminAuth, dashboardController.getDashboardData);
+
+
+router.use(adminErrorHandler)
 
 module.exports=router

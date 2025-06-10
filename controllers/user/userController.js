@@ -10,26 +10,26 @@ const mongoose = require('mongoose');
 const Offer = require('../../models/offerSchema');
 const bcrypt = require('bcrypt');
 
-const pageNotFound = async (req, res) => {
+const pageNotFound = async (req, res, next) => {
   try {
     res.render('page404');
-  } catch (err) {
-    console.error('Error rendering 404 page:', err);
-    res.status(500).send('Server Error');
+  } catch (error) {
+    error.statusCode = 500;
+    next(error)
   }
 };
 
-const loadSignup = async (req, res) => {
+const loadSignup = async (req, res, next) => {
   try {
     const referral = req.query.referral || null;
     res.render('signup', { message: null, referral });
-  } catch (err) {
-    console.error('Error loading signup page:', err);
-    res.status(500).send('Server Error');
+  } catch (error) {
+    error.statusCode = 500;
+    next(error)
   }
 };
 
-const loadLogin = async (req, res) => {
+const loadLogin = async (req, res, next) => {
   try {
     const message = req.query.error || null;
     if (!req.session.user) {
@@ -37,9 +37,9 @@ const loadLogin = async (req, res) => {
     } else {
       res.redirect('/');
     }
-  } catch (err) {
-    console.error('Error loading login page:', err);
-    res.redirect('/pageNotFound');
+  } catch (error) {
+    error.statusCode = 500;
+    next(error)
   }
 };
 
@@ -60,14 +60,6 @@ async function generateCode() {
   return result;
 }
 
-function generateTransactionId() {
-  const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
-  let result = 'WLT';
-  for (let i = 0; i < 9; i++) {
-    result += chars.charAt(Math.floor(Math.random() * chars.length));
-  }
-  return result;
-}
 
 async function sendVerificationEmail(email, otp) {
   try {
@@ -96,7 +88,7 @@ async function sendVerificationEmail(email, otp) {
   }
 }
 
-const signup = async (req, res) => {
+const signup = async (req, res, next) => {
   try {
     console.log('Signup request received:', req.body);
     const { username, dateOfBirth, email, password, cPassword, referral } = req.body;
@@ -137,9 +129,9 @@ const signup = async (req, res) => {
     console.log('Session data stored:', { userOtp: otp, otpExpires: req.session.otpExpires, userData: req.session.userData });
     res.render('verifyOtp');
     console.log('OTP Sent:', otp);
-  } catch (err) {
-    console.error('Signup error:', err);
-    res.redirect('/pageNotFound');
+  } catch (error) {
+    error.statusCode = 500;
+    next(error)
   }
 };
 
@@ -152,7 +144,7 @@ const securePassword = async (password) => {
   }
 };
 
-const verifyOtp = async (req, res) => {
+const verifyOtp = async (req, res, next) => {
   try {
     console.log('Verify OTP request received:', req.body);
     const { otp } = req.body;
@@ -244,12 +236,12 @@ const verifyOtp = async (req, res) => {
       res.status(400).json({ success: false, message: 'Invalid OTP' });
     }
   } catch (error) {
-    console.error('Error verifying OTP:', error);
-    res.status(500).json({ success: false, message: 'Server error' });
+    error.statusCode = 500;
+    next(error)
   }
 };
 
-const resendOtp = async (req, res) => {
+const resendOtp = async (req, res, next) => {
   try {
     const { email } = req.session.userData || {};
     if (!email) {
@@ -269,58 +261,14 @@ const resendOtp = async (req, res) => {
     console.log('Resend OTP:', otp);
     res.status(200).json({ success: true, message: 'OTP resent successfully' });
   } catch (error) {
-    console.error('Error resending OTP:', error);
-    res.status(500).json({ success: false, message: 'Server error' });
+    error.statusCode = 500;
+    next(error)
   }
 };
 
-// const loadWallet = async (req, res) => {
-//   try {
-//     const userId = req.session.user;
-
-//     if (!userId) {
-//       console.log('No user session found, redirecting to login');
-//       return res.redirect('/login');
-//     }
-
-//     const user = await User.findById(userId).select('username').lean();
-//     if (!user) {
-//       console.log('User not found for ID:', userId);
-//       return res.redirect('/login');
-//     }
-
-//     const wallet = await Wallet.findOne({ userId }).lean();
-
-//     if (!wallet) {
-//       return res.render('wallet', {
-//         user: {
-//           username: user.username,
-//           walletBalance: 0,
-//           walletTransactions: []
-//         }
-//       });
-//     }
-
-//     // Sort transactions by latest date
-//     const sortedTransactions = [...wallet.transactions].sort((a, b) => b.date - a.date);
-
-//     // Send data to EJS
-//     res.render('wallet', {
-//       user: {
-//         username: user.username,
-//         walletBalance: wallet.balance,
-//         walletTransactions: sortedTransactions
-//       }
-//     });
-
-//   } catch (error) {
-//     console.error('Error loading wallet page:', error);
-//     res.redirect('/pageNotFound');
-//   }
-// };
 
 
-const login = async (req, res) => {
+const login = async (req, res, next) => {
   try {
     const { email, password } = req.body;
     const user = await User.findOne({ email, isAdmin: false });
@@ -340,12 +288,12 @@ const login = async (req, res) => {
     req.session.userData = user;
     res.redirect('/');
   } catch (error) {
-    console.error('Login error:', error);
-    res.render('login', { message: 'Login failed. Please try again.' });
+    error.statusCode = 500;
+    next(error)
   }
 };
 
-const loadHomePage = async (req, res) => {
+const loadHomePage = async (req, res, next) => {
   try {
     const userId = req.session.user;
     const userData = userId ? await User.findById(userId).lean() : null;
@@ -407,17 +355,26 @@ const loadHomePage = async (req, res) => {
       }));
     }
 
+    // Fetch wishlist
+    let wishlist = null;
+    if (userId) {
+      wishlist = await Wishlist.findOne({ userId }).lean();
+    }
+
     res.render('home', {
       user: userData,
       productData: productsWithOffers,
+      wishlist: wishlist || { products: [] }
     });
-  } catch (err) {
-    console.error('Error loading home page:', err.message);
-    res.status(500).render('page404', { message: 'Unable to load home page' });
+  } catch (error) {
+    console.error('Error loading home page:', error);
+    error.statusCode = 500;
+    next(error);
   }
 };
 
-const loadShopPage = async (req, res) => {
+
+const loadShopPage = async (req, res, next) => {
   try {
     const userId = req.session.user;
     const userData = userId ? await User.findById(userId).lean() : null;
@@ -538,6 +495,12 @@ const loadShopPage = async (req, res) => {
     const totalPages = Math.ceil(totalProducts / perPage);
     const currentPage = Math.max(1, Math.min(parseInt(page) || 1, totalPages));
 
+    // Fetch wishlist
+    let wishlist = null;
+    if (userId) {
+      wishlist = await Wishlist.findOne({ userId }).lean();
+    }
+
     res.render('shop', {
       products: productsWithOffers,
       totalPages,
@@ -550,23 +513,30 @@ const loadShopPage = async (req, res) => {
       category: listedCategories,
       brand: listedBrands,
       findUser: userData,
+      wishlist: wishlist || { products: [] },
       message: req.session.userMsg || null,
     });
     req.session.userMsg = null;
   } catch (error) {
-    console.log('Error loading shop page:', error);
-    res.redirect('/pageNotFound');
+    console.error('Error loading shop page:', error);
+    error.statusCode = 500;
+    next(error);
   }
 };
 
-const logout = async (req, res) => {
-  req.session.destroy(err => {
-    if (err) {
-      console.error('Error destroying session:', err);
-      return res.redirect('/');
-    }
-    res.redirect('/login');
-  });
+const logout = async (req, res, next) => {
+  try {
+    req.session.destroy(err => {
+      if (err) {
+        console.error('Error destroying session:', err);
+        return res.redirect('/');
+      }
+      res.redirect('/login');
+    });
+  } catch (error) {
+    error.statusCode = 500;
+    next(error)
+  }
 };
 
 module.exports = {
@@ -575,7 +545,6 @@ module.exports = {
   pageNotFound,
   loadSignup,
   loadLogin,
-  // loadWallet,
   logout,
   signup,
   verifyOtp,

@@ -1,6 +1,6 @@
 const Coupon = require('../../models/couponSchema');
 
-const loadCoupon = async (req, res) => {
+const loadCoupon = async (req, res, next) => {
     try {
         let search = '';
         if (req.query.search) {
@@ -35,19 +35,21 @@ const loadCoupon = async (req, res) => {
             search
         });
     } catch (error) {
-        res.status(500).render('error', { message: 'Something went wrong while loading coupons' });
+        error.statusCode = 500;
+        next(error)
     }
 };
 
-const addCoupon = async (req, res) => {
+const addCoupon = async (req, res, next) => {
     try {
         const { name, couponCode, description, minimumPrice, offerPrice, createdOn, expireOn } = req.body;
 
+        function escapeRegex(str) {
+            return str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+        }
+
         const existingCoupon = await Coupon.findOne({
-            $or: [
-                { couponCode: { $regex: `^${couponCode}$`, $options: '' } },
-                { name: { $regex: `^${name}$`, $options: '' } }
-            ]
+            name: { $regex: `^${escapeRegex(name)}$`, $options: 'i' }
         });
 
         if (existingCoupon) {
@@ -67,12 +69,12 @@ const addCoupon = async (req, res) => {
         await newCoupon.save()
         return res.json({ success: true, message: 'Coupon added successfully!' });
     } catch (error) {
-        console.error(error)
-        return res.status(500).json({ success: false, message: 'Internal server error' });
+        error.statusCode = 500;
+        next(error)
     }
 };
 
-const editCoupon = async (req, res) => {
+const editCoupon = async (req, res, next) => {
     try {
         const { couponId, name, couponCode, description, minimumPrice, offerPrice, createdOn, expireOn } = req.body;
 
@@ -80,13 +82,12 @@ const editCoupon = async (req, res) => {
             return str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
         }
 
-        const couponCodeRegex = new RegExp(`^${escapeRegex(name)}$`);
+        const nameRegex = new RegExp(`^${escapeRegex(name)}$`, "i");
 
         const existingCoupon = await Coupon.findOne({
             _id: { $ne: couponId },
-            name: couponCodeRegex
+            name: nameRegex
         });
-
 
         if (existingCoupon) {
             return res.json({ success: false, message: 'Coupon already exists!' });
@@ -110,11 +111,12 @@ const editCoupon = async (req, res) => {
 
         return res.json({ success: true, message: 'Coupon updated successfully!' });
     } catch (error) {
-        return res.status(500).json({ success: false, message: 'Internal Server Error' });
+        error.statusCode = 500;
+        next(error)
     }
 };
 
-const deleteCoupon = async (req, res) => {
+const deleteCoupon = async (req, res, next) => {
     try {
         const id = req.params.id;
 
@@ -126,7 +128,8 @@ const deleteCoupon = async (req, res) => {
 
         return res.json({ success: true, message: 'Coupon deleted successfully' });
     } catch (error) {
-        return res.status(500).json({ success: false, message: 'Internal server error' });
+        error.statusCode = 500;
+        next(error)
     }
 };
 

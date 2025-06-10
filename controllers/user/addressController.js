@@ -1,6 +1,6 @@
 const Address = require('../../models/addressSchema');
 
-const loadAddress = async (req, res) => {
+const loadAddress = async (req, res, next) => {
     try {
         const userId = req.session.user;
         if (!userId) {
@@ -12,15 +12,12 @@ const loadAddress = async (req, res) => {
             addresses: addresses || { address: [] }
         });
     } catch (error) {
-        console.error('Error loading address page:', error);
-        res.status(500).json({
-            success: false,
-            message: 'An error occurred while loading your addresses. Please try again.'
-        });
+        error.statusCode = 500;
+        next(error)
     }
 };
 
-const addAddress = async (req, res) => {
+const addAddress = async (req, res, next) => {
     try {
         const userId = req.session.user;
         if (!userId) {
@@ -59,15 +56,12 @@ const addAddress = async (req, res) => {
             message: 'Address added successfully.'
         });
     } catch (error) {
-        console.error('Error adding address:', error);
-        res.status(500).json({
-            success: false,
-            message: 'An error occurred while adding the address.'
-        });
+        error.statusCode = 500;
+        next(error)
     }
 };
 
-const editAddress = async (req, res) => {
+const editAddress = async (req, res, next) => {
     try {
         const userId = req.session.user;
         if (!userId) {
@@ -112,15 +106,12 @@ const editAddress = async (req, res) => {
             message: 'Address updated successfully.'
         });
     } catch (error) {
-        console.error('Error editing address:', error);
-        res.status(500).json({
-            success: false,
-            message: 'An error occurred while updating the address.'
-        });
+        error.statusCode = 500;
+        next(error)
     }
 };
 
-const deleteAddress = async (req, res) => {
+const deleteAddress = async (req, res, next) => {
     try {
         const userId = req.session.user;
         if (!userId) {
@@ -155,15 +146,12 @@ const deleteAddress = async (req, res) => {
             message: 'Address deleted successfully.'
         });
     } catch (error) {
-        console.error('Error deleting address:', error);
-        res.status(500).json({
-            success: false,
-            message: 'An error occurred while deleting the address.'
-        });
+        error.statusCode = 500;
+        next(error)
     }
 };
 
-const deliverAddress = async (req, res) => {
+const deliverAddress = async (req, res, next) => {
     try {
         const userId = req.session.user;
         if (!userId) {
@@ -199,11 +187,8 @@ const deliverAddress = async (req, res) => {
             message: 'Delivery address set successfully.'
         });
     } catch (error) {
-        console.error('Error setting delivery address:', error);
-        res.status(500).json({
-            success: false,
-            message: 'An error occurred while setting the delivery address.'
-        });
+        error.statusCode = 500;
+        next(error)
     }
 };
 

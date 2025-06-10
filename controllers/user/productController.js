@@ -4,9 +4,10 @@ const User = require('../../models/userSchema');
 const Wishlist = require('../../models/wishlistSchema');
 const Offer = require('../../models/offerSchema');
 
-const productDetailPage = async (req, res) => {
+const productDetailPage = async (req, res, next) => {
     try {
         const productId = req.params.id;
+        const userId = req.session.user; // Get userId from session
         const currentDate = new Date();
 
         // Fetch the product with populated brand and category
@@ -22,7 +23,7 @@ const productDetailPage = async (req, res) => {
             isActive: true,
             validFrom: { $lte: currentDate },
             validUpto: { $gte: currentDate }
-        }).exec();
+        }).lean();
 
         // Fetch Category Offer
         const categoryOffer = product.category ? await Offer.findOne({
@@ -31,7 +32,7 @@ const productDetailPage = async (req, res) => {
             isActive: true,
             validFrom: { $lte: currentDate },
             validUpto: { $gte: currentDate }
-        }).exec() : null;
+        }).lean() : null;
 
         // Determine the largest offer
         let finalOffer = null;
@@ -57,9 +58,21 @@ const productDetailPage = async (req, res) => {
         })
             .populate('brand')
             .populate('category')
-            .limit(4);
+            .limit(4)
+            .lean();
 
-        // Add offer data for related products
+        // Fetch wishlist for the user (same as shop controller)
+        let wishlist = null;
+        if (userId) {
+            wishlist = await Wishlist.findOne({ userId }).lean();
+        }
+
+        // Check if main product is in wishlist
+        const isInWishlist = wishlist
+            ? wishlist.products.some(item => item.productId.toString() === productId)
+            : false;
+
+        // Add offer data and wishlist status for related products
         const relatedProductsWithOffers = await Promise.all(relatedProducts.map(async (prod) => {
             const prodOffer = await Offer.findOne({
                 offerType: 'Product',
@@ -67,7 +80,7 @@ const productDetailPage = async (req, res) => {
                 isActive: true,
                 validFrom: { $lte: currentDate },
                 validUpto: { $gte: currentDate }
-            }).exec();
+            }).lean();
 
             const catOffer = prod.category ? await Offer.findOne({
                 offerType: 'Category',
@@ -75,7 +88,7 @@ const productDetailPage = async (req, res) => {
                 isActive: true,
                 validFrom: { $lte: currentDate },
                 validUpto: { $gte: currentDate }
-            }).exec() : null;
+            }).lean() : null;
 
             let prodFinalOffer = null;
             if (prodOffer && catOffer) {
@@ -90,28 +103,34 @@ const productDetailPage = async (req, res) => {
                 ? prod.salePrice * (1 - prodFinalOffer.discountAmount / 100)
                 : prod.salePrice;
 
+            // Check if this related product is in the wishlist
+            const isProductInWishlist = wishlist
+                ? wishlist.products.some(item => item.productId.toString() === prod._id.toString())
+                : false;
+
             return {
-                ...prod._doc,
+                ...prod,
                 finalOffer: prodFinalOffer,
-                discountedPrice: prodDiscountedPrice
+                discountedPrice: prodDiscountedPrice,
+                isInWishlist: isProductInWishlist // Add wishlist status
             };
         }));
-
-        // Check if product is in wishlist
-        const wishlist = await Wishlist.findOne({ userId: req.session.user?._id });
-        const isInWishlist = wishlist ? wishlist.products.some(item => item.productId.toString() === productId) : false;
-
+console.log(relatedProductsWithOffers)
+        // Render the product detail page
         res.render('productDetail', {
             product,
             title: product.productName,
             relatedProducts: relatedProductsWithOffers,
             isInWishlist,
+            wishlist: wishlist || { products: [] }, // Consistent with shop controller
             finalOffer,
-            discountedPrice
+            discountedPrice,
+            findUser: userId ? await User.findById(userId).lean() : null // Add user data like shop controller
         });
     } catch (error) {
-        console.error(error);
-        res.status(500).render('error', { message: 'Server error' });
+        console.error('Error loading product detail page:', error);
+        error.statusCode = 500;
+        next(error);
     }
 };
 

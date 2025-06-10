@@ -69,6 +69,33 @@
         color: #ef4444;
         font-weight: 600;
     }
+    .pagination {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 10px;
+        margin-top: 20px;
+    }
+    .pagination a, .pagination span {
+        padding: 8px 12px;
+        border: 1px solid #d1d5db;
+        border-radius: 4px;
+        text-decoration: none;
+        color: #1f2937;
+        transition: background-color 0.2s ease;
+    }
+    .pagination a:hover:not(.disabled) {
+        background-color: #e5e7eb;
+    }
+    .pagination .active {
+        background-color: #1e3a8a;
+        color: white;
+        border-color: #1e3a8a;
+    }
+    .pagination .disabled {
+        color: #6b7280;
+        cursor: not-allowed;
+    }
 </style>
 
 <!-- Main Content -->
@@ -100,11 +127,11 @@
                                     </button>
                                 </div>
                                 <div class="flex items-center mt-3 space-x-2">
-                                    <button class="decrement-quantity quantity-btn bg-gray-200 text-gray-600 rounded-l <%= item.quantity <= 1 || item.productId.quantity <= 0 ? 'opacity-50 cursor-not-allowed' : '' %>" 
-                                            data-product-id="<%= item.productId._id %>" <%= item.quantity <= 1 || item.productId.quantity <= 0 ? 'disabled' : '' %>>-</button>
+                                    <button class="decrement-quantity quantity-btn bg-gray-200 text-gray-600 rounded-l <%= item.quantity <= 1 || item.productId.quantity <= 0 || item.productId.isListed === false ? 'opacity-50 cursor-not-allowed' : '' %>" 
+                                            data-product-id="<%= item.productId._id %>" <%= item.quantity <= 1 || item.productId.quantity <= 0 || item.productId.isListed === false ? 'disabled' : '' %>>-</button>
                                     <span class="quantity px-4 py-2 border-t border-b border-gray-200 text-gray-800 font-medium"><%= item.quantity %></span>
-                                    <button class="increment-quantity quantity-btn bg-gray-200 text-gray-600 rounded-r <%= item.quantity >= item.productId.quantity || item.quantity >= 5 || item.productId.quantity <= 0 ? 'opacity-50 cursor-not-allowed' : '' %>" 
-                                            data-product-id="<%= item.productId._id %>" <%= item.quantity >= item.productId.quantity || item.quantity >= 5 || item.productId.quantity <= 0 ? 'disabled' : '' %>>+</button>
+                                    <button class="increment-quantity quantity-btn bg-gray-200 text-gray-600 rounded-r <%= item.quantity >= item.productId.quantity || item.quantity >= 5 || item.productId.quantity <= 0 || item.productId.isListed === false ? 'opacity-50 cursor-not-allowed' : '' %>" 
+                                            data-product-id="<%= item.productId._id %>" <%= item.quantity >= item.productId.quantity || item.quantity >= 5 || item.productId.quantity <= 0 || item.productId.isListed === false ? 'disabled' : '' %>>+</button>
                                 </div>
                                 <div class="price-offer mt-3">
                                     <% if (item.finalOffer) { %>
@@ -115,17 +142,51 @@
                                         <span class="discounted-price">₹<%= (item.productId.salePrice * item.quantity).toLocaleString("en-IN", { minimumFractionDigits: 2, maximumFractionDigits: 2 }) %></span>
                                     <% } %>
                                 </div>
-                                <% if (item.productId.quantity <= 0) { %>
-                                    <p class="text-red-500 mt-2 text-sm font-medium">Out of stock</p>
+                                <% if (item.productId.isListed === false) { %>
+                                    <p class="text-red-500 mt-2 text-sm font-medium">
+                                        Product Unavailable
+                                    </p>
+                                <% } else if (item.productId.quantity <= 0 || item.quantity > item.productId.quantity) { %>
+                                    <% if (item.productId.quantity > 0) { %>
+                                        <p class="text-red-600 mt-2 text-sm font-medium">
+                                            Out of Stock.
+                                            <span class="error-stock">Available: <%= item.productId.quantity || 0 %></span>
+                                        </p>
+                                    <% } else { %>
+                                        <p class="text-red-500 mt-2 text-sm font-medium">
+                                            Out of Stock
+                                        </p>
+                                    <% } %>
                                 <% } %>
                             </div>
                         </div>
                     <% } %>
                 <% }) %>
+                <!-- Pagination Controls -->
+                <div class="pagination">
+                    <% if (currentPage > 1) { %>
+                        <a href="/cart?page=<%= currentPage - 1 %>">« Previous</a>
+                    <% } else { %>
+                        <span class="disabled">« Previous</span>
+                    <% } %>
+                    <% for (let i = 1; i <= totalPages; i++) { %>
+                        <a href="/cart?page=<%= i %>" class="<%= currentPage === i ? 'active' : '' %>"><%= i %></a>
+                    <% } %>
+                    <% if (currentPage < totalPages) { %>
+                        <a href="/cart?page=<%= currentPage + 1 %>">Next »</a>
+                    <% } else { %>
+                        <span class="disabled">Next »</span>
+                    <% } %>
+                </div>
             <% } else { %>
-                <div class="bg-white p-8 rounded-lg shadow-sm text-center">
-                    <p class="text-gray-600 text-lg">Your cart is empty.</p>
-                    <a href="/shop" class="text-blue-600 hover:underline mt-4 inline-block font-medium">Continue Shopping</a>
+                <div class="bg-white p-6 rounded-lg mb-6 max-w-md mx-auto">
+                    <p class="text-gray-700 text-lg text-center font-semibold">
+                        Your cart is empty.
+                    </p>
+                    <a style="text-decoration: none;" href="/shop"
+                        class="mt-4 inline-block text-center text-white bg-blue-600 hover:bg-blue-700 transition-colors duration-200 px-4 py-2 rounded-md font-medium w-full">
+                        Continue Shopping
+                    </a>
                 </div>
             <% } %>
         </div>
@@ -146,8 +207,8 @@
                     <span>Total</span>
                     <span>₹<%= total.toLocaleString("en-IN", { minimumFractionDigits: 2, maximumFractionDigits: 2 }) %></span>
                 </div>
-                <a href="/checkout" class="block w-full bg-blue-900 text-white py-2 rounded-lg mt-4 checkout-btn font-medium text-center <%= cart.items.some(item => item.productId.quantity <= 0) ? 'opacity-50 cursor-not-allowed' : '' %>"
-                   style="text-decoration: none; color: white;" <%= cart.items.some(item => item.productId.quantity <= 0) ? 'onclick="return false;"' : '' %>>Proceed to Checkout</a>
+                <a href="/checkout" class="block w-full bg-blue-900 text-white py-2 rounded-lg mt-4 checkout-btn font-medium text-center <%= cart.items.some(item => item && item.productId && (item.productId.quantity <= 0 || item.productId.isListed === false)) ? 'opacity-50 cursor-not-allowed' : '' %>"
+                    style="text-decoration: none; color: white;" <%= cart.items.some(item => item && item.productId && (item.productId.quantity <= 0 || item.productId.isListed === false)) ? 'onclick="return false;"' : '' %>>Proceed to Checkout</a>
             <% } else { %>
                 <p class="text-gray-600">Your cart is empty.</p>
             <% } %>
@@ -254,5 +315,9 @@ document.querySelectorAll('.remove-btn').forEach(button => {
         }
     });
 });
+
+
+
+
 </script>
 <%- include("../partials/user/footer") %>

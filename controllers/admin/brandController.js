@@ -1,6 +1,6 @@
 const Brand = require('../../models/brandSchema');
 
-const loadBrand = async (req, res) => {
+const loadBrand = async (req, res, next) => {
     try {
         let search = '';
         if (req.query.search) {
@@ -31,12 +31,12 @@ const loadBrand = async (req, res) => {
             search
         });
     } catch (error) {
-        console.error(error);
-        res.status(500).render('error', { message: 'Something went wrong while loading brands' });
+        error.statusCode = 500;
+        next(error)
     }
 };
 
-const addBrand = async (req, res) => {
+const addBrand = async (req, res, next) => {
     try {
         const { BrandName, description } = req.body;
 
@@ -55,12 +55,12 @@ const addBrand = async (req, res) => {
 
         return res.json({ success: true, message: 'Brand added successfully!' });
     } catch (error) {
-        console.error(error);
-        return res.status(500).json({ success: false, message: 'Internal server error' });
+        error.statusCode = 500;
+        next(error)
     }
 };
 
-const editBrand = async (req, res) => {
+const editBrand = async (req, res, next) => {
     try {
         const { brandId, BrandName, description } = req.body;
 
@@ -81,12 +81,12 @@ const editBrand = async (req, res) => {
 
         return res.json({ success: true, message: 'Brand updated successfully!' });
     } catch (error) {
-        console.error(error);
-        return res.status(500).json({ success: false, message: 'Internal Server Error' });
+        error.statusCode = 500;
+        next(error)
     }
 };
 
-const deleteBrand = async (req, res) => {
+const deleteBrand = async (req, res, next) => {
     try {
         const id = req.params.id;
 
@@ -98,12 +98,12 @@ const deleteBrand = async (req, res) => {
 
         return res.json({ success: true, message: 'Brand deleted successfully' });
     } catch (error) {
-        console.error(error);
-        return res.status(500).json({ success: false, message: 'Internal server error' });
+        error.statusCode = 500;
+        next(error)
     }
 };
 
-const unlistBrand = async (req, res) => {
+const unlistBrand = async (req, res, next) => {
     try {
         const id = req.params.id;
 
@@ -115,12 +115,12 @@ const unlistBrand = async (req, res) => {
 
         return res.json({ success: true, message: 'Brand unlisted' });
     } catch (error) {
-        console.error(error);
-        return res.status(500).json({ success: false, message: 'Internal server error' });
+        error.statusCode = 500;
+        next(error)
     }
 };
 
-const listBrand = async (req, res) => {
+const listBrand = async (req, res, next) => {
     try {
         const id = req.params.id;
 
@@ -132,8 +132,8 @@ const listBrand = async (req, res) => {
 
         return res.json({ success: true, message: 'Brand listed' });
     } catch (error) {
-        console.error(error);
-        return res.status(500).json({ success: false, message: 'Internal server error' });
+        error.statusCode = 500;
+        next(error)
     }
 };
 

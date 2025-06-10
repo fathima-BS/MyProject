@@ -4,9 +4,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Order Details</title>
+    <title>Order Details - Cario</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css">
     <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
@@ -19,7 +19,7 @@
             --text-color: #F1F5F9;
             --text-muted: #94A3B8;
             --border-color: rgba(148, 163, 184, 0.2);
-            --card-bg: #1E293B;
+            --card-bg: #131415;
             --card-header-bg: #0F172A;
             --table-header-bg: #090a0c;
             --hover-color: #4F46E5;
@@ -131,40 +131,48 @@
             color: var(--text-muted);
         }
 
-        .table {
+        .table-responsive .table {
             width: 100%;
             border-collapse: separate;
             border-spacing: 0;
             margin-top: 15px;
-            color: var(--text-color);
-            background-color: var(--card-bg); /* Ensure table has dark background */
+            color: var(--text-color) !important;
+            background-color: var(--card-bg) !important;
+            border-radius: 8px;
+            overflow: hidden;
         }
 
-        .table th {
-            background-color: var(--table-header-bg);
-            color: var(--text-color);
+        .table-responsive .table th {
+            background-color: var(--table-header-bg) !important;
+            color: var(--text-color) !important;
             padding: 15px;
             text-align: left;
             font-weight: 600;
-            border-bottom: 1px solid var(--border-color);
+            border-bottom: 1px solid var(--border-color) !important;
         }
 
-        .table tbody tr {
-            background-color: var(--card-bg); /* Ensure rows are dark */
+        .table-responsive .table tbody tr {
+            background-color: var(--card-bg) !important;
+            transition: background-color 0.2s ease;
         }
 
-        .table tbody td {
-            background-color: var(--card-bg); /* Ensure cells are dark */
+        .table-responsive .table tbody tr:hover {
+            background-color: #2D3748 !important; /* Slightly lighter for hover */
+        }
+
+        .table-responsive .table tbody td {
+            background-color: var(--card-bg) !important;
+            color: var(--text-color) !important;
             padding: 18px 15px;
-            border-bottom: 1px solid var(--border-color);
+            border-bottom: 1px solid var(--border-color) !important;
             vertical-align: middle;
         }
 
-        .table tr:last-child td {
-            border-bottom: none;
+        .table-responsive .table tr:last-child td {
+            border-bottom: none !important;
         }
 
-        .table .product-image {
+        .table-responsive .table .product-image {
             width: 60px;
             height: 60px;
             border-radius: 8px;
@@ -175,31 +183,31 @@
             justify-content: center;
         }
 
-        .table .product-image img {
+        .table-responsive .table .product-image img {
             width: 100%;
             height: 100%;
             object-fit: cover;
             transition: transform 0.3s ease;
         }
 
-        .table .product-image:hover img {
+        .table-responsive .table .product-image:hover img {
             transform: scale(1.05);
         }
 
-        .table .product-image svg {
+        .table-responsive .table .product-image svg {
             width: 32px;
             height: 32px;
             opacity: 0.8;
         }
 
-        .total-row {
+        .table-responsive .table .total-row {
             font-weight: 700;
             font-size: 16px;
         }
 
-        .total-row td {
-            background-color: var(--card-bg); /* Override semi-transparent background */
-            color: var(--text-color);
+        .table-responsive .table .total-row td {
+            background-color: var(--card-bg) !important;
+            color: var(--text-color) !important;
         }
 
         .status-badge {
@@ -362,13 +370,13 @@
                 width: 100%;
             }
 
-            .table .product-image {
+            .table-responsive .table .product-image {
                 width: 48px;
                 height: 48px;
             }
 
-            .table .product-image img,
-            .table .product-image svg {
+            .table-responsive .table .product-image img,
+            .table-responsive .table .product-image svg {
                 width: 24px;
                 height: 24px;
             }
@@ -418,7 +426,7 @@
                                 <%= order.address.name %>, <%= order.address.city %>, <%= order.address.State %> -
                                 <%= order.address.pincode %>
                                 <div class="detail-phone">
-                                    Phone:<br> <span style="color: white;">
+                                    Phone:<br> <span>
                                         <%= order.address.phone %>
                                         <%= order.address.altPhone ? `| Alt: ${order.address.altPhone}` : '' %>
                                     </span>
@@ -489,16 +497,16 @@
                                             <% } %>
                                         </div>
                                     </td>
-                                    <td style="color: rgb(255, 255, 255);">
+                                    <td>
                                         <%= item.product?.productName || 'Unknown Product' %>
                                     </td>
-                                    <td style="color: rgb(255, 255, 255);">
+                                    <td>
                                         <%= item.quantity %>
                                     </td>
-                                    <td style="color: rgb(255, 255, 255);">₹<%= item.price.toLocaleString('en-IN', {
+                                    <td>₹<%= item.price.toLocaleString('en-IN', {
                                             minimumFractionDigits: 2, maximumFractionDigits: 2 }) %>
                                     </td>
-                                    <td style="color: rgb(255, 255, 255);">₹<%= (item.price *
+                                    <td>₹<%= (item.price *
                                             item.quantity).toLocaleString('en-IN', { minimumFractionDigits: 2,
                                             maximumFractionDigits: 2 }) %>
                                     </td>
@@ -514,8 +522,8 @@
                                 calculatedTotal += item.price * item.quantity;
                             }); %>
                             <tr class="total-row">
-                                <td colspan="4" class="text-end" style="color: white;">Total</td>
-                                <td style="color: white;">
+                                <td colspan="4" class="text-end">Total</td>
+                                <td>
                                     ₹<%= calculatedTotal.toLocaleString('en-IN', {
                                         minimumFractionDigits: 2, maximumFractionDigits: 2 }) %>
                                 </td>

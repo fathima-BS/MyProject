@@ -9,7 +9,7 @@ const ExcelJS = require('exceljs');
 const ITEMS_PER_PAGE = 10;
 
 // List Orders with Search, Sort, Filter, and Pagination
-const listOrders = async (req, res) => {
+const listOrders = async (req, res,next) => {
   try {
     const { page = 1, search = '', status = 'all', months = 'all', sortBy = 'createdOn' } = req.query;
     let query = {};
@@ -68,13 +68,13 @@ const listOrders = async (req, res) => {
       sortBy,
     });
   } catch (error) {
-    console.error('Error listing orders:', error);
-    res.status(500).send('Server Error');
-  }
+      error.statusCode=500;
+      next(error)
+    }
 };
 
 // Get Order Details for Admin
-const getOrderDetails = async (req, res) => {
+const getOrderDetails = async (req, res,next) => {
   try {
     const orderId = req.params.id;
     const order = await Order.findOne({ orderId })
@@ -85,14 +85,14 @@ const getOrderDetails = async (req, res) => {
     }
 
     res.render('orderDetailsAdmin', { order });
-  } catch (error) {
-    console.error('Error fetching order details:', error.message, error.stack);
-    res.status(500).render('page404', { message: 'Something went wrong while fetching order details.' });
+  }catch (error) {
+    error.statusCode=500;
+    next(error)
   }
 };
 
 // Update Order Status
-const updateOrderStatus = async (req, res) => {
+const updateOrderStatus = async (req, res,next) => {
   try {
     const { orderId } = req.params;
     const { status } = req.body;
@@ -112,13 +112,13 @@ const updateOrderStatus = async (req, res) => {
     await order.save();
     res.status(200).json({ success: true, message: 'Order status updated successfully.' });
   } catch (error) {
-    console.error('Error updating order status:', error.message, error.stack);
-    res.status(500).json({ success: false, message: 'Something went wrong while updating the order status.' });
+     error.statusCode=500;
+     next(error)
   }
 };
 
 // Handle Return Request (Accept/Reject)
-const handleReturnRequest = async (req, res) => {
+const handleReturnRequest = async (req, res,next) => {
   try {
     const { orderId, productId, action, rejectReason } = req.query;
 
@@ -183,12 +183,12 @@ const handleReturnRequest = async (req, res) => {
     await order.save();
     res.status(200).json({ success: true, message: `Return request ${action}ed successfully.` });
   } catch (error) {
-    console.error('Error handling return request:', error.message, error.stack);
-    res.status(500).json({ success: false, message: 'Something went wrong while processing the return request.' });
+     error.statusCode=500;
+     next(error)
   }
 };
 
-const getSalesReport = async (req, res) => {
+const getSalesReport = async (req, res,next) => {
   try {
     const { filter = 'daily', startDate, endDate, page = 1 } = req.query;
     let query = {status:"Delivered"}; // Include all order statuses
@@ -288,12 +288,12 @@ const getSalesReport = async (req, res) => {
       totalPages,
     });
   } catch (error) {
-    console.error('Error fetching sales report:', error);
-    res.status(500).render('dashboard', { message: 'Something went wrong while fetching the sales report.' });
+    error.statusCode=500;
+    next(error)
   }
 };
 
-const downloadSalesReportPDF = async (req, res) => {
+const downloadSalesReportPDF = async (req, res,next) => {
   try {
     const { filter = 'daily', startDate, endDate } = req.query;
     let query = {status:"Delivered"};
@@ -504,12 +504,12 @@ const downloadSalesReportPDF = async (req, res) => {
     // Finalize the PDF and end the stream
     doc.end();
   } catch (error) {
-    console.error('Error generating PDF:', error);
-    res.status(500).send('Error generating PDF');
+     error.statusCode=500;
+     next(error)
   }
 };
 
-const downloadSalesReportExcel = async (req, res) => {
+const downloadSalesReportExcel = async (req, res,next) => {
   try {
     const { filter = 'daily', startDate, endDate } = req.query;
     let query = {status:"Delivered"};
@@ -683,8 +683,8 @@ const downloadSalesReportExcel = async (req, res) => {
     await workbook.xlsx.write(res);
     res.end();
   } catch (error) {
-    console.error('Error generating Excel:', error);
-    res.status(500).send('Error generating Excel');
+     error.statusCode=500;
+     next(error)
   }
 };
 

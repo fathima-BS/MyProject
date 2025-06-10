@@ -5,94 +5,122 @@ const Wishlist = require('../../models/wishlistSchema');
 const Offer = require('../../models/offerSchema');
 const mongoose = require('mongoose');
 
-const loadCartPage = async (req, res) => {
-  try {
-    const userId = req.session.user;
-    if (!userId) {
-      return res.redirect('/login?error=Please login to view your cart');
-    }
-
-    const userData = await User.findById(userId).lean();
-    const cart = await Cart.findOne({ userId })
-      .populate({
-        path: 'items.productId',
-        populate: { path: 'category' } // Populate category for Category offers
-      })
-      .lean();
-
-    const currentDate = new Date();
-
-    // Calculate subtotal, total items, and attach offer data
-    let subtotal = 0;
-    let totalItems = 0;
-    let updatedItems = [];
-
-    if (cart && cart.items && cart.items.length > 0) {
-      updatedItems = await Promise.all(cart.items.map(async (item) => {
-        if (!item.productId) return null; // Skip invalid items
-
-        // Fetch offers for the product
-        const productOffer = await Offer.findOne({
-          offerType: 'Product',
-          applicableTo: item.productId._id,
-          isActive: true,
-          validFrom: { $lte: currentDate },
-          validUpto: { $gte: currentDate }
-        }).lean();
-
-        const categoryOffer = item.productId.category ? await Offer.findOne({
-          offerType: 'Category',
-          applicableTo: item.productId.category._id,
-          isActive: true,
-          validFrom: { $lte: currentDate },
-          validUpto: { $gte: currentDate }
-        }).lean() : null;
-
-        let finalOffer = null;
-        if (productOffer && categoryOffer) {
-          finalOffer = productOffer.discountAmount > categoryOffer.discountAmount ? productOffer : categoryOffer;
-        } else if (productOffer) {
-          finalOffer = productOffer;
-        } else if (categoryOffer) {
-          finalOffer = categoryOffer;
+const loadCartPage = async (req, res, next) => {
+    try {
+        const userId = req.session.user;
+        if (!userId) {
+            return res.redirect('/login?error=Please login to view your cart');
         }
 
-        const discountedPrice = finalOffer
-          ? item.productId.salePrice * (1 - finalOffer.discountAmount / 100)
-          : item.productId.salePrice;
+        const userData = await User.findById(userId).lean();
+        const cart = await Cart.findOne({ userId })
+            .populate({
+                path: 'items.productId',
+                populate: { path: 'category' } // Populate category for Category offers
+            })
+            .lean();
 
-        subtotal += discountedPrice * item.quantity;
-        totalItems += item.quantity;
+        const currentDate = new Date();
+        const itemsPerPage = 3; // Number of items per page
+        const page = parseInt(req.query.page) || 1; // Get page number from query, default to 1
 
-        return {
-          ...item,
-          finalOffer,
-          discountedPrice
-        };
-      }));
+        // Calculate subtotal, total items, and attach offer data
+        let subtotal = 0;
+        let totalItems = 0;
+        let updatedItems = [];
 
-      // Filter out null items
-      updatedItems = updatedItems.filter(item => item !== null);
+        if (cart && cart.items && cart.items.length > 0) {
+            updatedItems = await Promise.all(cart.items.map(async (item) => {
+                if (!item.productId) return null; // Skip invalid items
+
+                // Fetch offers for the product
+                const productOffer = await Offer.findOne({
+                    offerType: 'Product',
+                    applicableTo: item.productId._id,
+                    isActive: true,
+                    validFrom: { $lte: currentDate },
+                    validUpto: { $gte: currentDate }
+                }).lean();
+
+                const categoryOffer = item.productId.category ? await Offer.findOne({
+                    offerType: 'Category',
+                    applicableTo: item.productId.category._id,
+                    isActive: true,
+                    validFrom: { $lte: currentDate },
+                    validUpto: { $gte: currentDate }
+                }).lean() : null;
+
+                let finalOffer = null;
+                if (productOffer && categoryOffer) {
+                    finalOffer = productOffer.discountAmount > categoryOffer.discountAmount ? productOffer : categoryOffer;
+                } else if (productOffer) {
+                    finalOffer = productOffer;
+                } else if (categoryOffer) {
+                    finalOffer = categoryOffer;
+                }
+
+                const discountedPrice = finalOffer
+                    ? item.productId.salePrice * (1 - finalOffer.discountAmount / 100)
+                    : item.productId.salePrice;
+
+                subtotal += discountedPrice * item.quantity;
+                totalItems += item.quantity;
+
+                return {
+                    ...item,
+                    finalOffer,
+                    discountedPrice
+                };
+            }));
+
+            // Filter out null items
+            updatedItems = updatedItems.filter(item => item !== null);
+
+            // Calculate pagination
+            const totalItemsInCart = updatedItems.length;
+            const totalPages = Math.ceil(totalItemsInCart / itemsPerPage);
+            const startIndex = (page - 1) * itemsPerPage;
+            const endIndex = startIndex + itemsPerPage;
+            updatedItems = updatedItems.slice(startIndex, endIndex);
+
+            // Ensure page is within valid range
+            if (page < 1 || page > totalPages) {
+                return res.redirect('/cart?page=1');
+            }
+
+            // Calculate shipping cost: ₹60 if subtotal < ₹2000, otherwise ₹0
+            const shippingCost = subtotal < 2000 ? 60 : 0;
+
+            res.render('cart', {
+                user: userData,
+                cart: { ...cart, items: updatedItems },
+                subtotal: subtotal.toFixed(2),
+                totalItems,
+                shippingCost: shippingCost.toFixed(2),
+                total: (subtotal + shippingCost).toFixed(2),
+                currentPage: page,
+                totalPages: totalPages
+            });
+        } else {
+            // Handle empty cart
+            res.render('cart', {
+                user: userData,
+                cart: { items: [] },
+                subtotal: 0,
+                totalItems: 0,
+                shippingCost: 0,
+                total: 0,
+                currentPage: 1,
+                totalPages: 1
+            });
+        }
+    } catch (error) {
+        error.statusCode = 500;
+        next(error)
     }
-
-    // Calculate shipping cost: ₹60 if subtotal < ₹2000, otherwise ₹0
-    const shippingCost = subtotal < 2000 ? 60 : 0;
-
-    res.render('cart', {
-      user: userData,
-      cart: cart ? { ...cart, items: updatedItems } : { items: [] },
-      subtotal: subtotal.toFixed(2),
-      totalItems,
-      shippingCost: shippingCost.toFixed(2),
-      total: (subtotal + shippingCost).toFixed(2),
-    });
-  } catch (error) {
-    console.error('Error loading cart page:', error.message, error.stack);
-    res.status(500).render('error', { message: 'Unable to load cart page' });
-  }
 };
 
-const addToCart = async (req, res) => {
+const addToCart = async (req, res, next) => {
     try {
         const userId = req.session.user;
         if (!userId) {
@@ -180,12 +208,12 @@ const addToCart = async (req, res) => {
 
         res.status(200).json({ success: true, message: 'Product added to cart successfully' });
     } catch (error) {
-        console.error('Error adding to cart:', error);
-        res.status(500).json({ success: false, message: 'Error adding to cart' });
+        error.statusCode = 500;
+        next(error)
     }
 };
 
-const incrementQuantity = async (req, res) => {
+const incrementQuantity = async (req, res, next) => {
     try {
         const userId = req.session.user;
         if (!userId) {
@@ -221,12 +249,12 @@ const incrementQuantity = async (req, res) => {
 
         res.status(200).json({ success: true, message: 'Quantity incremented successfully' });
     } catch (error) {
-        console.error('Error incrementing quantity:', error);
-        res.status(500).json({ success: false, message: 'Error updating quantity' });
+        error.statusCode = 500;
+        next(error)
     }
 };
 
-const decrementQuantity = async (req, res) => {
+const decrementQuantity = async (req, res, next) => {
     try {
         const userId = req.session.user;
         if (!userId) {
@@ -259,12 +287,12 @@ const decrementQuantity = async (req, res) => {
 
         res.status(200).json({ success: true, message: 'Quantity decremented successfully' });
     } catch (error) {
-        console.error('Error decrementing quantity:', error);
-        res.status(500).json({ success: false, message: 'Error updating quantity' });
+        error.statusCode = 500;
+        next(error)
     }
 };
 
-const removeItem = async (req, res) => {
+const removeItem = async (req, res, next) => {
     try {
         const userId = req.session.user;
         if (!userId) {
@@ -286,8 +314,8 @@ const removeItem = async (req, res) => {
 
         res.status(200).json({ success: true, message: 'Item removed successfully' });
     } catch (error) {
-        console.error('Error removing item:', error);
-        res.status(500).json({ success: false, message: 'Error removing item' });
+        error.statusCode = 500;
+        next(error)
     }
 };
 

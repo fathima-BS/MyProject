@@ -10,6 +10,12 @@ const wishlist = async (req, res) => {
       return res.status(401).render('login', { message: 'Please log in to view your wishlist' });
     }
 
+    // Pagination parameters
+    const page = parseInt(req.query.page) || 1; // Default to page 1
+    const limit = 3; // 3 products per page
+    const skip = (page - 1) * limit; // Calculate items to skip
+
+    // Fetch wishlist
     const wishlist = await Wishlist.findOne({ userId })
       .populate({
         path: 'products.productId',
@@ -20,13 +26,20 @@ const wishlist = async (req, res) => {
       })
       .lean();
 
-    const currentDate = new Date();
     let wishlistItems = wishlist ? wishlist.products.map(item => item.productId) : [];
+    const totalItems = wishlistItems.length; // Total number of items
+    const totalPages = Math.ceil(totalItems / limit); // Total pages
 
-    // Apply offer logic to each wishlist item
+    // Validate page number
+    if (page < 1 || (page > totalPages && totalPages > 0)) {
+      return res.redirect('/wishlist?page=1');
+    }
+
+    // Apply offer logic and slice items for the current page
+    const currentDate = new Date();
     if (wishlistItems.length > 0) {
       wishlistItems = await Promise.all(wishlistItems.map(async (item) => {
-        if (!item) return null; // Skip invalid items
+        if (!item) return null;
 
         // Fetch offers for the product
         const productOffer = await Offer.findOne({
@@ -67,11 +80,21 @@ const wishlist = async (req, res) => {
 
       // Filter out null items
       wishlistItems = wishlistItems.filter(item => item !== null);
+
+      // Slice items for the current page
+      wishlistItems = wishlistItems.slice(skip, skip + limit);
     }
 
     const message = req.query.message || '';
 
-    res.render('wishlist', { wishlistItems, message });
+    // Render wishlist with pagination data
+    res.render('wishlist', {
+      wishlistItems,
+      message,
+      currentPage: page,
+      totalPages,
+      totalItems
+    });
   } catch (error) {
     console.error('Error fetching wishlist:', error.message, error.stack);
     res.status(500).render('error', { message: 'Unable to load wishlist page' });
