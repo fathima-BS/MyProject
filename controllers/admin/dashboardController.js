@@ -4,11 +4,11 @@ const Product = require('../../models/productSchema');
 const Category = require('../../models/categorySchema');
 const Brand = require('../../models/brandSchema');
 
-const getDashboard = async (req, res) => {
+const getDashboard = async (req, res, next) => {
     try {
         // Verify collection existence
         const collections = await mongoose.connection.db.listCollections().toArray();
-        console.log('Existing collections:', collections.map(c => c.name));
+
 
         // Calculate stats
         const today = new Date();
@@ -150,28 +150,14 @@ const getDashboard = async (req, res) => {
             error: null
         });
     } catch (error) {
-        console.error('Error in getDashboard:', {
-            message: error.message,
-            stack: error.stack,
-            code: error.code,
-            name: error.name
-        });
-        res.render('dashboard', {
-            todaySales: 0,
-            yesterdaySales: 0,
-            monthlySales: 0,
-            yearlySales: 0,
-            topProducts: [],
-            topCategories: [],
-            topBrands: [],
-            error: 'Failed to load dashboard data: ' + error.message
-        });
+        error.statusCode = 500;
+        next(error)
     }
 };
 
-const getDashboardData = async (req, res) => {
+const getDashboardData = async (req, res, next) => {
     try {
-        
+
         const filter = req.query.filter || 'daily';
         let groupBy, dateFormat;
 
@@ -187,9 +173,12 @@ const getDashboardData = async (req, res) => {
                 dateFormat = '$_id'; // year-month string
                 break;
             case 'weekly':
-                groupBy = { $week: '$createdOn' };
-                dateFormat = '$_id'; // week number (you can convert outside if needed)
+                groupBy = {
+                    $dateToString: { format: "%Y-%m-%d", date: { $dateTrunc: { date: "$createdOn", unit: "week", binSize: 1 } } }
+                };
+                dateFormat = '$_id'; // ISO week start date
                 break;
+
             default: // daily
                 groupBy = {
                     $dateToString: { format: "%Y-%m-%d", date: "$createdOn" }
@@ -335,7 +324,7 @@ const getDashboardData = async (req, res) => {
             { $limit: 10 }
         ]);
 
-        
+
 
         res.json({
             labels: salesData.map(data => data.label),  // date strings for daily/monthly
@@ -350,17 +339,8 @@ const getDashboardData = async (req, res) => {
             }
         });
     } catch (error) {
-        console.error('Error in getDashboardData:', error.message, error.stack);
-        res.status(500).json({
-            error: 'Failed to fetch dashboard data',
-            labels: [],
-            sales: [],
-            revenue: [],
-            topProducts: [],
-            topCategories: [],
-            topBrands: [],
-            orderStatus: { labels: [], data: [] }
-        });
+        error.statusCode = 500;
+        next(error)
     }
 };
 

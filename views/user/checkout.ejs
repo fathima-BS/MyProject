@@ -345,18 +345,6 @@
             <div class="w-full lg:w-1/3 bg-white p-6 rounded-lg shadow-sm">
                 <h3 class="text-lg font-semibold text-gray-800 mb-4">Order Summary (<%= totalItems %> Items)</h3>
                 <!-- Coupon Section -->
-                <!-- <div class="coupon-section">
-                <input type="text" id="couponCode" class="coupon-input" placeholder="Enter coupon code" <%= cart.coupon && cart.coupon.code ? 'disabled' : '' %>>
-                <button id="applyCouponBtn" class="coupon-btn apply-coupon-btn" <%= cart.coupon && cart.coupon.code ? 'disabled' : '' %>>Apply</button>
-                <% if (cart.coupon && cart.coupon.code) { %>
-                    <button id="removeCouponBtn" class="coupon-btn remove-coupon-btn">Remove</button>
-                <% } %>
-            </div> -->
-                <% if (cart.coupon && cart.coupon.code) { %>
-                    <p class="applied-coupon">Applied Coupon: <%= cart.coupon.code %> (₹<%=
-                                cart.coupon.amount.toLocaleString("en-IN", { minimumFractionDigits: 2,
-                                maximumFractionDigits: 2 }) %> OFF)</p>
-                    <% } %>
                         <!-- Cart Items with Photos -->
                         <% if (cartItems && cartItems.length> 0) { %>
                             <% cartItems.forEach(item=> { %>
@@ -700,291 +688,370 @@
     </div>
 
     <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+    <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', function () {
-            // Modal functionality for Add Address
-            const addModal = document.getElementById('addressModal');
-            const openAddModalBtn = document.getElementById('openAddressModal');
-            const closeAddModalBtn = document.getElementById('closeAddressModal');
-            const addAddressForm = document.getElementById('addAddressForm');
-            const editAddressForm = document.getElementById('editAddressForm');
-            const applyCouponBtn = document.getElementById('applyCouponBtn');
-            const removeCouponBtn = document.getElementById('removeCouponBtn');
-            const couponCodeInput = document.getElementById('couponCode');
+        // Modal functionality for Add Address
+        const addModal = document.getElementById('addressModal');
+        const openAddModalBtn = document.getElementById('openAddressModal');
+        const closeAddModalBtn = document.getElementById('closeAddressModal');
+        const addAddressForm = document.getElementById('addAddressForm');
+        const editAddressForm = document.getElementById('editAddressForm');
+        const applyCouponBtn = document.getElementById('applyCouponBtn');
+        const removeCouponBtn = document.getElementById('removeCouponBtn');
+        const couponCodeInput = document.getElementById('couponCode');
 
-            if (openAddModalBtn && addModal && closeAddModalBtn) {
-                openAddModalBtn.addEventListener('click', function (e) {
-                    e.preventDefault();
-                    addModal.classList.add('show');
-                    document.body.style.overflow = 'hidden';
-                });
-
-                closeAddModalBtn.addEventListener('click', function () {
-                    addModal.classList.remove('show');
-                    document.body.style.overflow = '';
-                    document.querySelectorAll('#addAddressForm .error-message').forEach(function (error) {
-                        if (error) error.textContent = '';
-                    });
-                    document.getElementById('addAddressForm').reset();
-                });
-            }
-
-            // Modal functionality for Edit Address
-            const editModal = document.getElementById('editAddressModal');
-            const closeEditModalBtn = document.getElementById('closeEditAddressModal');
-
-            if (editModal && closeEditModalBtn) {
-                closeEditModalBtn.addEventListener('click', function () {
-                    editModal.classList.remove('show');
-                    document.body.style.overflow = '';
-                    document.querySelectorAll('#editAddressForm .error-message').forEach(function (error) {
-                        if (error) error.textContent = '';
-                    });
-                });
-            }
-
-            // Close modals on outside click
-            window.addEventListener('click', function (e) {
-                if (e.target === addModal || e.target === editModal) {
-                    addModal.classList.remove('show');
-                    editModal.classList.remove('show');
-                    document.body.style.overflow = '';
-                    document.querySelectorAll('.error-message').forEach(function (error) {
-                        if (error) error.textContent = '';
-                    });
-                    document.getElementById('addAddressForm').reset();
-                }
+        if (openAddModalBtn && addModal && closeAddModalBtn) {
+            openAddModalBtn.addEventListener('click', function (e) {
+                e.preventDefault();
+                addModal.classList.add('show');
+                document.body.style.overflow = 'hidden';
             });
 
-            // Regex patterns
-            const nameRegex = /^[a-zA-Z\s]{2,50}$/;
-            const phoneRegex = /^\d{10}$/;
-            const pincodeRegex = /^\d{6}$/;
-            const textRegex = /^[a-zA-Z\s]{2,100}$/;
-            const couponCodeRegex = /^[A-Z0-9]{4,20}$/;
+            closeAddModalBtn.addEventListener('click', function () {
+                addModal.classList.remove('show');
+                document.body.style.overflow = '';
+                document.querySelectorAll('#addAddressForm .error-message').forEach(error => error.textContent = '');
+                document.getElementById('addAddressForm').reset();
+            });
+        }
 
-            // Real-time validation for Add Address Form
-            function validateAddField(fieldId, value) {
-                const errorElement = document.getElementById(fieldId + 'Error');
-                if (!errorElement) return false;
+        // Modal functionality for Edit Address
+        const editModal = document.getElementById('editAddressModal');
+        const closeEditModalBtn = document.getElementById('closeEditAddressModal');
 
-                let errorMessage = '';
+        if (editModal && closeEditModalBtn) {
+            closeEditModalBtn.addEventListener('click', function () {
+                editModal.classList.remove('show');
+                document.body.style.overflow = '';
+                document.querySelectorAll('#editAddressForm .error-message').forEach(error => error.textContent = '');
+            });
+        }
 
-                switch (fieldId) {
-                    case 'addAddressType':
-                        if (!['Home', 'Work', 'Other'].includes(value)) {
-                            errorMessage = 'Please select a valid address type';
-                        }
-                        break;
-                    case 'addFullName':
-                        if (!value) {
-                            errorMessage = 'Please enter full name';
-                        } else if (!nameRegex.test(value)) {
-                            errorMessage = 'Name must be 2-50 letters or spaces';
-                        }
-                        break;
-                    case 'addMobileNo':
-                        if (!value) {
-                            errorMessage = 'Please enter mobile number';
+        // Close modals on outside click
+        window.addEventListener('click', function (e) {
+            if (e.target === addModal) {
+                addModal.classList.remove('show');
+                document.body.style.overflow = '';
+                document.querySelectorAll('#addAddressForm .error-message').forEach(error => error.textContent = '');
+                document.getElementById('addAddressForm').reset();
+            } else if (e.target === editModal) {
+                editModal.classList.remove('show');
+                document.body.style.overflow = '';
+                document.querySelectorAll('#editAddressForm .error-message').forEach(error => error.textContent = '');
+            }
+        });
+
+        // Regex patterns
+        const nameRegex = /^[a-zA-Z\s]{2,50}$/;
+        const phoneRegex = /^\d{10}$/;
+        const pincodeRegex = /^[1-9]\d{5}$/;
+        const textRegex = /^[a-zA-Z\s]{2,100}$/;
+        const couponCodeRegex = /^[A-Z0-9]{4,20}$/;
+
+        // Check if a string consists of all identical digits
+        function isAllIdenticalDigits(value) {
+            return /^(\d)\1*$/.test(value);
+        }
+
+        // Real-time validation for Add Address Form
+        function validateAddField(fieldId, value) {
+            const errorElement = document.getElementById(fieldId + 'Error');
+            if (!errorElement) return false;
+
+            let errorMessage = '';
+
+            switch (fieldId) {
+                case 'addAddressType':
+                    if (!['Home', 'Work', 'Other'].includes(value)) {
+                        errorMessage = 'Please select a valid address type';
+                    }
+                    break;
+                case 'addFullName':
+                    if (!value) {
+                        errorMessage = 'Please enter full name';
+                    } else if (!nameRegex.test(value)) {
+                        errorMessage = 'Name must be 2-50 letters or spaces';
+                    }
+                    break;
+                case 'addMobileNo':
+                    if (!value) {
+                        errorMessage = 'Please enter mobile number';
+                    } else if (value.length < 10) {
+                        errorMessage = 'Should be 10 digit';
+                    } else if (value.startsWith('0')) {
+                        errorMessage = 'Mobile number cannot start with 0';
+                    } else if (value === '0000000000') {
+                        errorMessage = 'Mobile number cannot be all zeros';
+                    } else if (isAllIdenticalDigits(value)) {
+                        errorMessage = 'Invalid digit';
+                    } else if (!phoneRegex.test(value)) {
+                        errorMessage = 'Mobile number must be 10 digits';
+                    }
+                    break;
+                case 'addAltPhone':
+                    if (value) {
+                        if (value.length < 10) {
+                            errorMessage = 'Should be 10 digit';
+                        } else if (value.startsWith('0')) {
+                            errorMessage = 'Alternate phone cannot start with 0';
+                        } else if (value === '0000000000') {
+                            errorMessage = 'Alternate phone cannot be all zeros';
+                        } else if (isAllIdenticalDigits(value)) {
+                            errorMessage = 'Invalid digit';
                         } else if (!phoneRegex.test(value)) {
-                            errorMessage = 'Mobile number must be 10 digits';
+                            errorMessage = 'Alternate phone must be 10 digits';
+                        } else if (value === document.getElementById('addMobileNo')?.value) {
+                            errorMessage = 'Alternate phone must be different from primary phone';
                         }
-                        break;
-                    case 'addAltPhone':
-                        if (value && !phoneRegex.test(value)) {
-                            errorMessage = 'Alternate phone must be 10 digits or empty';
-                        }
-                        break;
-                    case 'addLandMark':
-                        if (!value) {
-                            errorMessage = 'Please enter landmark';
-                        } else if (!textRegex.test(value)) {
-                            errorMessage = 'Landmark must be 2-100 letters or spaces';
-                        }
-                        break;
-                    case 'addCity':
-                        if (!value) {
-                            errorMessage = 'Please enter city';
-                        } else if (!textRegex.test(value)) {
-                            errorMessage = 'City must be 2-100 letters or spaces';
-                        }
-                        break;
-                    case 'addPincode':
-                        if (!value) {
-                            errorMessage = 'Please enter pincode';
-                        } else if (!pincodeRegex.test(value)) {
-                            errorMessage = 'Pincode must be 6 digits';
-                        }
-                        break;
-                    case 'addState':
-                        if (!value) {
-                            errorMessage = 'Please enter state';
-                        } else if (!textRegex.test(value)) {
-                            errorMessage = 'State must be 2-100 letters or spaces';
-                        }
-                        break;
-                }
-
-                errorElement.textContent = errorMessage;
-                return !errorMessage;
+                    }
+                    break;
+                case 'addLandMark':
+                    if (!value) {
+                        errorMessage = 'Please enter landmark';
+                    } else if (!textRegex.test(value)) {
+                        errorMessage = 'Landmark must be 2-100 letters or spaces';
+                    }
+                    break;
+                case 'addCity':
+                    if (!value) {
+                        errorMessage = 'Please enter city';
+                    } else if (!textRegex.test(value)) {
+                        errorMessage = 'City must be 2-100 letters or spaces';
+                    }
+                    break;
+                case 'addPincode':
+                    if (!value) {
+                        errorMessage = 'Please enter pincode';
+                    } else if (!pincodeRegex.test(value)) {
+                        errorMessage = 'Pincode must be 6 digits starting with 1-9';
+                    } else if (isAllIdenticalDigits(value)) {
+                        errorMessage = 'Pincode cannot consist of all identical digits';
+                    }
+                    break;
+                case 'addState':
+                    if (!value) {
+                        errorMessage = 'Please enter state';
+                    } else if (!textRegex.test(value)) {
+                        errorMessage = 'State must be 2-100 letters or spaces';
+                    }
+                    break;
             }
 
-            // Real-time validation for Edit Address Form
-            function validateEditField(fieldId, value) {
-                const errorElement = document.getElementById(fieldId + 'Error');
-                if (!errorElement) return false;
+            errorElement.textContent = errorMessage;
+            return !errorMessage;
+        }
 
-                let errorMessage = '';
+        // Real-time validation for Edit Address Form
+        function validateEditField(fieldId, value) {
+            const errorElement = document.getElementById(fieldId + 'Error');
+            if (!errorElement) return false;
 
-                switch (fieldId) {
-                    case 'editAddressType':
-                        if (!['Home', 'Work', 'Other'].includes(value)) {
-                            errorMessage = 'Please select a valid address type';
-                        }
-                        break;
-                    case 'editFullName':
-                        if (!value) {
-                            errorMessage = 'Please enter full name';
-                        } else if (!nameRegex.test(value)) {
-                            errorMessage = 'Name must be 2-50 letters or spaces';
-                        }
-                        break;
-                    case 'editMobileNo':
-                        if (!value) {
-                            errorMessage = 'Please enter mobile number';
+            let errorMessage = '';
+
+            switch (fieldId) {
+                case 'editAddressType':
+                    if (!['Home', 'Work', 'Other'].includes(value)) {
+                        errorMessage = 'Please select a valid address type';
+                    }
+                    break;
+                case 'editFullName':
+                    if (!value) {
+                        errorMessage = 'Please enter full name';
+                    } else if (!nameRegex.test(value)) {
+                        errorMessage = 'Name must be 2-50 letters or spaces';
+                    }
+                    break;
+                case 'editMobileNo':
+                    if (!value) {
+                        errorMessage = 'Please enter mobile number';
+                    } else if (value.length < 10) {
+                        errorMessage = 'Should be 10 digit';
+                    } else if (value.startsWith('0')) {
+                        errorMessage = 'Mobile number cannot start with 0';
+                    } else if (value === '0000000000') {
+                        errorMessage = 'Mobile number cannot be all zeros';
+                    } else if (isAllIdenticalDigits(value)) {
+                        errorMessage = 'Invalid digit';
+                    } else if (!phoneRegex.test(value)) {
+                        errorMessage = 'Mobile number must be 10 digits';
+                    }
+                    break;
+                case 'editAltPhone':
+                    if (value) {
+                        if (value.length < 10) {
+                            errorMessage = 'Should be 10 digit';
+                        } else if (value.startsWith('0')) {
+                            errorMessage = 'Alternate phone cannot start with 0';
+                        } else if (value === '0000000000') {
+                            errorMessage = 'Alternate phone cannot be all zeros';
+                        } else if (isAllIdenticalDigits(value)) {
+                            errorMessage = 'Invalid digit';
                         } else if (!phoneRegex.test(value)) {
-                            errorMessage = 'Mobile number must be 10 digits';
+                            errorMessage = 'Alternate phone must be 10 digits';
+                        } else if (value === document.getElementById('editMobileNo')?.value) {
+                            errorMessage = 'Alternate phone must be different from primary phone';
                         }
-                        break;
-                    case 'editAltPhone':
-                        if (value && !phoneRegex.test(value)) {
-                            errorMessage = 'Alternate phone must be 10 digits or empty';
-                        }
-                        break;
-                    case 'editLandMark':
-                        if (!value) {
-                            errorMessage = 'Please enter landmark';
-                        } else if (!textRegex.test(value)) {
-                            errorMessage = 'Landmark must be 2-100 letters or spaces';
-                        }
-                        break;
-                    case 'editCity':
-                        if (!value) {
-                            errorMessage = 'Please enter city';
-                        } else if (!textRegex.test(value)) {
-                            errorMessage = 'City must be 2-100 letters or spaces';
-                        }
-                        break;
-                    case 'editPincode':
-                        if (!value) {
-                            errorMessage = 'Please enter pincode';
-                        } else if (!pincodeRegex.test(value)) {
-                            errorMessage = 'Pincode must be 6 digits';
-                        }
-                        break;
-                    case 'editState':
-                        if (!value) {
-                            errorMessage = 'Please enter state';
-                        } else if (!textRegex.test(value)) {
-                            errorMessage = 'State must be 2-100 letters or spaces';
-                        }
-                        break;
-                }
-
-                errorElement.textContent = errorMessage;
-                return !errorMessage;
+                    }
+                    break;
+                case 'editLandMark':
+                    if (!value) {
+                        errorMessage = 'Please enter landmark';
+                    } else if (!textRegex.test(value)) {
+                        errorMessage = 'Landmark must be 2-100 letters or spaces';
+                    }
+                    break;
+                case 'editCity':
+                    if (!value) {
+                        errorMessage = 'Please enter city';
+                    } else if (!textRegex.test(value)) {
+                        errorMessage = 'City must be 2-100 letters or spaces';
+                    }
+                    break;
+                case 'editPincode':
+                    if (!value) {
+                        errorMessage = 'Please enter pincode';
+                    } else if (!pincodeRegex.test(value)) {
+                        errorMessage = 'Pincode must be 6 digits starting with 1-9';
+                    } else if (isAllIdenticalDigits(value)) {
+                        errorMessage = 'Pincode cannot consist of all identical digits';
+                    }
+                    break;
+                case 'editState':
+                    if (!value) {
+                        errorMessage = 'Please enter state';
+                    } else if (!textRegex.test(value)) {
+                        errorMessage = 'State must be 2-100 letters or spaces';
+                    }
+                    break;
             }
 
-            // Validate Coupon Code
-            function validateCouponCode(value) {
-                if (!value) {
-                    return 'Please enter a coupon code';
-                } else if (!couponCodeRegex.test(value)) {
-                    return 'Coupon code must be 4-20 alphanumeric characters';
-                }
-                return '';
+            errorElement.textContent = errorMessage;
+            return !errorMessage;
+        }
+
+        // Validate Coupon Code
+        function validateCouponCode(value) {
+            if (!value) {
+                return 'Please enter a coupon code';
+            } else if (!couponCodeRegex.test(value)) {
+                return 'Coupon code must be 4-20 alphanumeric characters';
             }
+            return '';
+        }
 
-            // Attach real-time validation to Add Address Form
-            const addAddressType = document.getElementById('addAddressType');
-            const addFullName = document.getElementById('addFullName');
-            const addMobileNo = document.getElementById('addMobileNo');
-            const addAltPhone = document.getElementById('addAltPhone');
-            const addLandMark = document.getElementById('addLandMark');
-            const addCity = document.getElementById('addCity');
-            const addPincode = document.getElementById('addPincode');
-            const addState = document.getElementById('addState');
+        // Attach real-time validation to Add Address Form
+        const addAddressType = document.getElementById('addAddressType');
+        const addFullName = document.getElementById('addFullName');
+        const addMobileNo = document.getElementById('addMobileNo');
+        const addAltPhone = document.getElementById('addAltPhone');
+        const addLandMark = document.getElementById('addLandMark');
+        const addCity = document.getElementById('addCity');
+        const addPincode = document.getElementById('addPincode');
+        const addState = document.getElementById('addState');
 
-            if (addAddressType) addAddressType.addEventListener('input', function () {
-                validateAddField('addAddressType', addAddressType.value ? addAddressType.value.trim() : '');
-            });
-            if (addFullName) addFullName.addEventListener('input', function () {
-                validateAddField('addFullName', addFullName.value ? addFullName.value.trim() : '');
-            });
-            if (addMobileNo) addMobileNo.addEventListener('input', function () {
-                validateAddField('addMobileNo', addMobileNo.value ? addMobileNo.value.trim() : '');
-            });
-            if (addAltPhone) addAltPhone.addEventListener('input', function () {
-                validateAddField('addAltPhone', addAltPhone.value ? addAltPhone.value.trim() : '');
-            });
-            if (addLandMark) addLandMark.addEventListener('input', function () {
-                validateAddField('addLandMark', addLandMark.value ? addLandMark.value.trim() : '');
-            });
-            if (addCity) addCity.addEventListener('input', function () {
-                validateAddField('addCity', addCity.value ? addCity.value.trim() : '');
-            });
-            if (addPincode) addPincode.addEventListener('input', function () {
-                validateAddField('addPincode', addPincode.value ? addPincode.value.trim() : '');
-            });
-            if (addState) addState.addEventListener('input', function () {
-                validateAddField('addState', addState.value ? addState.value.trim() : '');
-            });
+        if (addAddressType) addAddressType.addEventListener('input', () => validateAddField('addAddressType', addAddressType.value.trim()));
+        if (addFullName) addFullName.addEventListener('input', () => validateAddField('addFullName', addFullName.value.trim()));
+        if (addMobileNo) addMobileNo.addEventListener('input', () => validateAddField('addMobileNo', addMobileNo.value.trim()));
+        if (addAltPhone) addAltPhone.addEventListener('input', () => validateAddField('addAltPhone', addAltPhone.value.trim()));
+        if (addLandMark) addLandMark.addEventListener('input', () => validateAddField('addLandMark', addLandMark.value.trim()));
+        if (addCity) addCity.addEventListener('input', () => validateAddField('addCity', addCity.value.trim()));
+        if (addPincode) addPincode.addEventListener('input', () => validateAddField('addPincode', addPincode.value.trim()));
+        if (addState) addState.addEventListener('input', () => validateAddField('addState', addState.value.trim()));
 
-            // Attach real-time validation to Edit Address Form
-            const editAddressType = document.getElementById('editAddressType');
-            const editFullName = document.getElementById('editFullName');
-            const editMobileNo = document.getElementById('editMobileNo');
-            const editAltPhone = document.getElementById('editAltPhone');
-            const editLandMark = document.getElementById('editLandMark');
-            const editCity = document.getElementById('editCity');
-            const editPincode = document.getElementById('editPincode');
-            const editState = document.getElementById('editState');
+        // Attach real-time validation to Edit Address Form
+        const editAddressType = document.getElementById('editAddressType');
+        const editFullName = document.getElementById('editFullName');
+        const editMobileNo = document.getElementById('editMobileNo');
+        const editAltPhone = document.getElementById('editAltPhone');
+        const editLandMark = document.getElementById('editLandMark');
+        const editCity = document.getElementById('editCity');
+        const editPincode = document.getElementById('editPincode');
+        const editState = document.getElementById('editState');
+        const editAddressId = document.getElementById('editAddressId');
 
-            if (editAddressType) editAddressType.addEventListener('input', function () {
-                validateEditField('editAddressType', editAddressType.value ? editAddressType.value.trim() : '');
-            });
-            if (editFullName) editFullName.addEventListener('input', function () {
-                validateEditField('editFullName', editFullName.value ? editFullName.value.trim() : '');
-            });
-            if (editMobileNo) editMobileNo.addEventListener('input', function () {
-                validateEditField('editMobileNo', editMobileNo.value ? editMobileNo.value.trim() : '');
-            });
-            if (editAltPhone) editAltPhone.addEventListener('input', function () {
-                validateEditField('editAltPhone', editAltPhone.value ? editAltPhone.value.trim() : '');
-            });
-            if (editLandMark) editLandMark.addEventListener('input', function () {
-                validateEditField('editLandMark', editLandMark.value ? editLandMark.value.trim() : '');
-            });
-            if (editCity) editCity.addEventListener('input', function () {
-                validateEditField('editCity', editCity.value ? editCity.value.trim() : '');
-            });
-            if (editPincode) editPincode.addEventListener('input', function () {
-                validateEditField('editPincode', editPincode.value ? editPincode.value.trim() : '');
-            });
-            if (editState) editState.addEventListener('input', function () {
-                validateEditField('editState', editState.value ? editState.value.trim() : '');
-            });
+        if (editAddressType) editAddressType.addEventListener('input', () => validateEditField('editAddressType', editAddressType.value.trim()));
+        if (editFullName) editFullName.addEventListener('input', () => validateEditField('editFullName', editFullName.value.trim()));
+        if (editMobileNo) editMobileNo.addEventListener('input', () => validateEditField('editMobileNo', editMobileNo.value.trim()));
+        if (editAltPhone) editAltPhone.addEventListener('input', () => validateEditField('editAltPhone', editAltPhone.value.trim()));
+        if (editLandMark) editLandMark.addEventListener('input', () => validateEditField('editLandMark', editLandMark.value.trim()));
+        if (editCity) editCity.addEventListener('input', () => validateEditField('editCity', editCity.value.trim()));
+        if (editPincode) editPincode.addEventListener('input', () => validateEditField('editPincode', editPincode.value.trim()));
+        if (editState) editState.addEventListener('input', () => validateEditField('editState', editState.value.trim()));
 
-            // Apply Coupon
-            if (applyCouponBtn) {
-                applyCouponBtn.addEventListener('click', function () {
-                    const couponCode = couponCodeInput.value.trim();
-                    const error = validateCouponCode(couponCode);
-                    if (error) {
+        // Apply Coupon
+        if (applyCouponBtn) {
+            applyCouponBtn.addEventListener('click', function () {
+                const couponCode = couponCodeInput.value.trim();
+                const error = validateCouponCode(couponCode);
+                if (error) {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Invalid Coupon',
+                        text: error,
+                        confirmButtonText: 'OK',
+                        width: '400px',
+                        customClass: {
+                            popup: 'custom-swal',
+                            title: 'custom-swal-title',
+                            content: 'custom-swal-content'
+                        }
+                    });
+                    return;
+                }
+
+                fetch('/apply-coupon', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ couponCode })
+                })
+                    .then(response => {
+                        if (!response.ok) {
+                            return response.json().then(data => {
+                                throw new Error(data.message || 'Failed to apply coupon');
+                            });
+                        }
+                        return response.json();
+                    })
+                    .then(data => {
+                        if (data.success) {
+                            Swal.fire({
+                                icon: 'success',
+                                title: 'Coupon Applied',
+                                text: `Coupon ${couponCode} applied successfully! ₹${data.couponAmount.toLocaleString("en-IN", { minimumFractionDigits: 2, maximumFractionDigits: 2 })} discount.`,
+                                timer: 1500,
+                                showConfirmButton: false,
+                                width: '400px',
+                                customClass: {
+                                    popup: 'custom-swal',
+                                    title: 'custom-swal-title',
+                                    content: 'custom-swal-content'
+                                }
+                            }).then(() => {
+                                window.location.reload();
+                            });
+                        } else {
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'Error',
+                                text: data.message || 'Failed to apply coupon',
+                                confirmButtonText: 'OK',
+                                width: '400px',
+                                customClass: {
+                                    popup: 'custom-swal',
+                                    title: 'custom-swal-title',
+                                    content: 'custom-swal-content'
+                                }
+                            });
+                        }
+                    })
+                    .catch(error => {
                         Swal.fire({
                             icon: 'error',
-                            title: 'Invalid Coupon',
-                            text: error,
+                            title: 'Error',
+                            text: error.message || 'An error occurred while applying the coupon',
                             confirmButtonText: 'OK',
                             width: '400px',
                             customClass: {
@@ -993,30 +1060,150 @@
                                 content: 'custom-swal-content'
                             }
                         });
-                        return;
-                    }
+                    });
+            });
+        }
 
-                    fetch('/apply-coupon', {
+        // Remove Coupon
+        if (removeCouponBtn) {
+            removeCouponBtn.addEventListener('click', function () {
+                Swal.fire({
+                    icon: 'question',
+                    title: 'Remove Coupon',
+                    text: 'Are you sure you want to remove the applied coupon?',
+                    showCancelButton: true,
+                    confirmButtonText: 'Yes, Remove',
+                    cancelButtonText: 'No',
+                    width: '400px',
+                    customClass: {
+                        popup: 'custom-swal',
+                        title: 'custom-swal-title',
+                        content: 'custom-swal-content'
+                    }
+                }).then(result => {
+                    if (result.isConfirmed) {
+                        fetch('/remove-coupon', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json'
+                            }
+                        })
+                            .then(response => {
+                                if (!response.ok) {
+                                    return response.json().then(data => {
+                                        throw new Error(data.message || 'Failed to remove coupon');
+                                    });
+                                }
+                                return response.json();
+                            })
+                            .then(data => {
+                                if (data.success) {
+                                    Swal.fire({
+                                        icon: 'success',
+                                        title: 'Coupon Removed',
+                                        text: 'The coupon has been removed successfully',
+                                        timer: 1500,
+                                        showConfirmButton: false,
+                                        width: '400px',
+                                        customClass: {
+                                            popup: 'custom-swal',
+                                            title: 'custom-swal-title',
+                                            content: 'custom-swal-content'
+                                        }
+                                    }).then(() => {
+                                        window.location.reload();
+                                    });
+                                } else {
+                                    Swal.fire({
+                                        icon: 'error',
+                                        title: 'Error',
+                                        text: data.message || 'Failed to remove coupon',
+                                        confirmButtonText: 'OK',
+                                        width: '400px',
+                                        customClass: {
+                                            popup: 'custom-swal',
+                                            title: 'custom-swal-title',
+                                            content: 'custom-swal-content'
+                                        }
+                                    });
+                                }
+                            })
+                            .catch(error => {
+                                Swal.fire({
+                                    icon: 'error',
+                                    title: 'Error',
+                                    text: error.message || 'An error occurred while removing the coupon',
+                                    confirmButtonText: 'OK',
+                                    width: '400px',
+                                    customClass: {
+                                        popup: 'custom-swal',
+                                        title: 'custom-swal-title',
+                                        content: 'custom-swal-content'
+                                    }
+                                });
+                            });
+                    }
+                });
+            });
+        }
+
+        // Validation for Add Address Form on Submit
+        if (addAddressForm) {
+            addAddressForm.addEventListener('submit', function (event) {
+                event.preventDefault();
+
+                let isValid = true;
+
+                const fields = [
+                    { id: 'addAddressType', value: addAddressType ? addAddressType.value.trim() : '' },
+                    { id: 'addFullName', value: addFullName ? addFullName.value.trim() : '' },
+                    { id: 'addMobileNo', value: addMobileNo ? addMobileNo.value.trim() : '' },
+                    { id: 'addAltPhone', value: addAltPhone ? addAltPhone.value.trim() : '' },
+                    { id: 'addLandMark', value: addLandMark ? addLandMark.value.trim() : '' },
+                    { id: 'addCity', value: addCity ? addCity.value.trim() : '' },
+                    { id: 'addPincode', value: addPincode ? addPincode.value.trim() : '' },
+                    { id: 'addState', value: addState ? addState.value.trim() : '' }
+                ];
+
+                fields.forEach(field => {
+                    if (!validateAddField(field.id, field.value)) {
+                        isValid = false;
+                    }
+                });
+
+                if (isValid) {
+                    const formData = {
+                        addressType: addAddressType.value,
+                        name: addFullName.value,
+                        phone: addMobileNo.value,
+                        altPhone: addAltPhone.value,
+                        landMark: addLandMark.value,
+                        city: addCity.value,
+                        pincode: addPincode.value,
+                        state: addState.value
+                    };
+
+                    fetch('/add-address', {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json'
                         },
-                        body: JSON.stringify({ couponCode })
+                        body: JSON.stringify(formData)
                     })
                         .then(response => {
                             if (!response.ok) {
-                                return response.json().then(data => {
-                                    throw new Error(data.message || 'Failed to apply coupon');
+                                return response.text().then(text => {
+                                    throw new Error('Network response was not ok: ' + response.status + ' ' + text);
                                 });
                             }
                             return response.json();
                         })
-                        .then(data => {
-                            if (data.success) {
+                        .then(result => {
+                            if (result.success) {
                                 Swal.fire({
                                     icon: 'success',
-                                    title: 'Coupon Applied',
-                                    text: `Coupon ${couponCode} applied successfully! ₹${data.couponAmount.toLocaleString("en-IN", { minimumFractionDigits: 2, maximumFractionDigits: 2 })} discount.`,
+                                    title: 'Address Added',
+                                    text: 'Your new address has been added successfully',
                                     timer: 1500,
                                     showConfirmButton: false,
                                     width: '400px',
@@ -1026,13 +1213,17 @@
                                         content: 'custom-swal-content'
                                     }
                                 }).then(() => {
+                                    addModal.classList.remove('show');
+                                    document.body.style.overflow = '';
+                                    document.getElementById('addAddressForm').reset();
+                                    document.querySelectorAll('#addAddressForm .error-message').forEach(error => error.textContent = '');
                                     window.location.reload();
                                 });
                             } else {
                                 Swal.fire({
                                     icon: 'error',
                                     title: 'Error',
-                                    text: data.message || 'Failed to apply coupon',
+                                    text: result.message || 'Failed to add address',
                                     confirmButtonText: 'OK',
                                     width: '400px',
                                     customClass: {
@@ -1047,7 +1238,7 @@
                             Swal.fire({
                                 icon: 'error',
                                 title: 'Error',
-                                text: error.message || 'An error occurred while applying the coupon',
+                                text: 'An error occurred: ' + error.message,
                                 confirmButtonText: 'OK',
                                 width: '400px',
                                 customClass: {
@@ -1057,422 +1248,216 @@
                                 }
                             });
                         });
-                });
-            }
+                }
+            });
+        }
 
-            // Remove Coupon
-            if (removeCouponBtn) {
-                removeCouponBtn.addEventListener('click', function () {
-                    Swal.fire({
-                        icon: 'question',
-                        title: 'Remove Coupon',
-                        text: 'Are you sure you want to remove the applied coupon?',
-                        showCancelButton: true,
-                        confirmButtonText: 'Yes, Remove',
-                        cancelButtonText: 'No',
-                        width: '400px',
-                        customClass: {
-                            popup: 'custom-swal',
-                            title: 'custom-swal-title',
-                            content: 'custom-swal-content'
-                        }
-                    }).then(result => {
-                        if (result.isConfirmed) {
-                            fetch('/remove-coupon', {
-                                method: 'POST',
-                                headers: {
-                                    'Content-Type': 'application/json'
-                                }
-                            })
-                                .then(response => {
-                                    if (!response.ok) {
-                                        return response.json().then(data => {
-                                            throw new Error(data.message || 'Failed to remove coupon');
-                                        });
-                                    }
-                                    return response.json();
-                                })
-                                .then(data => {
-                                    if (data.success) {
-                                        Swal.fire({
-                                            icon: 'success',
-                                            title: 'Coupon Removed',
-                                            text: 'The coupon has been removed successfully',
-                                            timer: 1500,
-                                            showConfirmButton: false,
-                                            width: '400px',
-                                            customClass: {
-                                                popup: 'custom-swal',
-                                                title: 'custom-swal-title',
-                                                content: 'custom-swal-content'
-                                            }
-                                        }).then(() => {
-                                            window.location.reload();
-                                        });
-                                    } else {
-                                        Swal.fire({
-                                            icon: 'error',
-                                            title: 'Error',
-                                            text: data.message || 'Failed to remove coupon',
-                                            confirmButtonText: 'OK',
-                                            width: '400px',
-                                            customClass: {
-                                                popup: 'custom-swal',
-                                                title: 'custom-swal-title',
-                                                content: 'custom-swal-content'
-                                            }
-                                        });
-                                    }
-                                })
-                                .catch(error => {
-                                    Swal.fire({
-                                        icon: 'error',
-                                        title: 'Error',
-                                        text: error.message || 'An error occurred while removing the coupon',
-                                        confirmButtonText: 'OK',
-                                        width: '400px',
-                                        customClass: {
-                                            popup: 'custom-swal',
-                                            title: 'custom-swal-title',
-                                            content: 'custom-swal-content'
-                                        }
-                                    });
-                                });
-                        }
-                    });
-                });
-            }
+        // Validation for Edit Address Form on Submit
+        if (editAddressForm) {
+            editAddressForm.addEventListener('submit', function (event) {
+                event.preventDefault();
 
-            // Validation for Add Address Form on Submit
-            if (addAddressForm) {
-                addAddressForm.addEventListener('submit', function (event) {
-                    event.preventDefault();
+                let isValid = true;
 
-                    let isValid = true;
+                const fields = [
+                    { id: 'editAddressType', value: editAddressType ? editAddressType.value.trim() : '' },
+                    { id: 'editFullName', value: editFullName ? editFullName.value.trim() : '' },
+                    { id: 'editMobileNo', value: editMobileNo ? editMobileNo.value.trim() : '' },
+                    { id: 'editAltPhone', value: editAltPhone ? editAltPhone.value.trim() : '' },
+                    { id: 'editLandMark', value: editLandMark ? editLandMark.value.trim() : '' },
+                    { id: 'editCity', value: editCity ? editCity.value.trim() : '' },
+                    { id: 'editPincode', value: editPincode ? editPincode.value.trim() : '' },
+                    { id: 'editState', value: editState ? editState.value.trim() : '' }
+                ];
 
-                    const fields = [
-                        { id: 'addAddressType', value: addAddressType ? addAddressType.value.trim() : '' },
-                        { id: 'addFullName', value: addFullName ? addFullName.value.trim() : '' },
-                        { id: 'addMobileNo', value: addMobileNo ? addMobileNo.value.trim() : '' },
-                        { id: 'addAltPhone', value: addAltPhone ? addAltPhone.value.trim() : '' },
-                        { id: 'addLandMark', value: addLandMark ? addLandMark.value.trim() : '' },
-                        { id: 'addCity', value: addCity ? addCity.value.trim() : '' },
-                        { id: 'addPincode', value: addPincode ? addPincode.value.trim() : '' },
-                        { id: 'addState', value: addState ? addState.value.trim() : '' }
-                    ];
-
-                    fields.forEach(function (field) {
-                        if (!validateAddField(field.id, field.value)) {
-                            isValid = false;
-                        }
-                    });
-
-                    if (isValid) {
-                        const formData = {
-                            addressType: addAddressType.value,
-                            name: addFullName.value,
-                            phone: addMobileNo.value,
-                            altPhone: addAltPhone.value,
-                            landMark: addLandMark.value,
-                            city: addCity.value,
-                            pincode: addPincode.value,
-                            state: addState.value
-                        };
-
-                        fetch('/add-address', {
-                            method: 'POST',
-                            headers: {
-                                'Content-Type': 'application/json'
-                            },
-                            body: JSON.stringify(formData)
-                        })
-                            .then(function (response) {
-                                if (!response.ok) {
-                                    return response.text().then(text => {
-                                        throw new Error('Network response was not ok: ' + response.status + ' ' + text);
-                                    });
-                                }
-                                return response.json();
-                            })
-                            .then(function (result) {
-                                if (result.success) {
-                                    Swal.fire({
-                                        icon: 'success',
-                                        title: 'Address Added',
-                                        text: 'Your new address has been added successfully',
-                                        timer: 1500,
-                                        showConfirmButton: false,
-                                        width: '400px',
-                                        customClass: {
-                                            popup: 'custom-swal',
-                                            title: 'custom-swal-title',
-                                            content: 'custom-swal-content'
-                                        }
-                                    }).then(function () {
-                                        addModal.classList.remove('show');
-                                        document.body.style.overflow = '';
-                                        document.getElementById('addAddressForm').reset();
-                                        document.querySelectorAll('#addAddressForm .error-message').forEach(function (error) {
-                                            if (error) error.textContent = '';
-                                        });
-                                        window.location.reload();
-                                    });
-                                } else {
-                                    Swal.fire({
-                                        icon: 'error',
-                                        title: 'Error',
-                                        text: result.message || 'Failed to add address',
-                                        confirmButtonText: 'OK',
-                                        width: '400px',
-                                        customClass: {
-                                            popup: 'custom-swal',
-                                            title: 'custom-swal-title',
-                                            content: 'custom-swal-content'
-                                        }
-                                    });
-                                }
-                            })
-                            .catch(function (error) {
-                                Swal.fire({
-                                    icon: 'error',
-                                    title: 'Error',
-                                    text: 'An error occurred: ' + error.message,
-                                    confirmButtonText: 'OK',
-                                    width: '400px',
-                                    customClass: {
-                                        popup: 'custom-swal',
-                                        title: 'custom-swal-title',
-                                        content: 'custom-swal-content'
-                                    }
-                                });
-                            });
+                fields.forEach(field => {
+                    if (!validateEditField(field.id, field.value)) {
+                        isValid = false;
                     }
                 });
-            }
 
-            // Validation for Edit Address Form on Submit
-            if (editAddressForm) {
-                editAddressForm.addEventListener('submit', function (event) {
-                    event.preventDefault();
+                if (isValid) {
+                    const formData = {
+                        addressId: editAddressId ? editAddressId.value : '',
+                        addressType: editAddressType.value,
+                        name: editFullName.value,
+                        phone: editMobileNo.value,
+                        altPhone: editAltPhone.value,
+                        landMark: editLandMark.value,
+                        city: editCity.value,
+                        pincode: editPincode.value,
+                        state: editState.value
+                    };
 
-                    let isValid = true;
-
-                    const fields = [
-                        { id: 'editAddressType', value: editAddressType ? editAddressType.value.trim() : '' },
-                        { id: 'editFullName', value: editFullName ? editFullName.value.trim() : '' },
-                        { id: 'editMobileNo', value: editMobileNo ? editMobileNo.value.trim() : '' },
-                        { id: 'editAltPhone', value: editAltPhone ? editAltPhone.value.trim() : '' },
-                        { id: 'editLandMark', value: editLandMark ? editLandMark.value.trim() : '' },
-                        { id: 'editCity', value: editCity ? editCity.value.trim() : '' },
-                        { id: 'editPincode', value: editPincode ? editPincode.value.trim() : '' },
-                        { id: 'editState', value: editState ? editState.value.trim() : '' }
-                    ];
-
-                    fields.forEach(function (field) {
-                        if (!validateEditField(field.id, field.value)) {
-                            isValid = false;
-                        }
-                    });
-
-                    if (isValid) {
-                        const formData = {
-                            addressId: editAddressId.value,
-                            addressType: editAddressType.value,
-                            name: editFullName.value,
-                            phone: editMobileNo.value,
-                            altPhone: editAltPhone.value,
-                            landMark: editLandMark.value,
-                            city: editCity.value,
-                            pincode: editPincode.value,
-                            state: editState.value
-                        };
-
-                        fetch('/edit-address', {
-                            method: 'POST',
-                            headers: {
-                                'Content-Type': 'application/json'
-                            },
-                            body: JSON.stringify(formData)
-                        })
-                            .then(function (response) {
-                                if (!response.ok) {
-                                    return response.text().then(text => {
-                                        throw new Error('Network response was not ok: ' + response.status + ' ' + text);
-                                    });
-                                }
-                                return response.json();
-                            })
-                            .then(function (result) {
-                                if (result.success) {
-                                    Swal.fire({
-                                        icon: 'success',
-                                        title: 'Address Updated',
-                                        text: 'Your address has been updated successfully',
-                                        timer: 1500,
-                                        showConfirmButton: false,
-                                        width: '400px',
-                                        customClass: {
-                                            popup: 'custom-swal',
-                                            title: 'custom-swal-title',
-                                            content: 'custom-swal-content'
-                                        }
-                                    }).then(function () {
-                                        editModal.classList.remove('show');
-                                        document.body.style.overflow = '';
-                                        document.querySelectorAll('#editAddressForm .error-message').forEach(function (error) {
-                                            if (error) error.textContent = '';
-                                        });
-                                        window.location.reload();
-                                    });
-                                } else {
-                                    Swal.fire({
-                                        icon: 'error',
-                                        title: 'Error',
-                                        text: result.message || 'Failed to update address',
-                                        confirmButtonText: 'OK',
-                                        width: '400px',
-                                        customClass: {
-                                            popup: 'custom-swal',
-                                            title: 'custom-swal-title',
-                                            content: 'custom-swal-content'
-                                        }
-                                    });
-                                }
-                            })
-                            .catch(function (error) {
-                                Swal.fire({
-                                    icon: 'error',
-                                    title: 'Error',
-                                    text: 'An error occurred: ' + error.message,
-                                    confirmButtonText: 'OK',
-                                    width: '400px',
-                                    customClass: {
-                                        popup: 'custom-swal',
-                                        title: 'custom-swal-title',
-                                        content: 'custom-swal-content'
-                                    }
+                    fetch('/edit-address', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify(formData)
+                    })
+                        .then(response => {
+                            if (!response.ok) {
+                                return response.text().then(text => {
+                                    throw new Error('Network response was not ok: ' + response.status + ' ' + text);
                                 });
-                            });
-                    }
-                });
-            }
-
-            // Populate Edit Modal
-            document.querySelectorAll('.edit-btn').forEach(function (btn) {
-                btn.addEventListener('click', function (e) {
-                    e.preventDefault();
-                    let address;
-                    try {
-                        address = JSON.parse(this.getAttribute('data-address'));
-                    } catch (error) {
-                        Swal.fire({
-                            icon: 'error',
-                            title: 'Error',
-                            text: 'Failed to load address data. Please try again.',
-                            confirmButtonText: 'OK',
-                            width: '400px',
-                            customClass: {
-                                popup: 'custom-swal',
-                                title: 'custom-swal-title',
-                                content: 'custom-swal-content'
                             }
+                            return response.json();
+                        })
+                        .then(result => {
+                            if (result.success) {
+                                Swal.fire({
+                                    icon: 'success',
+                                    title: 'Address Updated',
+                                    text: 'Your address has been updated successfully',
+                                    timer: 1500,
+                                    showConfirmButton: false,
+                                    width: '400px',
+                                    customClass: {
+                                        popup: 'custom-swal',
+                                        title: 'custom-swal-title',
+                                        content: 'custom-swal-content'
+                                    }
+                                }).then(() => {
+                                    editModal.classList.remove('show');
+                                    document.body.style.overflow = '';
+                                    document.querySelectorAll('#editAddressForm .error-message').forEach(error => error.textContent = '');
+                                    window.location.reload();
+                                });
+                            } else {
+                                Swal.fire({
+                                    icon: 'error',
+                                    title: 'Error',
+                                    text: result.message || 'Failed to update address',
+                                    confirmButtonText: 'OK',
+                                    width: '400px',
+                                    customClass: {
+                                        popup: 'custom-swal',
+                                        title: 'custom-swal-title',
+                                        content: 'custom-swal-content'
+                                    }
+                                });
+                            }
+                        })
+                        .catch(error => {
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'Error',
+                                text: 'An error occurred: ' + error.message,
+                                confirmButtonText: 'OK',
+                                width: '400px',
+                                customClass: {
+                                    popup: 'custom-swal',
+                                    title: 'custom-swal-title',
+                                    content: 'custom-swal-content'
+                                }
+                            });
                         });
-                        return;
-                    }
-
-                    editAddressId.value = address._id || '';
-                    editAddressType.value = address.addressType || 'Home';
-                    editFullName.value = address.name || '';
-                    editMobileNo.value = address.phone || '';
-                    editAltPhone.value = address.altPhone || '';
-                    editLandMark.value = address.landMark || '';
-                    editCity.value = address.city || '';
-                    editPincode.value = address.pincode || '';
-                    editState.value = address.State || '';
-
-                    editModal.classList.add('show');
-                    document.body.style.overflow = 'hidden';
-
-                    validateEditField('editAddressType', editAddressType.value.trim());
-                    validateEditField('editFullName', editFullName.value.trim());
-                    validateEditField('editMobileNo', editMobileNo.value.trim());
-                    validateEditField('editAltPhone', editAltPhone.value.trim());
-                    validateEditField('editLandMark', editLandMark.value.trim());
-                    validateEditField('editCity', editCity.value.trim());
-                    validateEditField('editPincode', editPincode.value.trim());
-                    validateEditField('editState', editState.value.trim());
-                });
+                }
             });
+        }
 
-            // Handle Delete Address
-            document.querySelectorAll('.remove-btn').forEach(function (btn) {
-                btn.addEventListener('click', function (e) {
-                    e.preventDefault();
-                    const addressId = this.getAttribute('data-id');
-
+        // Populate Edit Modal
+        document.querySelectorAll('.edit-btn').forEach(btn => {
+            btn.addEventListener('click', function (e) {
+                e.preventDefault();
+                let address;
+                try {
+                    address = JSON.parse(this.getAttribute('data-address'));
+                } catch (error) {
                     Swal.fire({
-                        icon: 'question',
-                        title: 'Delete Address',
-                        text: 'Are you sure you want to delete this address?',
-                        showCancelButton: true,
-                        confirmButtonText: 'Yes, Delete',
-                        cancelButtonText: 'No',
+                        icon: 'error',
+                        title: 'Error',
+                        text: 'Failed to load address data. Please try again.',
+                        confirmButtonText: 'OK',
                         width: '400px',
                         customClass: {
                             popup: 'custom-swal',
                             title: 'custom-swal-title',
                             content: 'custom-swal-content'
                         }
-                    }).then(function (result) {
-                        if (result.isConfirmed) {
-                            fetch('/delete-address?id=' + addressId, {
-                                method: 'GET'
+                    });
+                    return;
+                }
+
+                if (editAddressId) editAddressId.value = address._id || '';
+                editAddressType.value = address.addressType || 'Home';
+                editFullName.value = address.name || '';
+                editMobileNo.value = address.phone || '';
+                editAltPhone.value = address.altPhone || '';
+                editLandMark.value = address.landMark || '';
+                editCity.value = address.city || '';
+                editPincode.value = address.pincode || '';
+                editState.value = address.State || ''; // Use capitalized State to match database
+
+                editModal.classList.add('show');
+                document.body.style.overflow = 'hidden';
+
+                validateEditField('editAddressType', editAddressType.value.trim());
+                validateEditField('editFullName', editFullName.value.trim());
+                validateEditField('editMobileNo', editMobileNo.value.trim());
+                validateEditField('editAltPhone', editAltPhone.value.trim());
+                validateEditField('editLandMark', editLandMark.value.trim());
+                validateEditField('editCity', editCity.value.trim());
+                validateEditField('editPincode', editPincode.value.trim());
+                validateEditField('editState', editState.value.trim());
+            });
+        });
+
+        // Handle Delete Address
+        document.querySelectorAll('.remove-btn').forEach(btn => {
+            btn.addEventListener('click', function (e) {
+                e.preventDefault();
+                const addressId = this.getAttribute('data-id');
+
+                Swal.fire({
+                    icon: 'question',
+                    title: 'Delete Address',
+                    text: 'Are you sure you want to delete this address?',
+                    showCancelButton: true,
+                    confirmButtonText: 'Yes, Delete',
+                    cancelButtonText: 'No',
+                    width: '400px',
+                    customClass: {
+                        popup: 'custom-swal',
+                        title: 'custom-swal-title',
+                        content: 'custom-swal-content'
+                    }
+                }).then(result => {
+                    if (result.isConfirmed) {
+                        fetch('/delete-address?id=' + addressId, {
+                            method: 'GET'
+                        })
+                            .then(response => {
+                                if (!response.ok) {
+                                    return response.text().then(text => {
+                                        throw new Error('Network response was not ok: ' + response.status + ' ' + text);
+                                    });
+                                }
+                                return response.json();
                             })
-                                .then(function (response) {
-                                    if (!response.ok) {
-                                        return response.text().then(text => {
-                                            throw new Error('Network response was not ok: ' + response.status + ' ' + text);
-                                        });
-                                    }
-                                    return response.json();
-                                })
-                                .then(function (result) {
-                                    if (result.success) {
-                                        Swal.fire({
-                                            icon: 'success',
-                                            title: 'Address Deleted',
-                                            text: 'The address has been removed successfully',
-                                            timer: 1500,
-                                            showConfirmButton: false,
-                                            width: '400px',
-                                            customClass: {
-                                                popup: 'custom-swal',
-                                                title: 'custom-swal-title',
-                                                content: 'custom-swal-content'
-                                            }
-                                        }).then(function () {
-                                            window.location.reload();
-                                        });
-                                    } else {
-                                        Swal.fire({
-                                            icon: 'error',
-                                            title: 'Error',
-                                            text: result.message || 'Failed to delete address',
-                                            confirmButtonText: 'OK',
-                                            width: '400px',
-                                            customClass: {
-                                                popup: 'custom-swal',
-                                                title: 'custom-swal-title',
-                                                content: 'custom-swal-content'
-                                            }
-                                        });
-                                    }
-                                })
-                                .catch(function (error) {
+                            .then(data => {
+                                if (data.success) {
+                                    Swal.fire({
+                                        icon: 'success',
+                                        title: 'Address Deleted',
+                                        text: 'The address has been removed successfully',
+                                        timer: 1500,
+                                        showConfirmButton: false,
+                                        width: '400px',
+                                        customClass: {
+                                            popup: 'custom-swal',
+                                            title: 'custom-swal-title',
+                                            content: 'custom-swal-content'
+                                        }
+                                    }).then(() => {
+                                        window.location.reload();
+                                    });
+                                } else {
                                     Swal.fire({
                                         icon: 'error',
                                         title: 'Error',
-                                        text: 'An error occurred: ' + error.message,
+                                        text: data.message || 'Failed to delete address',
                                         confirmButtonText: 'OK',
                                         width: '400px',
                                         customClass: {
@@ -1481,19 +1466,30 @@
                                             content: 'custom-swal-content'
                                         }
                                     });
+                                }
+                            })
+                            .catch(error => {
+                                Swal.fire({
+                                    icon: 'error',
+                                    title: 'Error',
+                                    text: 'An error occurred: ' + error.message,
+                                    confirmButtonText: 'OK',
+                                    width: '400px',
+                                    customClass: {
+                                        popup: 'custom-swal',
+                                        title: 'custom-swal-title',
+                                        content: 'custom-swal-content'
+                                    }
                                 });
-                        }
-                    });
+                            });
+                    }
                 });
             });
+        });
 
-            // Place Order Button
-            const placeOrderBtn = document.getElementById('placeOrder');
-            if (!placeOrderBtn) {
-                console.warn('Place Order button not found. Ensure element with id="placeOrder" exists in the DOM.');
-                return;
-            }
-
+        // Place Order Button
+        const placeOrderBtn = document.getElementById('placeOrder');
+        if (placeOrderBtn) {
             placeOrderBtn.addEventListener('click', async () => {
                 const selectedAddress = document.querySelector('input[name="selectedAddress"]:checked');
                 const paymentMethod = document.querySelector('input[name="paymentMethod"]:checked');
@@ -1503,7 +1499,13 @@
                         icon: 'warning',
                         title: 'No Address Selected',
                         text: 'Please select an address to proceed.',
-                        confirmButtonText: 'OK'
+                        confirmButtonText: 'OK',
+                        width: '400px',
+                        customClass: {
+                            popup: 'custom-swal',
+                            title: 'custom-swal-title',
+                            content: 'custom-swal-content'
+                        }
                     });
                     return;
                 }
@@ -1513,15 +1515,19 @@
                         icon: 'warning',
                         title: 'No Payment Method Selected',
                         text: 'Please select a payment method.',
-                        confirmButtonText: 'OK'
+                        confirmButtonText: 'OK',
+                        width: '400px',
+                        customClass: {
+                            popup: 'custom-swal',
+                            title: 'custom-swal-title',
+                            content: 'custom-swal-content'
+                        }
                     });
                     return;
                 }
 
-
                 const addressId = selectedAddress.value;
                 const paymentType = paymentMethod.value;
-
                 const addressCards = document.querySelectorAll('.address-card');
                 let addressIndex = -1;
                 addressCards.forEach((card, index) => {
@@ -1532,17 +1538,64 @@
                 });
 
                 if (addressIndex === -1) {
-                    alert('Selected address not found in the list.');
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error',
+                        text: 'Selected address not found in the list.',
+                        confirmButtonText: 'OK',
+                        width: '400px',
+                        customClass: {
+                            popup: 'custom-swal',
+                            title: 'custom-swal-title',
+                            content: 'custom-swal-content'
+                        }
+                    });
                     return;
                 }
 
                 try {
+                    // Check stock availability before proceeding
+                    const stockResponse = await fetch('/check-stock', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ addressIndex })
+                    });
+                    const stockData = await stockResponse.json();
+
+                    if (!stockData.success) {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Stock Issue',
+                            text: stockData.message || 'Some products are out of stock or unavailable.',
+                            confirmButtonText: 'OK',
+                            width: '400px',
+                            customClass: {
+                                popup: 'custom-swal',
+                                title: 'custom-swal-title',
+                                content: 'custom-swal-content'
+                            }
+                        }).then(() => {
+                            window.location.href = stockData.redirectTo || '/cart';
+                        });
+                        return;
+                    }
+
                     if (paymentType === "OnlinePayment") {
                         const response = await fetch('/createRazorpay', { method: 'POST' });
                         const order = await response.json();
-                        console.log(order, 'order is here')
                         if (!order.id) {
-                            alert(order.message || 'Failed to create Razorpay order.');
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'Error',
+                                text: order.message || 'Failed to create Razorpay order.',
+                                confirmButtonText: 'OK',
+                                width: '400px',
+                                customClass: {
+                                    popup: 'custom-swal',
+                                    title: 'custom-swal-title',
+                                    content: 'custom-swal-content'
+                                }
+                            });
                             return;
                         }
 
@@ -1550,7 +1603,7 @@
                             key: "<%= key_id %>",
                             amount: order.amount,
                             currency: order.currency,
-                            name: "My Shop",
+                            name: "Cario",
                             description: "Test Transaction",
                             order_id: order.id,
                             handler: async function (response) {
@@ -1563,14 +1616,23 @@
                                     const addressData = await addressResponse.json();
 
                                     if (!addressData.success) {
-                                        alert(addressData.message || 'Failed to select address.');
+                                        Swal.fire({
+                                            icon: 'error',
+                                            title: 'Error',
+                                            text: addressData.message || 'Failed to select address.',
+                                            confirmButtonText: 'OK',
+                                            width: '400px',
+                                            customClass: {
+                                                popup: 'custom-swal',
+                                                title: 'custom-swal-title',
+                                                content: 'custom-swal-content'
+                                            }
+                                        });
                                         return;
                                     }
                                     const orderResult = await fetch('/razorpayPlaceOrder', {
                                         method: 'POST',
-                                        headers: {
-                                            'Content-Type': 'application/json'
-                                        },
+                                        headers: { 'Content-Type': 'application/json' },
                                         body: JSON.stringify({
                                             razorpay_payment_id: response.razorpay_payment_id,
                                             razorpay_order_id: response.razorpay_order_id,
@@ -1580,25 +1642,45 @@
                                     });
 
                                     const result = await orderResult.json();
-                                    console.log(result, 'result')
                                     if (result.success) {
                                         window.location.href = `/order-success?orderId=${result.orderId}`;
                                     } else {
-                                        window.location.href = `/payment-failure?orderId=${result.orderId}&error=${encodeURIComponent(result.message || 'Order could not be placed.')}`;
+                                        Swal.fire({
+                                            icon: 'error',
+                                            title: 'Order Failed',
+                                            text: result.message || 'Order could not be placed.',
+                                            confirmButtonText: 'OK',
+                                            width: '400px',
+                                            customClass: {
+                                                popup: 'custom-swal',
+                                                title: 'custom-swal-title',
+                                                content: 'custom-swal-content'
+                                            }
+                                        }).then(() => {
+                                            window.location.href = result.redirectTo || `/payment-failure?orderId=${result.orderId}&error=${encodeURIComponent(result.message || 'Order could not be placed.')}`;
+                                        });
                                     }
                                 } catch (error) {
-                                    window.location.href = `/payment-failure?orderId=${order.id}&error=${encodeURIComponent('Payment success, but order placement failed.')}`;
+                                    Swal.fire({
+                                        icon: 'error',
+                                        title: 'Error',
+                                        text: 'An unexpected error occurred while placing the order.',
+                                        confirmButtonText: 'OK',
+                                        width: '400px',
+                                        customClass: {
+                                            popup: 'custom-swal',
+                                            title: 'custom-swal-title',
+                                            content: 'custom-swal-content'
+                                        }
+                                    }).then(() => {
+                                        window.location.href = `/payment-failure?orderId=${order.id}&error=${encodeURIComponent('Payment success, but order placement failed.')}`;
+                                    });
                                 }
                             },
-                            theme: {
-                                color: "#2563eb"
-                            }
+                            theme: { color: "#2563eb" }
                         };
 
                         const rzp = new Razorpay(options);
-                        // rzp.on('payment.failed', function (response) {
-                        //     window.location.href = `/payment-failure?orderId=${order.id}&error=${encodeURIComponent(response.error.description || 'Payment failed. Please try another payment method.')}`;
-                        // });
                         rzp.on('payment.failed', async function (response) {
                             try {
                                 const addressResponse = await fetch('/select-address', {
@@ -1609,7 +1691,18 @@
                                 const addressData = await addressResponse.json();
 
                                 if (!addressData.success) {
-                                    alert(addressData.message || 'Failed to select address.');
+                                    Swal.fire({
+                                        icon: 'error',
+                                        title: 'Error',
+                                        text: addressData.message || 'Failed to select address.',
+                                        confirmButtonText: 'OK',
+                                        width: '400px',
+                                        customClass: {
+                                            popup: 'custom-swal',
+                                            title: 'custom-swal-title',
+                                            content: 'custom-swal-content'
+                                        }
+                                    });
                                     return;
                                 }
                                 await fetch('/payment-failed-order', {
@@ -1639,7 +1732,18 @@
                         const addressData = await addressResponse.json();
 
                         if (!addressData.success) {
-                            alert(addressData.message || 'Failed to select address.');
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'Error',
+                                text: addressData.message || 'Failed to select address.',
+                                confirmButtonText: 'OK',
+                                width: '400px',
+                                customClass: {
+                                    popup: 'custom-swal',
+                                    title: 'custom-swal-title',
+                                    content: 'custom-swal-content'
+                                }
+                            });
                             return;
                         }
 
@@ -1653,109 +1757,148 @@
                         if (orderData.success) {
                             window.location.href = `/order-success?orderId=${orderData.orderId}`;
                         } else {
-                            // window.location.href = `/payment-failure?orderId=${orderData.orderId || ''}&error=${encodeURIComponent(orderData.message || 'Failed to place order.')}`;
-                              Swal.fire({
+                            Swal.fire({
                                 icon: 'error',
                                 title: 'Order Failed',
-                                text: orderData.message, // Message comes from backend
-                                confirmButtonText: 'OK'
+                                text: orderData.message || 'Order could not be placed.',
+                                confirmButtonText: 'OK',
+                                width: '400px',
+                                customClass: {
+                                    popup: 'custom-swal',
+                                    title: 'custom-swal-title',
+                                    content: 'custom-swal-content'
+                                }
+                            }).then(() => {
+                                if (orderData.redirectTo) {
+                                    window.location.href = orderData.redirectTo;
+                                }
                             });
                         }
                     }
                 } catch (error) {
-                    alert('An unexpected error occurred while placing the order.');
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error',
+                        text: 'An unexpected error occurred while placing the order.',
+                        confirmButtonText: 'OK',
+                        width: '400px',
+                        customClass: {
+                            popup: 'custom-swal',
+                            title: 'custom-swal-title',
+                            content: 'custom-swal-content'
+                        }
+                    });
                 }
             });
-        });
+        }
 
+        // Coupons Modal Handling
         const viewCouponsBtn = document.getElementById('viewCouponsBtn');
         const couponsModal = document.getElementById('couponsModal');
         const closeCouponsModalBtn = document.getElementById('closeCouponsModal');
+        const couponsList = document.getElementById('couponsList');
 
-        viewCouponsBtn.addEventListener('click', async () => {
-            try {
-                const response = await fetch('/coupons', {
-                    headers: { 'Content-Type': 'application/json' }
-                });
-                const data = await response.json();
-                if (data.success) {
-                    const couponsList = document.getElementById('couponsList');
-                    couponsList.innerHTML = data.coupons.map(coupon => `
-        <div class="coupon-card">
-          <div>
-            <p class="font-semibold">${coupon.couponCode}</p>
-            <p>₹${coupon.offerPrice.toLocaleString("en-IN")} OFF on min. ₹${coupon.minimumPrice.toLocaleString("en-IN")}</p>
-            <p>Expires: ${new Date(coupon.expireOn).toLocaleDateString()}</p>
-          </div>
-          <button class="copy-btn" data-code="${coupon.couponCode}">Copy Code</button>
-        </div>
-      `).join('');
-                    couponsModal.classList.add('show');
-                    document.body.style.overflow = 'hidden';
-                } else {
-                    Swal.fire({
-                        icon: 'error',
-                        title: 'Error',
-                        text: data.message || 'Failed to load coupons',
-                        width: '400px',
-                        customClass: { popup: 'custom-swal', title: 'custom-swal-title', content: 'custom-swal-content' }
-                    });
-                }
-            } catch (error) {
-                Swal.fire({
-                    icon: 'error',
-                    title: 'Error',
-                    text: 'An error occurred while fetching coupons',
-                    width: '400px',
-                    customClass: { popup: 'custom-swal', title: 'custom-swal-title', content: 'custom-swal-content' }
-                });
-            }
-        });
-
-        couponsList.addEventListener('click', async (e) => {
-            if (e.target.classList.contains('copy-btn')) {
-                const code = e.target.getAttribute('data-code');
+        if (viewCouponsBtn && couponsModal && closeCouponsModalBtn && couponsList) {
+            viewCouponsBtn.addEventListener('click', async () => {
                 try {
-                    await navigator.clipboard.writeText(code);
-                    Swal.fire({
-                        icon: 'success',
-                        title: 'Copied!',
-                        text: `Coupon code ${code} copied to clipboard`,
-                        timer: 1500,
-                        showConfirmButton: false,
-                        width: '400px',
-                        customClass: { popup: 'custom-swal', title: 'custom-swal-title', content: 'custom-swal-content' }
+                    const response = await fetch('/coupons', {
+                        headers: { 'Content-Type': 'application/json' }
                     });
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+                    const data = await response.json();
+                    if (data.success && Array.isArray(data.coupons)) {
+                        couponsList.innerHTML = data.coupons.length > 0 ? data.coupons.map(coupon => `
+                            <div class="coupon-card">
+                                <div>
+                                    <p class="font-semibold">${coupon.couponCode}</p>
+                                    <p>₹${coupon.offerPrice.toLocaleString("en-IN")} OFF on min. ₹${coupon.minimumPrice.toLocaleString("en-IN")}</p>
+                                    <p>Expires: ${new Date(coupon.expireOn).toLocaleDateString()}</p>
+                                </div>
+                                <button class="button copy-btn" data-code="${coupon.couponCode}">Copy Code</button>
+                            </div>
+                        `).join('') : '<p>No coupons available.</p>';
+                        couponsModal.classList.add('show');
+                        document.body.style.overflow = 'hidden';
+                    } else {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Error',
+                            text: data.message || 'Failed to load coupons',
+                            width: '400px',
+                            customClass: { popup: 'custom-swal', title: 'custom-swal-title', content: 'custom-swal-content' }
+                        });
+                    }
                 } catch (error) {
+                    console.error('Error fetching coupons:', error);
                     Swal.fire({
                         icon: 'error',
                         title: 'Error',
-                        text: 'Failed to copy coupon code',
+                        text: 'An error occurred while fetching coupons: ' + error.message,
                         width: '400px',
                         customClass: { popup: 'custom-swal', title: 'custom-swal-title', content: 'custom-swal-content' }
                     });
                 }
-            }
-        });
+            });
 
-        closeCouponsModalBtn.addEventListener('click', () => {
-            couponsModal.classList.remove('show');
-            document.body.style.overflow = '';
-        });
-    </script>
-    <script>
+            couponsList.addEventListener('click', async (e) => {
+                if (e.target.classList.contains('copy-btn')) {
+                    const code = e.target.getAttribute('data-code');
+                    try {
+                        await navigator.clipboard.writeText(code);
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Copied!',
+                            text: `Coupon code ${code} copied to clipboard`,
+                            timer: 1500,
+                            showConfirmButton: false,
+                            width: '400px',
+                            customClass: { popup: 'custom-swal', title: 'custom-swal-title', content: 'custom-swal-content' }
+                        });
+                    } catch (error) {
+                        console.error('Error copying coupon code:', error);
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Error',
+                            text: 'Failed to copy coupon code: ' + error.message,
+                            width: '400px',
+                            customClass: { popup: 'custom-swal', title: 'custom-swal-title', content: 'custom-swal-content' }
+                        });
+                    }
+                }
+            });
+
+            closeCouponsModalBtn.addEventListener('click', () => {
+                couponsModal.classList.remove('show');
+                document.body.style.overflow = '';
+            });
+
+            // Close coupons modal on outside click
+            window.addEventListener('click', function (e) {
+                if (e.target === couponsModal) {
+                    couponsModal.classList.remove('show');
+                    document.body.style.overflow = '';
+                }
+            });
+        } else {
+            console.warn('Coupons modal elements not found:', {
+                viewCouponsBtn: !!viewCouponsBtn,
+                couponsModal: !!couponsModal,
+                closeCouponsModalBtn: !!closeCouponsModalBtn,
+                couponsList: !!couponsList
+            });
+        }
+
+        // Payment Option Selection
         document.querySelectorAll(".payment-option").forEach(option => {
-            option.addEventListener("click", () => {
-                // Remove "selected" from all
-                document.querySelectorAll(".payment-option").forEach(o => o.classList.remove("selected"));
-
-                // Add "selected" to clicked one
-                option.classList.add("selected");
-
-                // Select the radio inside it
+            option.addEventListener('click', () => {
+                document.querySelectorAll(".payment-option").forEach(o => o.classList.remove('selected'));
+                option.classList.add('selected');
                 option.querySelector('input[type="radio"]').checked = true;
             });
         });
+    });
     </script>
 
-    <%- include("../partials/user/footer") %>
+<%- include("../partials/user/footer") %>

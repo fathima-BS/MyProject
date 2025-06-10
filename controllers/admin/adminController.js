@@ -1,7 +1,7 @@
 const User = require('../../models/userSchema');
 const bcrypt = require('bcrypt');
 
-const loadlogin = async (req, res) => {
+const loadlogin = async (req, res,next) => {
     try {
         const message = req.session.message || '';
         req.session.message = null;
@@ -12,13 +12,12 @@ const loadlogin = async (req, res) => {
 
         res.render('adminlogin', { message });
     } catch (error) {
-        console.error('Error in loadlogin:', error);
-        req.session.message = 'Failed to load login page';
-        res.redirect('/admin/pageerror');
+       error.statusCode=500;
+       next(error)
     }
 };
 
-const login = async (req, res) => {
+const login = async (req, res,next) => {
     try {
         const { email, password } = req.body;
         const findadmin = await User.findOne({ isAdmin: true, email });
@@ -34,39 +33,37 @@ const login = async (req, res) => {
         req.session.message = 'Invalid credentials';
         return res.redirect('/admin/login');
     } catch (error) {
-        console.error('Error in admin login:', error);
-        req.session.message = 'Server error';
-        res.redirect('/admin/pageerror');
+         error.statusCode=500;
+         next(error)
     }
 };
 
 
 
-const loadErrorPage = async (req, res) => {
+const loadErrorPage = async (req, res,next) => {
     try {
         const message = req.session.message || 'An unexpected error occurred';
         req.session.message = null;
-        res.render('page404', { message });
+        res.render('adminPage404', { message });
     } catch (error) {
-        console.error('Error in loadErrorPage:', error);
-        res.status(500).send('Internal Server Error');
+         error.statusCode=500;
+         next(error)
     }
 };
 
-const logout = async (req, res) => {
+const logout = async (req, res,next) => {
     try {
         req.session.destroy(err => {
             if (err) {
-               console.log("error while logour");
-               res.redirect('/page404')
+               console.log("error while logout");
+               res.redirect('/pageerror')
                
             }
             res.redirect('/admin/login');
         });
     } catch (error) {
-        console.error('Error in logout:', error);
-        req.session.message = 'Failed to log out';
-        res.redirect('/admin/pageerror');
+        error.statusCode=500;
+        next(error)
     }
 };
 

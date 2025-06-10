@@ -220,6 +220,38 @@
         text-align: center;
     }
     
+    .pagination {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 10px;
+        margin-top: 20px;
+    }
+    
+    .pagination a, .pagination span {
+        padding: 8px 12px;
+        border: 1px solid #d1d5db;
+        border-radius: 4px;
+        text-decoration: none;
+        color: #1f2937;
+        transition: background-color 0.2s ease;
+    }
+    
+    .pagination a:hover:not(.disabled) {
+        background-color: #e5e7eb;
+    }
+    
+    .pagination .active {
+        background-color: #1e3a8a;
+        color: white;
+        border-color: #1e3a8a;
+    }
+    
+    .pagination .disabled {
+        color: #6b7280;
+        cursor: not-allowed;
+    }
+    
     @media (max-width: 768px) {
         .wishlist-item {
             flex-direction: column;
@@ -242,11 +274,17 @@
 </style>
 
 <div class="wishlist-container py-5">
-    <h1 class="page-title">My Wishlist</h1>
+    <h1 class="page-title">My Wishlist (<%= totalItems %> Items)</h1>
 
-    <% if (message) { %>
+    <div class="breadcrumb">
+        <a href="/">Home</a>
+        <span>></span>
+        <span class="active">Wishlist</span>
+    </div>
+
+    <!-- <% if (message) { %>
         <div class="message-alert"><%= message %></div>
-    <% } %>
+    <% } %> -->
     
     <% if (wishlistItems && wishlistItems.length > 0) { %>
         <% wishlistItems.forEach(item => { %>
@@ -303,6 +341,22 @@
                 </div>
             <% } %>
         <% }) %>
+        <!-- Pagination Controls -->
+        <div class="pagination">
+            <% if (currentPage > 1) { %>
+                <a href="/wishlist?page=<%= currentPage - 1 %>">« Previous</a>
+            <% } else { %>
+                <span class="disabled">« Previous</span>
+            <% } %>
+            <% for (let i = 1; i <= totalPages; i++) { %>
+                <a href="/wishlist?page=<%= i %>" class="<%= currentPage === i ? 'active' : '' %>"><%= i %></a>
+            <% } %>
+            <% if (currentPage < totalPages) { %>
+                <a href="/wishlist?page=<%= currentPage + 1 %>">Next »</a>
+            <% } else { %>
+                <span class="disabled">Next »</span>
+            <% } %>
+        </div>
     <% } else { %>
         <div class="empty-wishlist">
             <div class="empty-icon">
@@ -311,7 +365,7 @@
                 </svg>
             </div>
             <p class="empty-text">Your wishlist is empty.</p>
-            <a href="/shop" class="start-shopping">Start Shopping</a>
+            <a style="text-decoration: none;" href="/shop" class="start-shopping">Start Shopping</a>
         </div>
     <% } %>
 </div>
@@ -333,7 +387,7 @@ async function removeFromWishlist(productId) {
                 confirmButtonText: 'OK',
                 confirmButtonColor: '#0d6efd'
             }).then(() => {
-                window.location.href = '/wishlist?message=Product%20removed%20from%20wishlist';
+                window.location.href = '/wishlist?page=<%= currentPage %>&message=Product%20removed%20from%20wishlist';
             });
         } else {
             Swal.fire({

@@ -1,6 +1,6 @@
 const User = require('../../models/userSchema');
 
-const loadUser = async (req, res) => {
+const loadUser = async (req, res, next) => {
     try {
         let search = '';
         if (req.query.search) {
@@ -38,12 +38,12 @@ const loadUser = async (req, res) => {
             search
         });
     } catch (error) {
-        console.error(error);
-        res.status(500).render('error', { message: 'Something went wrong while loading users' });
+        error.statusCode = 500;
+        next(error)
     }
 };
 
-const unblockUser = async (req, res) => {
+const unblockUser = async (req, res, next) => {
     try {
         const id = req.params.id;
 
@@ -55,12 +55,12 @@ const unblockUser = async (req, res) => {
 
         return res.json({ success: true, message: 'User unblocked successfully' });
     } catch (error) {
-        console.error(error);
-        return res.status(500).json({ success: false, message: 'Internal Server Error' });
+        error.statusCode = 500;
+        next(error)
     }
 };
 
-const blockUser = async (req, res) => {
+const blockUser = async (req, res, next) => {
     try {
         const id = req.params.id;
 
@@ -72,8 +72,8 @@ const blockUser = async (req, res) => {
 
         return res.json({ success: true, message: 'User blocked successfully' });
     } catch (error) {
-        console.error(error);
-        return res.status(500).json({ success: false, message: 'Internal server error' });
+        error.statusCode = 500;
+        next(error)
     }
 };
 

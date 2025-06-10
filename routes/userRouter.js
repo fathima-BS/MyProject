@@ -10,6 +10,7 @@ const orderController = require('../controllers/user/orderController');
 const wishlistController=require('../controllers/user/wishlistController')
 const passport = require('passport');
 const { userAuth } = require('../middlewares/auth');
+const {userErrorHandler} = require("../middlewares/error")
 
 router.get('/', userController.loadHomePage);
 router.get('/pageNotFound', userController.pageNotFound);
@@ -100,6 +101,9 @@ router.post('/apply-coupon', userAuth,checkoutController.applyCoupon)
 router.post('/remove-coupon', userAuth,checkoutController.removeCoupon)
 router.get('/coupons', userAuth, checkoutController.getCoupons);
 
+//stock check
+router.post('/check-stock',userAuth,checkoutController.checkStock)
+
 //order
 router.get('/orders',userAuth, orderController.getMyOrders);
 router.get('/order-details/:id',userAuth, orderController.orderDetails)
@@ -120,6 +124,6 @@ router.post('/payment-success',userAuth, checkoutController.paymentSuccess);
 router.post('/generate-referral-code', userAuth, profileController.generateReferralCode);
 router.post('/payment-failed-order',userAuth,checkoutController.paymentfailedorder)
 
-
+router.use(userErrorHandler)
 
 module.exports = router;

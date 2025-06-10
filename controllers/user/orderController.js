@@ -4,7 +4,7 @@ const Wallet = require('../../models/walletSchema');
 const ITEMS_PER_PAGE = 10;
 
 // Get My Orders
-const getMyOrders = async (req, res) => {
+const getMyOrders = async (req, res, next) => {
     try {
         req.user = req.session.userData ? req.session.userData : req.user;
         if (!req.user) {
@@ -31,13 +31,13 @@ const getMyOrders = async (req, res) => {
             user: req.user,
         });
     } catch (error) {
-        console.error('Error loading orders:', error.message, error.stack);
-        res.status(500).render('page404', { message: 'Something went wrong while fetching orders.' });
+        error.statusCode = 500;
+        next(error)
     }
 };
 
 // Get Order Details
-const orderDetails = async (req, res) => {
+const orderDetails = async (req, res, next) => {
     try {
         const orderId = req.params.id;
         const order = await Order.findOne({ orderId, userId: req.user?._id ? req.user?._id : req.session.user })
@@ -49,13 +49,13 @@ const orderDetails = async (req, res) => {
 
         res.render('order-details', { orderId, order });
     } catch (error) {
-        console.error('Error fetching order details:', error.message, error.stack);
-        res.status(500).render('page404', { message: 'Something went wrong while fetching order details.' });
+        error.statusCode = 500;
+        next(error)
     }
 };
 
 // Cancel Entire Order
-const cancelOrder = async (req, res) => {
+const cancelOrder = async (req, res, next) => {
     try {
         const { orderId } = req.body;
         const order = await Order.findOne({ orderId, userId: req.user._id });
@@ -73,41 +73,41 @@ const cancelOrder = async (req, res) => {
         order.orderedItems.forEach(item => {
             item.status = 'Cancelled';
         });
-         
-        if(order.paymentMethod !== "COD"){
-             // Update wallet
-        let wallet = await Wallet.findOne({ userId: req.user._id });
-        if (!wallet) {
-            wallet = new Wallet({
-                userId: req.user._id,
-                balance: 0,
-                transactions: [],
+
+        if (order.paymentMethod !== "COD") {
+            // Update wallet
+            let wallet = await Wallet.findOne({ userId: req.user._id });
+            if (!wallet) {
+                wallet = new Wallet({
+                    userId: req.user._id,
+                    balance: 0,
+                    transactions: [],
+                });
+            }
+
+            wallet.balance += refundAmount;
+            wallet.transactions.push({
+                amount: refundAmount,
+                type: 'credit',
+                description: `Refund for cancelled order #${orderId}`,
+                date: new Date(),
             });
-        }
-       
-        wallet.balance += refundAmount;
-        wallet.transactions.push({
-            amount: refundAmount,
-            type: 'credit',
-            description: `Refund for cancelled order #${orderId}`,
-            date: new Date(),
-        });
 
-        await Promise.all([order.save(), wallet.save()]);
+            await Promise.all([order.save(), wallet.save()]);
 
-        }else{
+        } else {
             await order.save()
         }
-       
+
         res.status(200).json({ success: true, message: 'Order cancelled successfully.' });
     } catch (error) {
-        console.error('Error cancelling order:', error.message, error.stack);
-        res.status(500).json({ success: false, message: 'Something went wrong while cancelling the order.' });
+        error.statusCode = 500;
+        next(error)
     }
 };
 
 // Cancel Individual Item
-const cancelItem = async (req, res) => {
+const cancelItem = async (req, res, next) => {
     try {
         const { orderId, productId } = req.body;
         const order = await Order.findOne({ orderId, userId: req.user._id });
@@ -134,40 +134,40 @@ const cancelItem = async (req, res) => {
         if (allItemsCancelled) {
             order.status = 'Cancelled';
         }
-         
-        if(order.paymentMethod !== "COD"){
-             let wallet = await Wallet.findOne({ userId: req.user._id });
-        if (!wallet) {
-            wallet = new Wallet({
-                userId: req.user._id,
-                balance: 0,
-                transactions: [],
+
+        if (order.paymentMethod !== "COD") {
+            let wallet = await Wallet.findOne({ userId: req.user._id });
+            if (!wallet) {
+                wallet = new Wallet({
+                    userId: req.user._id,
+                    balance: 0,
+                    transactions: [],
+                });
+            }
+
+            wallet.balance += refundAmount;
+            wallet.transactions.push({
+                amount: refundAmount,
+                type: 'credit',
+                description: `Refund for cancelled item in order #${orderId}`,
+                date: new Date(),
             });
-        }
 
-        wallet.balance += refundAmount;
-        wallet.transactions.push({
-            amount: refundAmount,
-            type: 'credit',
-            description: `Refund for cancelled item in order #${orderId}`,
-            date: new Date(),
-        });
-
-        await Promise.all([order.save(), wallet.save()]);
-        }else{
+            await Promise.all([order.save(), wallet.save()]);
+        } else {
             await order.save()
         }
-        
-       
+
+
         res.status(200).json({ success: true, message: 'Item cancelled successfully.' });
     } catch (error) {
-        console.error('Error cancelling item:', error.message, error.stack);
-        res.status(500).json({ success: false, message: 'Something went wrong while cancelling the item.' });
+        error.statusCode = 500;
+        next(error)
     }
 };
 
 // Request Return for Entire Order
-const returnOrder = async (req, res) => {
+const returnOrder = async (req, res, next) => {
     try {
         const { orderId } = req.body;
         const order = await Order.findOne({ orderId, userId: req.user._id });
@@ -190,13 +190,13 @@ const returnOrder = async (req, res) => {
         await order.save();
         res.status(200).json({ success: true, message: 'Return request submitted successfully.' });
     } catch (error) {
-        console.error('Error requesting return:', error.message, error.stack);
-        res.status(500).json({ success: false, message: 'Something went wrong while requesting the return.' });
+        error.statusCode = 500;
+        next(error)
     }
 };
 
 // Request Return for Individual Item
-const returnItem = async (req, res) => {
+const returnItem = async (req, res, next) => {
     try {
         const { orderId, productId } = req.body;
         const order = await Order.findOne({ orderId, userId: req.user._id });
@@ -215,7 +215,7 @@ const returnItem = async (req, res) => {
         }
 
         item.status = 'Return Request';
-        const allItemsDeliveredOrReturning = order.orderedItems.every(item => 
+        const allItemsDeliveredOrReturning = order.orderedItems.every(item =>
             ['Delivered', 'Return Request', 'Returned', 'Return Rejected'].includes(item.status)
         );
         if (allItemsDeliveredOrReturning) {
@@ -225,8 +225,8 @@ const returnItem = async (req, res) => {
         await order.save();
         res.status(200).json({ success: true, message: 'Return request submitted successfully.' });
     } catch (error) {
-        console.error('Error requesting item return:', error.message, error.stack);
-        res.status(500).json({ success: false, message: 'Something went wrong while requesting the return.' });
+        error.statusCode = 500;
+        next(error)
     }
 };
 

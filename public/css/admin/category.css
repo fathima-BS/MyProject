@@ -9,7 +9,7 @@ body {
 }
 
 .main-content {
-    margin-left: 220px; /* Increased to clear the 200px sidebar width, with extra padding for spacing */
+    margin-left: 220px; 
     padding: 20px;
 }
 

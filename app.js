@@ -11,7 +11,12 @@ const userRouter=require('./routes/userRouter')
 const adminRouter=require('./routes/adminRouter')
 const User = require('./models/userSchema')
 const { getCartCount } = require('./controllers/user/cartController');
+const { adminErrorHandler } = require('./middlewares/error');
+const {userErrorHandler} =require('./middlewares/error')
+// const morgan=require('morgan')
 db()
+
+// app.use(morgan('dev'))
 app.use(express.json())
 app.use(express.urlencoded({extended:true}))
 app.use(session({
@@ -70,11 +75,27 @@ app.use(express.static(path.join(__dirname,'public')))
 
 app.use((req,res,next)=>{
   res.set('cache-control','no-store')
-    next()
+  next()
 })
 
 app.use('/',userRouter)
 app.use('/admin', adminRouter)
+
+// Catch-all for wrong URLs
+app.use('/admin/*', (req, res, next) => {
+  const error = new Error('Admin Page Not Found');
+  error.statusCode = 404;
+  next(error);
+});
+
+app.use('/*', (req, res, next) => {
+  const error = new Error('User Page Not Found');
+  error.statusCode = 404;
+  next(error);
+});
+
+app.use('/admin', adminErrorHandler);
+app.use('/', userErrorHandler);
 app.listen(PORT,()=>{
     console.log("server is listening to port 3000")
 })

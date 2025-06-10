@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sales Report - Cario Admin</title>
+    <title>Sales Report - Cario</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -35,7 +35,7 @@
 
         /* Summary Card */
         .summary-card {
-            background-color: #8B5A2B; /* Brownish */
+            background-color: #8B5A2B;
             border-radius: 12px;
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
             padding: 20px;
@@ -46,7 +46,7 @@
         .summary-card:hover {
             transform: translateY(-4px);
             box-shadow: 0 6px 16px rgba(0, 0, 0, 0.3);
-            background-color: #A0522D; /* Lighter brown */
+            background-color: #A0522D;
         }
 
         .summary-card .stats-title {
@@ -81,7 +81,7 @@
         }
 
         .filter-container .btn-primary {
-            background-color: #7c3aed; /* Purple */
+            background-color: #7c3aed;
             border: none;
             padding: 8px 16px;
             border-radius: 4px;
@@ -105,7 +105,7 @@
         }
 
         .filter-container .download-btn {
-            background-color: #28a745; /* Green */
+            background-color: #28a745;
             color: white;
             border: none;
             padding: 8px 16px;
@@ -118,7 +118,7 @@
         }
 
         .filter-container .excel-btn {
-            background-color: #17a2b8; /* Cyan */
+            background-color: #17a2b8;
             color: white;
             border: none;
             padding: 8px 16px;
@@ -131,30 +131,37 @@
         }
 
         /* Table */
-        .table {
-            color: #fff;
+        .table-responsive .table {
+            color: #ffffff !important;
             border-radius: 8px;
             overflow: hidden;
-            background-color: #1E293B; /* Black theme background */
+            background-color: #121212 !important; /* Dark black theme */
+            border: 1px solid #2d3748 !important;
         }
 
-        .table th {
-            background-color: #1E293B; /* Black theme for headers */
-            color: #ffffff; /* White text */
-            font-weight: 500;
-            border-bottom: 1px solid #2d3748;
+        .table-responsive .table th {
+            background-color: #1a1717 !important;
+            color: #ffffff !important;
+            font-weight: 600;
+            border-bottom: 2px solid #2d3748 !important;
             padding: 1rem;
+            text-align: left;
         }
 
-        .table tbody tr {
-            background-color: #1E293B; /* Black theme for rows */
+        .table-responsive .table tbody tr {
+            background-color: #1a1717;
+            transition: background-color 0.2s ease;
         }
 
-        .table td {
-            background-color: #1E293B; /* Black theme for cells */
-            color: #ffffff; /* White text */
+        .table-responsive .table tbody tr:hover {
+            background-color: #1a1a1a !important;
+        }
+
+        .table-responsive .table td {
+            background-color: #1a1717;
+            color: #ffffff !important;
             padding: 1rem;
-            border-bottom: 1px solid #2d3748;
+            border-bottom: 1px solid #2d3748 !important;
             vertical-align: middle;
         }
 
@@ -235,9 +242,10 @@
                 align-items: flex-start;
             }
 
-            .table th,
-            .table td {
+            .table-responsive .table th,
+            .table-responsive .table td {
                 padding: 12px 10px;
+                font-size: 0.9rem;
             }
 
             .pagination {

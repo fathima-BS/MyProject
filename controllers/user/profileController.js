@@ -49,7 +49,7 @@ async function sendVerificationEmail(email, otp) {
     }
 }
 
-const generateReferralCode = async (req, res) => {
+const generateReferralCode = async (req, res, next) => {
     try {
         const userId = req.session.user;
         if (!userId) {
@@ -72,21 +72,21 @@ const generateReferralCode = async (req, res) => {
         console.log('Generated referral code for user:', user.email, referralCode);
         res.json({ success: true, referralCode });
     } catch (error) {
-        console.error('Error generating referral code:', error);
-        res.json({ success: false, message: 'Server error' });
+        error.statusCode = 500;
+        next(error)
     }
 };
 
-const forgetPassword = async (req, res) => {
+const forgetPassword = async (req, res, next) => {
     try {
         return res.render('forgetPassword', { message: null });
     } catch (error) {
-        console.log("Forgot Password page not loading: ", error.message);
-        res.status(500).json({ success: false, message: 'Server Error' });
+        error.statusCode = 500;
+        next(error)
     }
 };
 
-const forgetPasswordsubmit = async (req, res) => {
+const forgetPasswordsubmit = async (req, res, next) => {
     try {
         const { email } = req.body;
 
@@ -111,11 +111,12 @@ const forgetPasswordsubmit = async (req, res) => {
             });
         }
     } catch (error) {
-        res.status(500).json({ success: false, message: 'Server Error' });
+        error.statusCode = 500;
+        next(error)
     }
 };
 
-const verifyForgetPassOtp = async (req, res) => {
+const verifyForgetPassOtp = async (req, res, next) => {
     try {
         const { otp } = req.body;
         const storedOtp = req.session.userOtp;
@@ -141,12 +142,12 @@ const verifyForgetPassOtp = async (req, res) => {
             return res.json({ success: false, message: "Invalid OTP. Please try again." });
         }
     } catch (error) {
-        console.error("Error verifying OTP:", error.message);
-        return res.status(500).json({ success: false, message: "Server Error" });
+        error.statusCode = 500;
+        next(error)
     }
 };
 
-const resendForgetPassOtp = async (req, res) => {
+const resendForgetPassOtp = async (req, res, next) => {
     try {
         const email = req.session.email;
 
@@ -166,21 +167,21 @@ const resendForgetPassOtp = async (req, res) => {
             return res.json({ success: false, message: "Failed to resend OTP. Please try again." });
         }
     } catch (error) {
-        console.error("Error resending OTP:", error.message);
-        return res.status(500).json({ success: false, message: "Server Error" });
+        error.statusCode = 500;
+        next(error)
     }
 };
 
-const resetPass = async (req, res) => {
+const resetPass = async (req, res, next) => {
     try {
         res.render("resetPass");
     } catch (error) {
-        console.error("Error while loading reset password", error.message);
-        res.status(500).render('error', { message: 'Server Error' });
+        error.statusCode = 500;
+        next(error)
     }
 };
 
-const newPass = async (req, res) => {
+const newPass = async (req, res, next) => {
     try {
         const { NewPassword, password } = req.body;
         const email = req.session.email;
@@ -211,12 +212,12 @@ const newPass = async (req, res) => {
         delete req.session.email;
         return res.redirect('/login?passwordchanged=true');
     } catch (error) {
-        console.error('Error in newPass controller:', error);
-        return res.render('resetPass', { message: 'An error occurred. Please try again later.' });
+        error.statusCode = 500;
+        next(error)
     }
 };
 
-const postNewPassword = async (req, res) => {
+const postNewPassword = async (req, res, next) => {
     try {
         console.log("Request body in postNewPassword:", req.body);
 
@@ -226,8 +227,8 @@ const postNewPassword = async (req, res) => {
         console.log("Session userId:", userId);
 
         if (!userId) {
-            return res.status(401).json({ 
-                success: false, 
+            return res.status(401).json({
+                success: false,
                 message: "User not authenticated. Please log in again.",
                 redirectUrl: "/login"
             });
@@ -262,8 +263,8 @@ const postNewPassword = async (req, res) => {
         }
 
         if (!user.password) {
-            return res.status(400).json({ 
-                success: false, 
+            return res.status(400).json({
+                success: false,
                 message: "No password set for this account. Please use the forgot password option."
             });
         }
@@ -299,12 +300,12 @@ const postNewPassword = async (req, res) => {
 
         return res.status(200).json({ success: true, message: "Password updated successfully" });
     } catch (error) {
-        console.error("Error in postNewPassword:", error.message);
-        return res.status(500).json({ success: false, message: "Server error: " + error.message });
+        error.statusCode = 500;
+        next(error)
     }
 };
 
-const loadUserProfile = async (req, res) => {
+const loadUserProfile = async (req, res, next) => {
     try {
         const userId = req.session.user;
         if (!userId) {
@@ -317,12 +318,12 @@ const loadUserProfile = async (req, res) => {
         }
         return res.render('userProfile', { user: userData });
     } catch (error) {
-        console.error("Error while loading Profile Page", error);
-        return res.status(500).json({ success: false, message: 'Internal error' });
+        error.statusCode = 500;
+        next(error)
     }
 };
 
-const PhoneNo = async (req, res) => {
+const PhoneNo = async (req, res, next) => {
     try {
         const userId = req.session.user;
         if (!userId) {
@@ -343,12 +344,12 @@ const PhoneNo = async (req, res) => {
         await User.findByIdAndUpdate(userId, { phone });
         res.json({ success: true, redirectUrl: '/userProfile' });
     } catch (error) {
-        console.error(error);
-        return res.status(500).json({ error: 'Internal error' });
+        error.statusCode = 500;
+        next(error)
     }
 };
 
-const loadEditProfile = async (req, res) => {
+const loadEditProfile = async (req, res, next) => {
     try {
         const userId = req.session.user;
         if (!userId) {
@@ -375,12 +376,12 @@ const loadEditProfile = async (req, res) => {
         }
         return res.render('editProfile', { user });
     } catch (error) {
-        console.error("Error while loading Profile Page", error);
-        return res.status(500).json({ success: false, message: 'Internal error' });
+        error.statusCode = 500;
+        next(error)
     }
 };
 
-const editProfile = (req, res) => {
+const editProfile = (req, res, next) => {
     profileUpload(req, res, async (err) => {
         if (err) {
             console.error('Multer error:', err.stack);
@@ -478,13 +479,13 @@ const editProfile = (req, res) => {
                 });
             }
         } catch (error) {
-            console.error("Error while updating profile:", error.stack);
-            res.status(500).json({ success: false, message: `Server error: ${error.message}` });
+            error.statusCode = 500;
+            next(error)
         }
     });
 };
 
-const changeEmail = async (req, res) => {
+const changeEmail = async (req, res, next) => {
     try {
         const userId = req.session.user;
         const userData = await User.findById(userId);
@@ -499,12 +500,12 @@ const changeEmail = async (req, res) => {
             currentEmail: userData.email || ''
         });
     } catch (error) {
-        console.error('Error loading changeEmail page:', error);
-        res.status(500).json({ success: false, message: 'Internal Server Error' });
+        error.statusCode = 500;
+        next(error)
     }
 };
 
-const sendOtp = async (req, res) => {
+const sendOtp = async (req, res, next) => {
     try {
         const { email } = req.body;
         const userId = req.session.user;
@@ -539,12 +540,12 @@ const sendOtp = async (req, res) => {
             return res.json({ success: false, message: "Failed to send OTP. Please try again." });
         }
     } catch (error) {
-        console.error("Error sending OTP:", error);
-        return res.status(500).json({ success: false, message: "Server Error" });
+        error.statusCode = 500;
+        next(error)
     }
 };
 
-const getVerifyOtp = async (req, res) => {
+const getVerifyOtp = async (req, res, next) => {
     try {
         const { email } = req.query;
         if (!email) {
@@ -552,12 +553,12 @@ const getVerifyOtp = async (req, res) => {
         }
         res.render('verifyProfileOtp', { email });
     } catch (error) {
-        console.error("Error loading OTP verification page:", error);
-        res.status(500).json({ success: false, message: 'Internal error' });
+        error.statusCode = 500;
+        next(error)
     }
 };
 
-const verifyOtp = async (req, res) => {
+const verifyOtp = async (req, res, next) => {
     try {
         const { email, otp } = req.body;
         const storedOtp = req.session.userOtp;
@@ -592,12 +593,12 @@ const verifyOtp = async (req, res) => {
             return res.json({ success: false, message: "Invalid OTP. Please try again." });
         }
     } catch (error) {
-        console.error("Error verifying OTP:", error);
-        return res.status(500).json({ success: false, message: "Server Error" });
+        error.statusCode = 500;
+        next(error)
     }
 };
 
-const resendOtp = async (req, res) => {
+const resendOtp = async (req, res, next) => {
     try {
         const { email } = req.body;
         const newEmail = req.session.newEmail;
@@ -633,8 +634,8 @@ const resendOtp = async (req, res) => {
             return res.json({ success: false, message: "Failed to resend OTP. Please try again." });
         }
     } catch (error) {
-        console.error("Error resending OTP:", error);
-        return res.status(500).json({ success: false, message: "Server Error" });
+        error.statusCode = 500;
+        next(error)
     }
 };
 

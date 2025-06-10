@@ -1,6 +1,6 @@
 const Category = require('../../models/categorySchema');
 
-const loadCategory = async (req, res) => {
+const loadCategory = async (req, res, next) => {
     try {
         let search = '';
         if (req.query.search) {
@@ -31,12 +31,12 @@ const loadCategory = async (req, res) => {
             search
         });
     } catch (error) {
-        console.error(error);
-        res.status(500).render('error', { message: 'Something went wrong while loading categories' });
+        error.statusCode = 500;
+        next(error)
     }
 };
 
-const addCategory = async (req, res) => {
+const addCategory = async (req, res, next) => {
     try {
         const { categoryName, description } = req.body;
 
@@ -55,12 +55,12 @@ const addCategory = async (req, res) => {
 
         return res.json({ success: true, message: 'Category added successfully!' });
     } catch (error) {
-        console.error(error);
-        return res.status(500).json({ success: false, message: 'Internal server error' });
+        error.statusCode = 500;
+        next(error)
     }
 };
 
-const editCategory = async (req, res) => {
+const editCategory = async (req, res, next) => {
     try {
         const { categoryId, categoryName, description } = req.body;
 
@@ -73,7 +73,7 @@ const editCategory = async (req, res) => {
             return res.json({ success: false, message: 'Category already exists!' });
         }
 
-        const updatedCategory = await Category.findByIdAndUpdate(categoryId, { $set: { name: categoryName, description} });
+        const updatedCategory = await Category.findByIdAndUpdate(categoryId, { $set: { name: categoryName, description } });
 
         if (!updatedCategory) {
             return res.json({ success: false, message: 'Category not found!' });
@@ -81,12 +81,12 @@ const editCategory = async (req, res) => {
 
         return res.json({ success: true, message: 'Category updated successfully!' });
     } catch (error) {
-        console.error(error);
-        return res.status(500).json({ success: false, message: 'Internal Server Error' });
+        error.statusCode = 500;
+        next(error)
     }
 };
 
-const deleteCategory = async (req, res) => {
+const deleteCategory = async (req, res, next) => {
     try {
         const id = req.params.id;
 
@@ -98,12 +98,12 @@ const deleteCategory = async (req, res) => {
 
         return res.json({ success: true, message: 'Category deleted successfully' });
     } catch (error) {
-        console.error(error);
-        return res.status(500).json({ success: false, message: 'Internal server error' });
+        error.statusCode = 500;
+        next(error)
     }
 };
 
-const unlistCategory = async (req, res) => {
+const unlistCategory = async (req, res, next) => {
     try {
         const id = req.params.id;
 
@@ -115,12 +115,12 @@ const unlistCategory = async (req, res) => {
 
         return res.json({ success: true, message: 'Category unlisted' });
     } catch (error) {
-        console.error(error);
-        return res.status(500).json({ success: false, message: 'Internal server error' });
+        error.statusCode = 500;
+        next(error)
     }
 };
 
-const listCategory = async (req, res) => {
+const listCategory = async (req, res, next) => {
     try {
         const id = req.params.id;
 
@@ -132,8 +132,8 @@ const listCategory = async (req, res) => {
 
         return res.json({ success: true, message: 'Category listed' });
     } catch (error) {
-        console.error(error);
-        return res.status(500).json({ success: false, message: 'Internal server error' });
+        error.statusCode = 500;
+        next(error)
     }
 };
 

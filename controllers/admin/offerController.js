@@ -3,7 +3,7 @@ const Category = require('../../models/categorySchema');
 const Brand = require('../../models/brandSchema');
 const Product = require('../../models/productSchema');
 const mongoose = require('mongoose');
-const loadOffers = async (req, res) => {
+const loadOffers = async (req, res, next) => {
     try {
         let search = '';
         if (req.query.search) {
@@ -45,12 +45,12 @@ const loadOffers = async (req, res) => {
             products
         });
     } catch (error) {
-        console.error('Error in loadOffers:', error.message, error.stack);
-        res.status(500).render('error', { message: 'Something went wrong while loading offers' });
+        error.statusCode = 500;
+        next(error)
     }
 };
 
-const addOffer = async (req, res) => {
+const addOffer = async (req, res, next) => {
     try {
         const { offerName, description, discountType, discountAmount, validFrom, validUpto, offerType, applicableTo } = req.body;
 
@@ -95,12 +95,12 @@ const addOffer = async (req, res) => {
         await newOffer.save();
         return res.status(201).json({ success: true, message: 'Offer added successfully!' });
     } catch (error) {
-        console.error('Error in addOffer:', error.message, error.stack);
-        return res.status(500).json({ success: false, message: 'Internal server error' });
+        error.statusCode = 500;
+        next(error)
     }
 };
 
-const editOffer = async (req, res) => {
+const editOffer = async (req, res, next) => {
     try {
         const { offerId, offerName, description, discountType, discountAmount, validFrom, validUpto, offerType, applicableTo } = req.body;
         console.log(req.body)
@@ -115,38 +115,24 @@ const editOffer = async (req, res) => {
         if (isNaN(discountValue) || discountValue <= 0 || discountValue > 100) {
             return res.status(400).json({ success: false, message: 'Discount percentage must be between 0 and 100.' });
         }
+        // Escape regex special characters
+        function escapeRegex(str) {
+            return str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+        }
 
-        // Check for existing offer with the same name (excluding the current offer)
+        // Case-insensitive regex (but still exact match)
+        const offerNameRegex = new RegExp(`^${escapeRegex(offerName)}$`, 'i');
 
-        const mongoose = require('mongoose'); // ✅ Required at the top
+        const existingOffer = await Offer.findOne({
+            _id: { $ne: new mongoose.Types.ObjectId(offerId) }, // Exclude current offer
+            offerName: offerNameRegex                            // Case-insensitive, exact match
+        });
 
-// Check for existing offer with the same name (excluding the current offer)
+        console.log(existingOffer, "existing : ");
 
-
-// Escape regex special characters
-function escapeRegex(str) {
-  return str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-}
-
-// Case-insensitive regex (but still exact match)
-const offerNameRegex = new RegExp(`^${escapeRegex(offerName)}$`, 'i');
-
-const existingOffer = await Offer.findOne({
-  _id: { $ne: new mongoose.Types.ObjectId(offerId) }, // Exclude current offer
-  offerName: offerNameRegex                            // Case-insensitive, exact match
-});
-
-console.log(existingOffer, "existing : ");
-
-if (existingOffer) {
-  return res.status(400).json({ success: false, message: 'Offer name already exists!' });
-}
-
-
-
-
-
-
+        if (existingOffer) {
+            return res.status(400).json({ success: false, message: 'Offer name already exists!' });
+        }
         const updatedOffer = await Offer.findByIdAndUpdate(offerId, {
             $set: {
                 offerName,
@@ -167,12 +153,12 @@ if (existingOffer) {
 
         return res.status(200).json({ success: true, message: 'Offer updated successfully!' });
     } catch (error) {
-        console.error('Error in editOffer:', error.message, error.stack);
-        return res.status(500).json({ success: false, message: 'Internal Server Error' });
+        error.statusCode = 500;
+        next(error)
     }
 };
 
-const deleteOffer = async (req, res) => {
+const deleteOffer = async (req, res, next) => {
     try {
         const id = req.params.id;
 
@@ -184,8 +170,8 @@ const deleteOffer = async (req, res) => {
 
         return res.status(200).json({ success: true, message: 'Offer deleted successfully' });
     } catch (error) {
-        console.error('Error in deleteOffer:', error.message, error.stack);
-        return res.status(500).json({ success: false, message: 'Internal server error' });
+        error.statusCode = 500;
+        next(error)
     }
 };
 
