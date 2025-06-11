@@ -539,6 +539,22 @@ const logout = async (req, res, next) => {
   }
 };
 
+const aboutPage = (req, res) => {
+  res.render('aboutUs', {
+    title: 'About Us - Cario Fashion Store',
+    description: 'Learn about Cario Fashion Store, our mission to provide top-quality fashion, and our story.'
+  });
+};
+
+const contactPage = (req, res) => {
+  res.render('contactUs', {
+    title: 'Contact Us - Cario Fashion Store',
+    description: 'Get in touch with Cario Fashion Store for any inquiries or support.'
+  });
+};
+
+
+
 module.exports = {
   loadHomePage,
   loadShopPage,
@@ -549,5 +565,7 @@ module.exports = {
   signup,
   verifyOtp,
   resendOtp,
-  login
+  login,
+  aboutPage,
+  contactPage
 };

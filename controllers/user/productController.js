@@ -115,7 +115,7 @@ const productDetailPage = async (req, res, next) => {
                 isInWishlist: isProductInWishlist // Add wishlist status
             };
         }));
-console.log(relatedProductsWithOffers)
+
         // Render the product detail page
         res.render('productDetail', {
             product,

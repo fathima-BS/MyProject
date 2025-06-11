@@ -8,10 +8,8 @@
    <meta name="viewport" content="width=device-width, initial-scale=1.0">
    <meta http-equiv="X-UA-Compatible" content="ie=edge">
 
-
    <link href="https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@300;400;600;700;800;900&display=swap"
       rel="stylesheet">
-
 
    <link rel="stylesheet" href="/css/bootstrap.min.css" type="text/css">
    <link rel="stylesheet" href="/css/elegant-icons.css" type="text/css">
@@ -19,8 +17,6 @@
    <link rel="stylesheet" href="/css/nice-select.css" type="text/css">
    <link rel="stylesheet" href="/css/owl.carousel.min.css" type="text/css">
    <link rel="stylesheet" href="/css/slicknav.min.css" type="text/css">
-   <!-- <link rel="stylesheet" href="/user-assets/css/maind134.css" type="text/css"> -->
-
    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet">
 
    <style>
@@ -32,7 +28,6 @@
          box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
          width: 100%;
       }
-
 
       .header__logo {
          padding: 20px 0;
@@ -48,7 +43,6 @@
          object-fit: contain;
       }
 
-
       .container-head {
          padding-left: 30px;
          padding-right: 30px;
@@ -62,7 +56,6 @@
          margin-right: 0 !important;
       }
 
-      /* Menu Styles */
       .header__menu {
          text-align: center;
          padding: 10px 0;
@@ -113,7 +106,6 @@
          transform: scale(1);
       }
 
-
       .header__nav__option {
          text-align: right;
          padding: 10px 0;
@@ -163,7 +155,6 @@
          width: 30px;
          height: 20px;
       }
-
 
       .user-name {
          margin-right: 15px;
@@ -221,9 +212,7 @@
          padding: 3px 6px;
          color: #fff;
          background-color: #dc3545;
-         /* Bootstrap danger color */
       }
-
 
       @media (max-width: 991px) {
          .header__menu {
@@ -244,22 +233,21 @@
    <header class="header">
       <div class="container-head">
          <div class="row">
-
             <div class="col-lg-3 col-md-3">
                <div class="header__logo">
                   <a href="/"><img class="logo" src="/img/logo.png" alt="Cario Logo"></a>
                </div>
             </div>
-
             <div class="col-lg-6 col-md-6">
                <nav class="header__menu mobile-menu">
                   <ul>
-                     <li class="active"><a href="/">Home</a></li>
-                     <li id="shop"><a href="/shop">Shop</a></li>
+                     <li><a href="/">Home</a></li>
+                     <li><a href="/shop">Shop</a></li>
+                     <li><a href="/about">About Us</a></li>
+                     <li><a href="/contact">Contact Us</a></li>
                   </ul>
                </nav>
             </div>
-
             <div class="col-lg-3 col-md-3">
                <div class="header__nav__option">
                   <%if(user){%>
@@ -272,23 +260,20 @@
                            <a href="/logout">Logout</a>
                         </div>
                      </div>
-                     <%} else {%>
-                        <a href="/signup" class="sign-in-link">Sign Up</a>
-                        <a href="/login" class="sign-in-link">Log in</a>
-                        <%}%>
-                           <a href="/wishlist" class="icon-link"><img src="/img/icon/heart.png" alt="Wishlist"></a>
-                           <a href="/cart"
-                              class="cart-icon position-relative d-flex align-items-center ms-3 text-decoration-none">
-                              <img src="/img/icon/cart.png" alt="Cart" class="cart-img me-1" />
-                              <span
-                                 class="cart-count badge rounded-pill bg-danger position-absolute top-0 start-100 translate-middle">
-                                 <%= typeof cartCount !=='undefined' ? cartCount : 0 %>
-                              </span>
-                           </a>
+                  <%} else {%>
+                     <a href="/signup" class="sign-in-link">Sign Up</a>
+                     <a href="/login" class="sign-in-link">Log in</a>
+                  <%}%>
+                  <a href="/wishlist" class="icon-link"><img src="/img/icon/heart.png" alt="Wishlist"></a>
+                  <a href="/cart" class="cart-icon position-relative d-flex align-items-center ms-3 text-decoration-none">
+                     <img src="/img/icon/cart.png" alt="Cart" class="cart-img me-1" />
+                     <span class="cart-count badge rounded-pill bg-danger position-absolute top-0 start-100 translate-middle">
+                        <%= typeof cartCount !== 'undefined' ? cartCount : 0 %>
+                     </span>
+                  </a>
                </div>
             </div>
          </div>
-
          <div class="canvas__open"><i class="fa fa-bars"></i></div>
       </div>
    </header>
@@ -306,8 +291,7 @@
                if (href === "/" && currentPath === "/") {
                   li.classList.add("active");
                   matchFound = true;
-               }
-               else if (href !== "/" && currentPath.startsWith(href)) {
+               } else if (href !== "/" && currentPath.startsWith(href)) {
                   li.classList.add("active");
                   matchFound = true;
                }
