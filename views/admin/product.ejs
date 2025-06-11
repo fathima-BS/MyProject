@@ -370,12 +370,16 @@
                 return;
             }
 
-            selectedFiles = files.slice(0, 3 - (originalImages.length + croppedImages.length - deletedImageIndices.size));
+            const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
+            selectedFiles = files
+                .filter(file => allowedTypes.includes(file.type))
+                .slice(0, 3 - (originalImages.length + croppedImages.length - deletedImageIndices.size));
+            
             if (selectedFiles.length === 0) {
                 Swal.fire({
                     icon: "warning",
-                    title: "Limit Reached",
-                    text: "You have already uploaded the maximum of 3 images.",
+                    title: "Invalid File Type or Limit Reached",
+                    text: "Only JPG, JPEG, PNG, and WEBP images are allowed, and you can upload up to 3 images.",
                     timer: 3000,
                     showConfirmButton: false
                 });
@@ -402,6 +406,8 @@
                     timer: 3000,
                     showConfirmButton: false
                 });
+                currentFileIndex++;
+                showCropperForCurrentFile();
                 return;
             }
             const reader = new FileReader();
@@ -444,14 +450,14 @@
                     return;
                 }
 
-                const file = new File([blob], `cropped-${Date.now()}.jpg`, { type: "image/jpeg" });
+                const file = new File([blob], `cropped-${Date.now()}.webp`, { type: "image/webp" });
                 croppedImages.push(file);
                 renderImagePreview();
 
                 cropperOverlay.style.display = "none";
                 currentFileIndex++;
                 showCropperForCurrentFile();
-            });
+            }, "image/webp", 0.8);
         });
 
         function renderImagePreview() {
@@ -577,11 +583,11 @@
             if (currentProductId) formData.append("productId", currentProductId);
 
             const retainedOriginalImages = originalImages.filter((_, index) => !deletedImageIndices.has(index));
-            retainedOriginalImages.forEach((img, index) => {
+            retainedOriginalImages.forEach(img => {
                 formData.append("existingImages", img);
             });
-            croppedImages.forEach((file, index) => {
-                formData.append("productImage", file, `cropped-image-${index}.jpg`);
+            croppedImages.forEach(file => {
+                formData.append("productImage", file, file.name);
             });
 
             const url = currentProductId ? "/admin/edit-product" : "/admin/add-product";

@@ -1,7 +1,10 @@
 const Product = require('../../models/productSchema');
 const Category = require('../../models/categorySchema');
 const Brand = require('../../models/brandSchema');
-const { productUpload } = require('../../config/multerconfig')
+const { productUpload } = require('../../config/multerconfig');
+const sharp = require('sharp');
+const fs = require('fs').promises;
+const path = require('path');
 
 const loadProduct = async (req, res, next) => {
     try {
@@ -41,6 +44,25 @@ const loadProduct = async (req, res, next) => {
     }
 };
 
+// Retry mechanism for file deletion
+async function unlinkWithRetry(filePath, maxRetries = 3, delay = 100) {
+    for (let attempt = 1; attempt <= maxRetries; attempt++) {
+        try {
+            await fs.unlink(filePath);
+            console.log(`Deleted file: ${filePath}`);
+            return;
+        } catch (err) {
+            if (err.code === 'EBUSY' && attempt < maxRetries) {
+                console.warn(`File busy, retrying (${attempt}/${maxRetries}): ${filePath}`);
+                await new Promise(resolve => setTimeout(resolve, delay));
+                continue;
+            }
+            console.error(`Failed to delete ${filePath}:`, err);
+            throw err; // Rethrow if max retries reached or other error
+        }
+    }
+}
+
 const addProduct = async (req, res, next) => {
     productUpload(req, res, async (err) => {
         if (err) {
@@ -49,9 +71,6 @@ const addProduct = async (req, res, next) => {
         }
         try {
             const { productName, description, brand, category, salePrice, quantity } = req.body;
-
-            console.log('addProduct request body:', req.body);
-            console.log('addProduct files:', req.files);
 
             // Validate required fields
             if (!productName || !description || !brand || !category || !salePrice || quantity === undefined || quantity === '') {
@@ -109,7 +128,28 @@ const addProduct = async (req, res, next) => {
                 return res.status(400).json({ message: 'Maximum 3 images allowed' });
             }
 
-            const productImage = req.files.map(file => `/Uploads/products/${file.filename}`).slice(0, 3);
+            // Convert uploaded images to WebP
+            const productImage = [];
+            for (const file of req.files) {
+                const filePath = path.join(__dirname, '..', '..', 'public', 'Uploads', 'products', file.filename);
+                const newFileName = `product-${Date.now()}-${Math.round(Math.random() * 1e9)}.webp`;
+                const newPath = path.join(__dirname, '..', '..', 'public', 'Uploads', 'products', newFileName);
+                try {
+                    await sharp(filePath)
+                        .webp({ quality: 80 })
+                        .toFile(newPath);
+                    try {
+                        await unlinkWithRetry(filePath);
+                    } catch (err) {
+                        console.warn(`Non-critical error: Failed to delete original file ${filePath}. Continuing...`);
+                    }
+                    productImage.push(`/Uploads/products/${newFileName}`);
+                } catch (err) {
+                    console.error(`Failed to convert ${file.filename} to WebP:`, err);
+                    return res.status(500).json({ message: 'Error processing images' });
+                }
+            }
+
             const product = new Product({ 
                 productName, 
                 description, 
@@ -210,30 +250,122 @@ const editProduct = async (req, res, next) => {
             }
 
             // Update fields
-            product.productName = productName || product.productName;
-            product.description = description || product.description;
-            product.brand = brand || product.brand;
-            product.category = category || product.category;
+            product.productName = productName;
+            product.description = description;
+            product.brand = brand;
+            product.category = category;
             product.salePrice = parsedSalePrice;
             product.quantity = parsedQuantity;
 
             // Handle images
-            let updatedImages = product.productImage || [];
-            if (req.body.existingImages) {
-                const existingImages = Array.isArray(req.body.existingImages) ? req.body.existingImages : [req.body.existingImages];
-                updatedImages = existingImages.filter(img => product.productImage.includes(img));
-            }
+            let updatedImages = [];
             if (req.files && req.files.length > 0) {
-                const newImages = req.files.map(file => `/Uploads/products/${file.filename}`);
-                updatedImages = [...updatedImages, ...newImages].slice(0, 3);
+                // Convert new images to WebP
+                const newImages = [];
+                for (const file of req.files) {
+                    const filePath = path.join(__dirname, '..', '..', 'public', 'Uploads', 'products', file.filename);
+                    const newFileName = `product-${Date.now()}-${Math.round(Math.random() * 1e9)}.webp`;
+                    const newPath = path.join(__dirname, '..', '..', 'public', 'Uploads', 'products', newFileName);
+                    try {
+                        await sharp(filePath)
+                            .webp({ quality: 80 })
+                            .toFile(newPath);
+                        try {
+                            await unlinkWithRetry(filePath);
+                        } catch (err) {
+                            console.warn(`Non-critical error: Failed to delete original file ${filePath}. Continuing...`);
+                        }
+                        newImages.push(`/Uploads/products/${newFileName}`);
+                    } catch (err) {
+                        console.error(`Failed to convert ${file.filename} to WebP:`, err);
+                        return res.status(500).json({ message: 'Error processing images' });
+                    }
+                }
+                updatedImages = newImages.slice(0, 3);
+                if (updatedImages.length < 3) {
+                    const remainingCount = 3 - updatedImages.length;
+                    const existingImages = product.productImage || [];
+                    // Convert existing images to WebP if not already
+                    for (let img of existingImages.slice(0, remainingCount)) {
+                        if (!img.endsWith('.webp')) {
+                            const oldPath = path.join(__dirname, '..', '..', 'public', img);
+                            const newFileName = `product-${Date.now()}-${Math.round(Math.random() * 1e9)}.webp`;
+                            const newPath = path.join(__dirname, '..', '..', 'public', 'Uploads', 'products', newFileName);
+                            try {
+                                await sharp(oldPath)
+                                    .webp({ quality: 80 })
+                                    .toFile(newPath);
+                                try {
+                                    await unlinkWithRetry(oldPath);
+                                } catch (err) {
+                                    console.warn(`Non-critical error: Failed to delete original file ${oldPath}. Continuing...`);
+                                }
+                                updatedImages.push(`/Uploads/products/${newFileName}`);
+                            } catch (err) {
+                                console.error(`Failed to convert image ${oldPath} to WebP:`, err);
+                            }
+                        } else {
+                            updatedImages.push(img);
+                        }
+                    }
+                    updatedImages = updatedImages.slice(0, 3);
+                }
+            } else {
+                updatedImages = product.productImage || [];
+                if (req.body.existingImages) {
+                    const existingImages = Array.isArray(req.body.existingImages) 
+                        ? req.body.existingImages 
+                        : [req.body.existingImages];
+                    const filteredImages = existingImages.filter(img => product.productImage.includes(img)).slice(0, 3);
+                    // Convert existing images to WebP if not already
+                    const convertedImages = [];
+                    for (let img of filteredImages) {
+                        if (!img.endsWith('.webp')) {
+                            const oldPath = path.join(__dirname, '..', '..', 'public', img);
+                            const newFileName = `product-${Date.now()}-${Math.round(Math.random() * 1e9)}.webp`;
+                            const newPath = path.join(__dirname, '..', '..', 'public', 'Uploads', 'products', newFileName);
+                            try {
+                                await sharp(oldPath)
+                                    .webp({ quality: 80 })
+                                    .toFile(newPath);
+                                try {
+                                    await unlinkWithRetry(oldPath);
+                                } catch (err) {
+                                    console.warn(`Non-critical error: Failed to delete original file ${oldPath}. Continuing...`);
+                                }
+                                convertedImages.push(`/Uploads/products/${newFileName}`);
+                            } catch (err) {
+                                console.error(`Failed to convert image ${oldPath} to WebP:`, err);
+                                convertedImages.push(img); // Fallback to original
+                            }
+                        } else {
+                            convertedImages.push(img);
+                        }
+                    }
+                    updatedImages = convertedImages.slice(0, 3);
+                }
             }
+
             if (updatedImages.length !== 3) {
                 console.log('Invalid image count:', updatedImages.length);
                 return res.status(400).json({ message: 'Exactly 3 images are required' });
             }
-            product.productImage = updatedImages;
 
+            // Delete old images that are no longer used
+            const oldImages = product.productImage || [];
+            const imagesToDelete = oldImages.filter(img => !updatedImages.includes(img));
+            for (const img of imagesToDelete) {
+                const filePath = path.join(__dirname, '..', '..', 'public', img);
+                try {
+                    await unlinkWithRetry(filePath);
+                } catch (err) {
+                    console.warn(`Non-critical error: Failed to delete old image ${filePath}. Continuing...`);
+                }
+            }
+
+            product.productImage = updatedImages;
             await product.save();
+
             res.status(200).json({ message: 'Product updated successfully', product });
         } catch (error) {
             console.error('Error in editProduct:', error.stack);
@@ -249,6 +381,15 @@ const deleteProduct = async (req, res, next) => {
         const product = await Product.findByIdAndUpdate(id, { $set: { isDeleted: true } });
         if (!product) {
             return res.json({ success: false, message: 'Product not found!' });
+        }
+        // Delete associated images
+        for (const img of product.productImage || []) {
+            const filePath = path.join(__dirname, '..', '..', 'public', img);
+            try {
+                await unlinkWithRetry(filePath);
+            } catch (err) {
+                console.warn(`Non-critical error: Failed to delete image ${filePath}. Continuing...`);
+            }
         }
         return res.json({ success: true, message: 'Product deleted successfully' });
     } catch (error) {

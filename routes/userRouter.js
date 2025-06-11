@@ -55,6 +55,9 @@ router.get("/auth/google/callback", (req, res, next) => {
 // Shop and Product 
 router.get('/shop', userAuth, userController.loadShopPage);
 router.get('/product/:id', userAuth, productController.productDetailPage);
+router.get('/about',userAuth,userController.aboutPage)
+router.get('/contact',userAuth,userController.contactPage)
+
 
 // Profile routes
 router.get('/userProfile', userAuth, profileController.loadUserProfile);

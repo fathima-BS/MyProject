@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>About Us - Cario Travel Bags</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            overflow-x: hidden;
+        }
+
+        /* Hero Section */
+        .hero-section {
+            height: 60vh;
+            background: linear-gradient(135deg, rgba(0,0,0,0.6), rgba(0,0,0,0.3)),
+              url('/img/TravelBaground3.webp') center/cover;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            color: white;
+            position: relative;
+        }
+
+        .hero-content h1 {
+            font-size: 3.5rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            opacity: 0;
+            animation: fadeInUp 1s ease forwards 0.5s;
+        }
+
+        .hero-content .breadcrumb {
+            font-size: 1.1rem;
+            opacity: 0.9;
+            margin-bottom: 2rem;
+            opacity: 0;
+            animation: fadeInUp 1s ease forwards 0.7s;
+        }
+
+        .hero-content .breadcrumb a {
+            color: #ff6b35;
+            text-decoration: none;
+            transition: color 0.3s ease;
+        }
+
+        .hero-content .breadcrumb a:hover {
+            color: #fff;
+        }
+
+        /* Services Section */
+        .services-section {
+            padding: 80px 0;
+            background: #f8f9fa;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        .services-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 40px;
+            margin-top: 60px;
+        }
+
+        .service-card {
+            background: white;
+            padding: 40px 30px;
+            border-radius: 15px;
+            text-align: center;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            transition: all 0.3s ease;
+            opacity: 0;
+            transform: translateY(30px);
+            animation: fadeInUp 0.8s ease forwards;
+        }
+
+        .service-card:nth-child(2) {
+            animation-delay: 0.2s;
+        }
+
+        .service-card:nth-child(3) {
+            animation-delay: 0.4s;
+        }
+
+        .service-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.15);
+        }
+
+        .service-icon {
+            width: 80px;
+            height: 80px;
+            background: linear-gradient(135deg, #ff6b35, #f7931e);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 25px;
+            font-size: 2rem;
+            color: white;
+        }
+
+        .service-card h3 {
+            font-size: 1.5rem;
+            margin-bottom: 15px;
+            color: #2c3e50;
+            font-weight: 600;
+        }
+
+        .service-card p {
+            color: #666;
+            line-height: 1.7;
+            font-size: 1rem;
+        }
+
+        /* About Content Section */
+        .about-section {
+            padding: 100px 0;
+            background: white;
+        }
+
+        .about-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+            gap: 60px;
+            margin-top: 60px;
+        }
+
+        .about-card {
+            padding: 40px;
+            border-left: 5px solid #ff6b35;
+            background: #f8f9fa;
+            border-radius: 10px;
+            opacity: 0;
+            transform: translateX(-30px);
+            animation: slideInLeft 0.8s ease forwards;
+        }
+
+        .about-card:nth-child(2) {
+            animation-delay: 0.3s;
+            transform: translateX(30px);
+            animation-name: slideInRight;
+        }
+
+        .about-card h2 {
+            font-size: 2rem;
+            color: #2c3e50;
+            margin-bottom: 20px;
+            font-weight: 700;
+        }
+
+        .about-card p {
+            font-size: 1.1rem;
+            line-height: 1.8;
+            color: #555;
+        }
+
+        /* Founder Section */
+        .founder-section {
+        padding: 60px 20px;
+        background-color: #f9f9f9;
+        text-align: center;
+        }
+
+        .founder-card {
+        max-width: 500px;
+        margin: 0 auto;
+        background: #fff;
+        border-radius: 20px;
+        padding: 30px 20px;
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+        }
+
+        .founder-image {
+        width: 220px;
+        height: 220px;
+        margin: 0 auto 20px;
+        border-radius: 50%;
+        overflow: hidden;
+        border: 5px solid #eee;
+        }
+
+        .founder-image img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        }
+
+        .founder-card h3 {
+        margin: 15px 0 5px;
+        font-size: 24px;
+        color: #333;
+        }
+
+        .founder-card .title {
+        color: #888;
+        font-weight: bold;
+        margin-bottom: 15px;
+        }
+
+        .founder-card .description {
+        font-size: 16px;
+        color: #555;
+        line-height: 1.6;
+        }
+
+
+        /* Section Headers */
+        .section-header {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .section-header h2 {
+            font-size: 2.5rem;
+            color: #2c3e50;
+            font-weight: 700;
+            margin-bottom: 15px;
+        }
+
+        .section-header p {
+            font-size: 1.2rem;
+            color: #666;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        /* Animations */
+        @keyframes fadeInUp {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes slideInLeft {
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        @keyframes slideInRight {
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .hero-content h1 {
+                font-size: 2.5rem;
+            }
+
+            .about-grid {
+                grid-template-columns: 1fr;
+                gap: 40px;
+            }
+
+            .services-grid {
+                grid-template-columns: 1fr;
+                gap: 30px;
+            }
+
+            .section-header h2 {
+                font-size: 2rem;
+            }
+
+            .founder-section {
+                padding: 60px 0;
+            }
+
+            .about-section, .services-section {
+                padding: 60px 0;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .hero-content h1 {
+                font-size: 2rem;
+            }
+
+            .about-card, .service-card {
+                padding: 30px 20px;
+            }
+
+            .founder-card {
+                padding: 40px 25px;
+            }
+        }
+
+        /* Custom scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #ff6b35;
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: #e55a2b;
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <%- include("../partials/user/header") %>
+    <!-- Hero Section -->
+    <section class="hero-section">
+        <div class="hero-content">
+            <h1>About Cario</h1>
+        </div>
+    </section>
+
+    <!-- Services Section -->
+    <section class="services-section">
+        <div class="container">
+            <div class="section-header">
+                <h2>Why Choose Cario?</h2>
+                <p>We're committed to providing exceptional service and quality products for every traveler</p>
+            </div>
+            <div class="services-grid">
+                <div class="service-card">
+                    <div class="service-icon">
+                        ⭐
+                    </div>
+                    <h3>Quality Products</h3>
+                    <p>Every travel bag is crafted with premium materials and rigorous quality standards, ensuring durability for all your adventures.</p>
+                </div>
+                <div class="service-card">
+                    <div class="service-icon">
+                        🎧
+                    </div>
+                    <h3>24/7 Support</h3>
+                    <p>Our team is available around the clock to help you choose the perfect travel bag or resolve any queries.</p>
+                </div>
+                <div class="service-card">
+                    <div class="service-icon">
+                        🔒
+                    </div>
+                    <h3>Secure Payments</h3>
+                    <p>Shop confidently with our secure payment system, protecting your transactions for a worry-free experience.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- About Content Section -->
+    <section class="about-section">
+        <div class="container">
+            <div class="section-header">
+                <h2>Our Journey</h2>
+                <p>Discover the story behind Cario and what drives us to create exceptional travel experiences</p>
+            </div>
+            <div class="about-grid">
+                <div class="about-card">
+                    <h2>Our Story</h2>
+                    <p>Founded in 2021, Cario was created with a passion for travel and adventure. We set out to design and curate the finest travel bags, blending style, durability, and functionality. From a small vision, we've grown into a trusted brand, helping travelers worldwide carry their essentials with confidence and ease.</p>
+                </div>
+                <div class="about-card">
+                    <h2>Our Mission</h2>
+                    <p>At Cario, our mission is to empower travelers with high-quality, stylish, and reliable travel bags. Every product is carefully selected to ensure durability and convenience, so you can focus on the journey ahead, knowing your gear is ready for any adventure.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Founder Section -->
+    <section class="founder-section">
+  <div class="container">
+    <h2>Meet Our Founder</h2>
+    <div class="founder-card">
+      <div class="founder-image">
+        <img src="/img/founder.png" alt="Founder of Cario Fashion Store" />
+      </div>
+      <h3>Fathima Sulaiman</h3>
+      <p class="title">Founder & CEO</p>
+      <p class="description">
+        Fathima Sulaiman, an avid traveler, founded Cario to solve the challenges of finding reliable and stylish travel bags.
+        With a keen eye for design and a commitment to quality, she leads Cario in delivering products that inspire adventure.
+      </p>
+    </div>
+  </div>
+</section>
+<!-- Footer -->
+<%- include("../partials/user/footer") %>
+</body>
+</html>
