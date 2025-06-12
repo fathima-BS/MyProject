@@ -25,6 +25,7 @@ router.get('/logout', userController.logout);
 
 router.get('/forgot-password', profileController.forgetPassword);
 router.post('/forgot-password', profileController.forgetPasswordsubmit);
+router.get('/forgotPassOtp',profileController.showForgotOtpPage)
 router.post('/verifyForgetPassOtp', profileController.verifyForgetPassOtp);
 router.post('/resendForgetOtp', profileController.resendForgetPassOtp);
 router.get('/reset-password', profileController.resetPass);

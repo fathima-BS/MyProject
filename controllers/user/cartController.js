@@ -16,7 +16,10 @@ const loadCartPage = async (req, res, next) => {
         const cart = await Cart.findOne({ userId })
             .populate({
                 path: 'items.productId',
-                populate: { path: 'category' } // Populate category for Category offers
+                populate: [
+                    { path: 'category' },
+                    { path: 'brand' }
+                ]
             })
             .lean();
 

@@ -13,7 +13,7 @@ const userAuth = (req, res, next) => {
                             res.render('login', { message: 'You are blocked. Please contact support.' });
                         });
                     } else {
-                       
+                        req.user = data;
                         res.locals.user = data; 
                         next();
                     }

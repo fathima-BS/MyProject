@@ -133,7 +133,7 @@
 
     .strike-price {
         font-size: 18px;
-        color: #999;
+        color: #878686;
         text-decoration: line-through;
     }
 
@@ -148,9 +148,6 @@
         color: #555;
         line-height: 1.6;
         margin-bottom: 20px;
-        max-height: 100px;
-        overflow-y: auto;
-        margin-right: 100px;
     }
 
     .status-quantity {
@@ -219,6 +216,10 @@
         box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
         transition: transform 0.3s;
         position: relative;
+        height: 400px; /* Set a fixed height for consistency */
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between; 
     }
 
     .product-card:hover {
@@ -227,12 +228,42 @@
 
     .product-card img {
         max-width: 100%;
-        height: auto;
+        height: 200px; 
+        object-fit: cover; 
         border-radius: 5px;
-        margin-bottom: 10px;
+        margin: 0 auto 10px; 
+        display: block; 
     }
 
-    /* Wishlist Button Styling (Matching Homepage and Shop) */
+    .product-card h4 {
+        font-size: 16px;
+        color: #333;
+        margin-bottom: 8px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    .product-card h6 {
+        font-size: 14px;
+        color: #666;
+        margin-bottom: 8px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap; 
+    }
+
+    .product-card p {
+        font-size: 14px;
+        color: #333;
+        margin-bottom: 10px;
+        flex-grow: 1; 
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+    }
+
     .wishlist-btn {
         position: absolute;
         top: 10px;
@@ -262,7 +293,7 @@
     }
 
     .add-to-cart-btn {
-        background: #28a745;
+        background: #1e3a8a;
         color: #fff;
         padding: 10px;
         border: none;
@@ -274,7 +305,7 @@
     }
 
     .add-to-cart-btn:hover {
-        background: #218838;
+        background: #17286b;
         transform: translateY(-2px);
     }
 
@@ -300,6 +331,9 @@
         .product-grid {
             grid-template-columns: repeat(2, 1fr);
         }
+        .product-card {
+            height: 380px; /* Slightly smaller height for medium screens */
+        }
     }
 
     @media (max-width: 768px) {
@@ -322,11 +356,18 @@
         .product-main-container .breadcrumb {
             padding: 10px 15px;
         }
+
+        .product-card {
+            height: 360px; /* Adjust height for smaller screens */
+        }
     }
 
     @media (max-width: 576px) {
         .product-grid {
             grid-template-columns: 1fr;
+        }
+        .product-card {
+            height: 340px; /* Adjust height for mobile */
         }
     }
 </style>
@@ -382,12 +423,11 @@
             <p class="product-description"><%= product.description %></p>
 
             <div class="status-quantity">
-                <% if(product.quantity > 0) { %>
-                <span class="status">Status: <%= product.status %></span>
-                <% } else { %>
-                    <span class="status">Out of Stock</span>
+               <% if (product.quantity > 0) { %>
+                    <span class="status">Status: <%= product.status %></span>
                 <% } %>
-                <span class="quantity">Quantity: <%= product.quantity %> in stock</span>
+
+                <span style="color: #000000; font-weight: 300;" class="quantity">Quantity: <%= product.quantity %> in stock</span>
             </div>
 
             <div class="action-buttons">
@@ -410,16 +450,17 @@
                         <div class="product-card">
                             <a href="javascript:void(0)" class="wishlist-btn" data-product-id="<%= product._id %>" onclick="toggleWishlist('<%= product._id %>', this)" aria-label="Toggle wishlist">
                                 <i class="<%= product.isInWishlist ? 'fas' : 'far' %> fa-heart"></i>
-
                             </a>
                             <a style="text-decoration: none; color: black;" href="/product/<%= product._id %>">
                                 <img src="<%= product.productImage[0] %>" alt="<%= product.productName || 'Product Image' %>" />
-                                <h4><%= product.productName %></h4>
-                                <h6><%= product.brand ? product.brand.BrandName : 'Unknown Brand' %></h6>
+                                <h4 style="font-weight: bolder;"><%= product.productName %></h4>
+                                <h6 style="font-weight: 300;"><%= product.brand ? product.brand.BrandName : 'Unknown Brand' %></h6>
                                 <p>
                                     <% if (product.finalOffer) { %>
-                                        ₹<%= product.discountedPrice.toLocaleString("en-IN", { minimumFractionDigits: 2 }) %>
-                                        <span class="strike-price">
+                                        <strong>
+                                            ₹<%= product.discountedPrice.toLocaleString("en-IN", { minimumFractionDigits: 2 }) %>
+                                        </strong>
+                                        <span style="font-weight: 100;" class="strike-price">
                                             ₹<%= product.salePrice.toLocaleString("en-IN", { minimumFractionDigits: 2 }) %>
                                         </span>
                                         <span style="color: #ff4444; font-weight: 600;">
@@ -430,7 +471,11 @@
                                     <% } %>
                                 </p>
                             </a>
-                            <button class="add-to-cart-btn" onclick="addToCart('<%= product._id %>')">Add to Cart</button>
+                            <% if(product.quantity > 0) { %>
+                                <button class="add-to-cart-btn" onclick="addToCart('<%= product._id %>')">Add to Cart</button>
+                            <% } else { %>
+                                <button class="add-to-cart-btn" style="background-color: #3a3a3a;" disabled>Out Of Stock</button>
+                            <% } %>
                         </div>
                     <% }) %>
                 <% } else { %>

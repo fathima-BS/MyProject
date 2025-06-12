@@ -152,7 +152,7 @@ const loadCheckout = async (req, res, next) => {
     const cart = await Cart.findOne({ userId })
       .populate({
         path: 'items.productId',
-        populate: { path: 'category' }
+        populate: [{ path: 'category' }, { path: 'brand' }]
       })
       .lean();
 
@@ -177,9 +177,16 @@ const loadCheckout = async (req, res, next) => {
           item.productId &&
           item.productId._id &&
           item.productId.salePrice != null &&
-          item.productId.isListed &&
+          item.productId.isListed === true &&
           item.productId.quantity > 0 &&
-          item.quantity <= item.productId.quantity;
+          item.quantity <= item.productId.quantity &&
+          item.productId.brand &&
+          item.productId.brand.isDeleted !== true &&
+          item.productId.brand.isListed === true &&
+          item.productId.category &&
+          item.productId.category.isDeleted !== true &&
+          item.productId.category.isListed === true;
+
         // if (!isValid) {
         //   console.log('Filtered out invalid item:', item);
         // }
@@ -338,43 +345,61 @@ const checkStock = async (req, res, next) => {
       return res.status(401).json({ success: false, message: 'Please login to check stock' });
     }
 
-    const cart = await Cart.findOne({ userId }).populate('items.productId');
+    const cart = await Cart.findOne({ userId }).populate({
+      path: 'items.productId',
+      populate: ['brand', 'category']
+    });
+
     if (!cart || cart.items.length === 0) {
       return res.status(400).json({ success: false, message: 'Cart is empty' });
     }
 
-    // Check product quantities and listing status
     for (const item of cart.items) {
-      const product = await Product.findById(item.productId._id);
-      if (!product) {
+      const product = item.productId;
+
+      if (!product || product.isListed === false) {
         return res.status(400).json({
           success: false,
-          message: `Product is unavailable`,
+          message: `Product "${product?.productName || 'Unknown'}" is unavailable.`,
           redirectTo: '/cart?unlisted=true'
         });
       }
-      if (product.isListed === false) {
+
+      const brand = product.brand;
+      if (!brand || brand.isListed === false || brand.isDeleted === true) {
         return res.status(400).json({
           success: false,
-          message: `Product is unavailable`,
+          message: `Product "${product.productName}" is unavailable.`,
           redirectTo: '/cart?unlisted=true'
         });
       }
+
+      const category = product.category;
+      if (!category || category.isListed === false || category.isDeleted === true) {
+        return res.status(400).json({
+          success: false,
+          message: `Product "${product.productName}" is unavailable.`,
+          redirectTo: '/cart?unlisted=true'
+        });
+      }
+
       if (product.quantity < item.quantity) {
         return res.status(400).json({
           success: false,
-          message: `Insufficient stock for ${item.productId.productName}.`,
+          message: `Insufficient stock for "${product.productName}".`,
           redirectTo: '/cart'
         });
       }
     }
 
     res.json({ success: true, message: 'All products are in stock and available' });
+
   } catch (error) {
     error.statusCode = 500;
     next(error);
   }
 };
+
 
 const placeOrder = async (req, res, next) => {
   try {
@@ -395,22 +420,34 @@ const placeOrder = async (req, res, next) => {
 
     // Check product quantities and listing status before proceeding
     for (const item of cart.items) {
-      const product = await Product.findById(item.productId._id);
-      if (!product || product.isListed === false) {
+      const product = await Product.findById(item.productId._id)
+        .populate('brand')
+        .populate('category')
+        .lean();
+
+      const isUnavailable =
+        !product ||
+        !product.isListed ||
+        !product.brand?.isListed || product.brand?.isDeleted ||
+        !product.category?.isListed || product.category?.isDeleted;
+
+      if (isUnavailable) {
         return res.status(400).json({
           success: false,
-          message: `Product is unavailable `,
+          message: `Product "${item.productId.productName}" is unavailable.`,
           redirectTo: '/cart?unlisted=true'
         });
       }
+
       if (product.quantity < item.quantity) {
         return res.status(400).json({
           success: false,
-          message: `Insufficient stock for ${item.productId.productName}`,
+          message: `Insufficient stock for "${item.productId.productName}"`,
           redirectTo: '/cart'
         });
       }
     }
+
 
     let sum = 0;
     for (let item of cart.items) {
@@ -674,7 +711,6 @@ const createRazorpay = async (req, res, next) => {
     let amount = subtotal + shippingCost;
     let amountInPaise = Math.round(amount * 100);
 
-    console.log(cart, "cart is here");
     const options = {
       amount: amountInPaise,
       currency: 'INR',
@@ -736,23 +772,36 @@ const placeRazorpayOrder = async (req, res, next) => {
     }
 
     // Check product quantities and listing status before proceeding
+    // Check product, brand, and category status before proceeding
     for (const item of cart.items) {
-      const product = await Product.findById(item.productId._id);
-      if (!product || product.isListed === false) {
+      const product = await Product.findById(item.productId._id)
+        .populate('brand')
+        .populate('category')
+        .lean();
+
+      const isUnavailable =
+        !product ||
+        !product.isListed ||
+        !product.brand?.isListed || product.brand?.isDeleted ||
+        !product.category?.isListed || product.category?.isDeleted;
+
+      if (isUnavailable) {
         return res.status(400).json({
           success: false,
-          message: `Product is unavailable`,
+          message: `Product "${item.productId.productName}" is unavailable.`,
           redirectTo: '/cart?unlisted=true'
         });
       }
+
       if (product.quantity < item.quantity) {
         return res.status(400).json({
           success: false,
-          message: `Insufficient stock for ${item.productId.productName}`,
+          message: `Insufficient stock for "${item.productId.productName}"`,
           redirectTo: '/cart'
         });
       }
     }
+
 
     const checkoutSummary = req.session.checkoutSummary || {};
     if (!checkoutSummary.selectedAddress) {

@@ -384,6 +384,46 @@
             background-color: #7a5f3d;
         }
 
+        .input-group .password-toggle {
+            background-color: #f8f9fa;
+            border: 1px solid #ced4da;
+            border-left: 0;
+            color: #212529;
+            font-size: 1rem;
+            padding: 0 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 40px;
+            transition: background-color 0.2s ease, color 0.2s ease;
+        }
+
+        .input-group .password-toggle:hover {
+            background-color: #e9ecef;
+            color: #495057;
+        }
+
+        .input-group .password-toggle:focus {
+            outline: none;
+            box-shadow: 0 0 0 0.2rem rgba(33, 37, 41, 0.25);
+        }
+
+        .form-control.password-input {
+            border-radius: 6px 0 0 6px;
+            border-right: 0;
+            height: calc(2.25rem + 2px);
+        }
+
+        .form-control.password-input:focus {
+            border-color: #212529;
+            box-shadow: 0 0 0 0.2rem rgba(33, 37, 41, 0.25);
+        }
+
+        .input-group {
+            border-radius: 6px;
+            overflow: hidden;
+        }
+
         @media (max-width: 768px) {
             .profile-container {
                 flex-direction: column;
@@ -560,17 +600,32 @@
                     <form id="changePasswordForm">
                         <div class="form-group">
                             <label for="currentPassword">Current Password</label>
-                            <input type="password" id="currentPassword" name="password" class="form-control" required />
+                            <div class="input-group">
+                                <input type="password" id="currentPassword" name="password" class="form-control password-input" required />
+                                <button type="button" class="password-toggle" aria-label="Show password" onclick="togglePassword('currentPassword', this)">
+                                    <i class="fas fa-eye"></i>
+                                </button>
+                            </div>
                             <span id="currentPasswordError" class="error-message"></span>
                         </div>
                         <div class="form-group">
                             <label for="newPassword">New Password</label>
-                            <input type="password" id="newPassword" name="NewPassword" class="form-control" required />
+                            <div class="input-group">
+                                <input type="password" id="newPassword" name="NewPassword" class="form-control password-input" required />
+                                <button type="button" class="password-toggle" aria-label="Show password" onclick="togglePassword('newPassword', this)">
+                                    <i class="fas fa-eye"></i>
+                                </button>
+                            </div>
                             <span id="newPasswordError" class="error-message"></span>
                         </div>
                         <div class="form-group">
                             <label for="confirmNewPassword">Confirm New Password</label>
-                            <input type="password" id="confirmNewPassword" name="confirmNewPassword" class="form-control" required />
+                            <div class="input-group">
+                                <input type="password" id="confirmNewPassword" name="confirmNewPassword" class="form-control password-input" required />
+                                <button type="button" class="password-toggle" aria-label="Show password" onclick="togglePassword('confirmNewPassword', this)">
+                                    <i class="fas fa-eye"></i>
+                                </button>
+                            </div>
                             <span id="confirmNewPasswordError" class="error-message"></span>
                         </div>
                         <div class="modal-actions">
@@ -587,6 +642,17 @@
 
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script>
+        // Function to toggle password visibility
+        window.togglePassword = function(inputId, button) {
+            const input = document.getElementById(inputId);
+            const icon = button.querySelector('i');
+            const isPassword = input.type === 'password';
+            input.type = isPassword ? 'text' : 'password';
+            icon.classList.toggle('fa-eye', isPassword);
+            icon.classList.toggle('fa-eye-slash', !isPassword);
+            button.setAttribute('aria-label', isPassword ? 'Hide password' : 'Show password');
+        };
+
         document.addEventListener('DOMContentLoaded', () => {
             const modal = document.getElementById('passwordModal');
             const changePasswordForm = document.getElementById('changePasswordForm');

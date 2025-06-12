@@ -80,7 +80,7 @@ async function sendVerificationEmail(email, otp) {
       text: `Your OTP is ${otp}`,
       html: `<b>Your OTP: ${otp}</b>`,
     });
-    console.log('Email sent successfully:', info.messageId);
+
     return info.accepted.length > 0;
   } catch (error) {
     console.error('Error sending email:', error);
@@ -90,27 +90,23 @@ async function sendVerificationEmail(email, otp) {
 
 const signup = async (req, res, next) => {
   try {
-    console.log('Signup request received:', req.body);
     const { username, dateOfBirth, email, password, cPassword, referral } = req.body;
     if (!password || !cPassword) {
-      console.log('Password or confirm password missing');
-      return res.render('signup', { message: 'Password is required', referral });
+      return res.render('signup', { message: null, referral });
     }
     if (password !== cPassword) {
       console.log('Passwords do not match');
-      return res.render('signup', { message: 'Passwords do not match', referral });
+      return res.render('signup', { message: null, referral });
     }
     const findUser = await User.findOne({ email });
     if (findUser) {
-      console.log('User already exists with email:', email);
       return res.render('signup', { message: 'User with this email already exists', referral });
     }
 
     if (referral) {
       const user = await User.findOne({ referralCode: referral });
       if (!user || user.isBlocked) {
-        console.log('Invalid or blocked referral code:', referral);
-        return res.render('signup', { message: 'Invalid referral code', referral });
+        return res.render('signup', { message: null, referral });
       }
       req.session.referralCode = referral;
       console.log('Referral code stored in session:', referral);
@@ -126,7 +122,6 @@ const signup = async (req, res, next) => {
     req.session.userOtp = otp;
     req.session.otpExpires = Date.now() + 60 * 1000;
     req.session.userData = { username, dateOfBirth, email, password };
-    console.log('Session data stored:', { userOtp: otp, otpExpires: req.session.otpExpires, userData: req.session.userData });
     res.render('verifyOtp');
     console.log('OTP Sent:', otp);
   } catch (error) {
@@ -228,7 +223,6 @@ const verifyOtp = async (req, res, next) => {
       delete req.session.otpExpires;
       delete req.session.userData;
       delete req.session.referralCode;
-      console.log('Session cleared');
 
       res.json({ success: true, redirectUrl: '/login' });
     } else {
@@ -381,6 +375,10 @@ const loadShopPage = async (req, res, next) => {
     const listedCategories = await Category.find({ isListed: true, isDeleted: false }).lean();
     const listedBrands = await Brand.find({ isListed: true, isDeleted: false }).lean();
 
+
+    const listedCategoryIds = listedCategories.map(cat => cat._id.toString());
+    const listedBrandIds = listedBrands.map(brand => brand._id.toString());
+
     let { search, sort, categoryf, brandf, priceRange, page = 1 } = req.query;
     const perPage = 9;
     const skip = (page - 1) * perPage;
@@ -388,19 +386,22 @@ const loadShopPage = async (req, res, next) => {
     let filter = {
       isDeleted: false,
       isListed: true,
+      category: { $in: listedCategoryIds },
+      brand: { $in: listedBrandIds }
     };
 
     if (categoryf && categoryf !== 'all') {
-      if (listedCategories.some(cat => cat._id.toString() === categoryf)) {
+      if (listedCategoryIds.includes(categoryf)) {
         filter.category = categoryf;
       }
     }
 
     if (brandf && brandf !== 'all') {
-      if (listedBrands.some(brand => brand._id.toString() === brandf)) {
+      if (listedBrandIds.includes(brandf)) {
         filter.brand = brandf;
       }
     }
+
 
     if (priceRange) {
       switch (priceRange) {
