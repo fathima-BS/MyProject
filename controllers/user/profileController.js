@@ -99,22 +99,42 @@ const forgetPasswordsubmit = async (req, res, next) => {
             if (emailSent) {
                 req.session.userOtp = otp;
                 req.session.email = email;
-                req.session.otpTimestamp = Date.now(); // Store timestamp for forgot password
-                res.render("forgotPassOtp");
+                req.session.otpTimestamp = Date.now();
                 console.log("OTP:", otp);
+                return res.redirect("/forgotPassOtp");
             } else {
-                res.json({ success: false, message: "Failed to send OTP. Please try again" });
+                return res.render("forgetPassword", {
+                    message: "Failed to send OTP. Please try again",
+                });
             }
         } else {
-            res.render("forgetPassword", {
+            return res.render("forgetPassword", {
                 message: "User with this email does not exist",
             });
         }
     } catch (error) {
         error.statusCode = 500;
-        next(error)
+        next(error);
     }
 };
+
+const showForgotOtpPage = async (req, res, next) => {
+    try {
+        if (!req.session.userOtp || !req.session.email || !req.session.otpTimestamp) {
+            return res.redirect('/forget-password');
+        }
+
+        const timeElapsed = Math.floor((Date.now() - req.session.otpTimestamp) / 1000);
+        const remainingTime = Math.max(0, 60 - timeElapsed); 
+
+        res.render("forgotPassOtp", { remainingTime });  
+    } catch (error) {
+        error.statusCode = 500;
+        next(error);
+    }
+};
+
+
 
 const verifyForgetPassOtp = async (req, res, next) => {
     try {
@@ -644,6 +664,7 @@ const resendOtp = async (req, res, next) => {
 module.exports = {
     forgetPassword,
     forgetPasswordsubmit,
+    showForgotOtpPage,
     verifyForgetPassOtp,
     resendForgetPassOtp,
     resetPass,
@@ -659,4 +680,5 @@ module.exports = {
     verifyOtp,
     resendOtp,
     generateReferralCode,
+
 };

@@ -117,6 +117,7 @@
                     <% if (item.productId) { %>
                         <div class="bg-white p-6 rounded-lg shadow-sm mb-6 flex items-center cart-item">
                             <img src="<%= item.productId.productImage[0] || '/images/placeholder.jpg' %>" alt="<%= item.productId.productName || 'Product Image' %>" class="w-24 h-24 object-cover mr-6 rounded">
+
                             <div class="flex-1">
                                 <div class="flex justify-between items-center">
                                     <h3 class="text-lg font-semibold text-gray-800"><%= item.productId.productName %></h3>
@@ -126,13 +127,28 @@
                                         </svg>
                                     </button>
                                 </div>
+
+                                <% 
+                                    const brand = item.productId.brand;
+                                    const category = item.productId.category;
+                                    const isProductUnlisted = item.productId.isListed === false;
+                                    const isBrandUnavailable = !brand || brand.isDeleted || brand.isListed === false;
+                                    const isCategoryUnavailable = !category || category.isDeleted || category.isListed === false;
+                                    const showUnavailable = isProductUnlisted || isBrandUnavailable || isCategoryUnavailable;
+                                %>
+
                                 <div class="flex items-center mt-3 space-x-2">
-                                    <button class="decrement-quantity quantity-btn bg-gray-200 text-gray-600 rounded-l <%= item.quantity <= 1 || item.productId.quantity <= 0 || item.productId.isListed === false ? 'opacity-50 cursor-not-allowed' : '' %>" 
-                                            data-product-id="<%= item.productId._id %>" <%= item.quantity <= 1 || item.productId.quantity <= 0 || item.productId.isListed === false ? 'disabled' : '' %>>-</button>
+                                    <button class="decrement-quantity quantity-btn bg-gray-200 text-gray-600 rounded-l <%= item.quantity <= 1 || item.productId.quantity <= 0 || showUnavailable ? 'opacity-50 cursor-not-allowed' : '' %>" 
+                                        data-product-id="<%= item.productId._id %>" 
+                                        <%= item.quantity <= 1 || item.productId.quantity <= 0 || showUnavailable ? 'disabled' : '' %>>-</button>
+
                                     <span class="quantity px-4 py-2 border-t border-b border-gray-200 text-gray-800 font-medium"><%= item.quantity %></span>
-                                    <button class="increment-quantity quantity-btn bg-gray-200 text-gray-600 rounded-r <%= item.quantity >= item.productId.quantity || item.quantity >= 5 || item.productId.quantity <= 0 || item.productId.isListed === false ? 'opacity-50 cursor-not-allowed' : '' %>" 
-                                            data-product-id="<%= item.productId._id %>" <%= item.quantity >= item.productId.quantity || item.quantity >= 5 || item.productId.quantity <= 0 || item.productId.isListed === false ? 'disabled' : '' %>>+</button>
+
+                                    <button class="increment-quantity quantity-btn bg-gray-200 text-gray-600 rounded-r <%= item.quantity >= item.productId.quantity || item.quantity >= 5 || item.productId.quantity <= 0 || showUnavailable ? 'opacity-50 cursor-not-allowed' : '' %>" 
+                                        data-product-id="<%= item.productId._id %>" 
+                                        <%= item.quantity >= item.productId.quantity || item.quantity >= 5 || item.productId.quantity <= 0 || showUnavailable ? 'disabled' : '' %>>+</button>
                                 </div>
+
                                 <div class="price-offer mt-3">
                                     <% if (item.finalOffer) { %>
                                         <span class="discounted-price">₹<%= (item.discountedPrice * item.quantity).toLocaleString("en-IN", { minimumFractionDigits: 2, maximumFractionDigits: 2 }) %></span>
@@ -142,10 +158,10 @@
                                         <span class="discounted-price">₹<%= (item.productId.salePrice * item.quantity).toLocaleString("en-IN", { minimumFractionDigits: 2, maximumFractionDigits: 2 }) %></span>
                                     <% } %>
                                 </div>
-                                <% if (item.productId.isListed === false) { %>
-                                    <p class="text-red-500 mt-2 text-sm font-medium">
-                                        Product Unavailable
-                                    </p>
+
+                                <!-- 🔴 Product Unavailable for 3 conditions -->
+                                <% if (showUnavailable) { %>
+                                    <p class="text-red-500 mt-2 text-sm font-medium">Product Unavailable</p>
                                 <% } else if (item.productId.quantity <= 0 || item.quantity > item.productId.quantity) { %>
                                     <% if (item.productId.quantity > 0) { %>
                                         <p class="text-red-600 mt-2 text-sm font-medium">
@@ -153,15 +169,14 @@
                                             <span class="error-stock">Available: <%= item.productId.quantity || 0 %></span>
                                         </p>
                                     <% } else { %>
-                                        <p class="text-red-500 mt-2 text-sm font-medium">
-                                            Out of Stock
-                                        </p>
+                                        <p class="text-red-500 mt-2 text-sm font-medium">Out of Stock</p>
                                     <% } %>
                                 <% } %>
                             </div>
                         </div>
                     <% } %>
                 <% }) %>
+
                 <!-- Pagination Controls -->
                 <div class="pagination">
                     <% if (currentPage > 1) { %>
